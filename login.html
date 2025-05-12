@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Booth - Đăng nhập</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <h2>Đăng nhập Photo Booth</h2>
+            <div id="error-message"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Đăng nhập</button>
+            </form>
+            <p>Chưa có tài khoản? <a href="#" id="register-link">Đăng ký</a></p>
+            <div class="loading-spinner" id="loading-spinner"></div>
+            <p class="author-credit">Made with 💖 by ThanhNguyxn</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from './src/js/firebase-config.js';
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const loginForm = document.getElementById('login-form');
+        const registerLink = document.getElementById('register-link');
+        const errorMessage = document.getElementById('error-message');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        let isRegistering = false;
+
+        registerLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isRegistering = !isRegistering;
+            document.querySelector('h2').textContent = isRegistering ? 'Đăng ký Photo Booth' : 'Đăng nhập Photo Booth';
+            registerLink.textContent = isRegistering ? 'Quay lại đăng nhập' : 'Đăng ký';
+            errorMessage.style.display = 'none';
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            loadingSpinner.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            try {
+                if (isRegistering) {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+                window.location.href = 'index.html';
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        });
+
+        // Kiểm tra nếu đã đăng nhập
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,94 +1,90 @@
 # Photo Booth Web Application
 
-A modern web-based photo booth application with features like photo capture, filters, stickers, and social sharing.
+A modern web-based photo booth application with Firebase authentication and a clean, modular structure.
 
 ## Features
 
-- Photo capture using webcam
-- Image upload support
-- Photo editing with filters and stickers
-- Social login (Google, Facebook)
-- Guest mode
-- Admin panel for content moderation
-- Public gallery
-- Content moderation using NSFW.js
-- Responsive design
+- User authentication (login/register)
+- Live camera preview
+- 3-second countdown timer
+- Capture three photos
+- Download photo strip
+- Modern UI with responsive design
+- Secure user sessions
 
 ## Setup
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/photo-booth.git
-cd photo-booth
-```
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
 
-2. Update Firebase configuration:
-Edit `src/js/firebase-config.js` with your Firebase credentials:
+2. Get your Firebase configuration and update `src/js/firebase-config.js` with your credentials:
 ```javascript
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
-  authDomain: "your-app.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 ```
 
-3. Set up Firebase:
-- Create a new Firebase project
-- Enable Authentication (Email/Password, Google, Facebook)
-- Create a Firestore database
-- Set up Storage rules
+3. Enable Email/Password authentication in your Firebase project:
+   - Go to Authentication > Sign-in method
+   - Enable Email/Password provider
 
-4. Install dependencies:
-```bash
-npm install
+4. Serve the application using a local web server (due to module security requirements)
+   For example, using Python:
+   ```bash
+   python -m http.server 8000
+   ```
+   Or using Node.js:
+   ```bash
+   npx http-server
+   ```
+
+5. Access the application at `http://localhost:8000`
+
+## Project Structure
+
 ```
-
-5. Run the application:
-```bash
-npm start
+├── index.html           # Main application page
+├── login.html          # Login/Register page
+├── src/
+│   ├── js/
+│   │   ├── camera.js           # Camera functionality
+│   │   └── firebase-config.js  # Firebase configuration
+│   └── css/
+│       └── styles.css          # Application styles
+└── README.md
 ```
 
 ## Usage
 
-### Guest Mode
-- Click "Continue as Guest" to use basic features
-- Take photos using webcam
-- Apply filters and stickers
-- Download photos
+1. Register or login with your email and password
+2. Allow camera access when prompted
+3. Click "Take Photo" to start the countdown
+4. After taking 3 photos, click "Download Photos" to get your photo strip
+5. Click "Take Photo" again to start a new session
+6. Use the "Logout" button to end your session
 
-### User Account
-- Create an account or login with Google/Facebook
-- Access additional features like:
-  - Saving photos to your account
-  - Sharing to public gallery
-  - Creating photo collections
+## Browser Support
 
-### Admin Access
-- Login with admin credentials:
-  - Email: thanhnguyentuan2007@gmail.com
-  - Password: Thanh17112007
-- Access admin features:
-  - Content moderation
-  - User management
-  - Statistics
+The application requires a modern browser with support for:
+- WebRTC (getUserMedia API)
+- ES6 Modules
+- Async/Await
+- CSS Grid/Flexbox
 
 ## Security
 
-- Content moderation using NSFW.js
-- Secure Firebase rules
-- Admin authentication
-- Safe image storage
-
-## Contributing
-
-Feel free to submit issues and enhancement requests.
+- Authentication is handled securely through Firebase
+- Camera access requires explicit user permission
+- No sensitive data is stored locally
+- All Firebase communication is encrypted
 
 ## License
 
-[MIT](LICENSE)
+MIT License - feel free to use and modify for your own projects.
 
 ## Author
 

@@ -13,7 +13,7 @@
     <meta property="og:title" content="✨ Cute Photo Booth ✨">
     <meta property="og:description" content="Take cute photos with filters and stickers!">
     <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
-    <title>✨ Cute Photo Booth ✨</title>
+    <title>✨ Photo Booth by ThanhNguyxn ✨</title>
 
     <!-- CSS files -->
     <link rel="stylesheet" href="css/main.css">
@@ -52,9 +52,20 @@
             content: var(--tab-color);
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="theme-pink">
     <div class="container">
+        <div class="header">
+            <h1>✨ Photo Booth ✨</h1>
+            <p class="author-credit">Made with 💖 by ThanhNguyxn</p>
+            <div class="user-controls">
+                <span id="user-email"></span>
+                <button id="logout-btn">Logout</button>
+            </div>
+        </div>
+
         <!-- Navigation Bar -->
         <div class="nav-bar">
             <button class="nav-btn active" data-section="capture">📸 Chụp ảnh</button>
@@ -110,15 +121,39 @@
                     </div>
                 </div>
             </div>
-            <button id="capture-btn" class="button">Chụp ảnh</button>
-            <div class="video-container">
-                <video id="video" autoplay></video>
+            <div class="button-container">
+                <button id="capture-btn">
+                    <i class="fas fa-camera"></i> Chụp ảnh
+                </button>
+            </div>
+            <div id="video-container">
+                <video id="video" autoplay playsinline></video>
                 <div id="countdown"></div>
             </div>
             <div id="photos">
-                <div class="photo-slot" id="slot-1"></div>
-                <div class="photo-slot" id="slot-2"></div>
-                <div class="photo-slot" id="slot-3"></div>
+                <div class="photo-slot" id="slot-1">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="photo-slot" id="slot-2">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="photo-slot" id="slot-3">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button id="download-btn" disabled>
+                    <i class="fas fa-download"></i> Tải ảnh
+                </button>
+                <button id="share-btn" disabled>
+                    <i class="fas fa-share-alt"></i> Chia sẻ
+                </button>
             </div>
             <div id="error-message"></div>
         </div>
@@ -257,6 +292,190 @@
     <script src="js/editor.js"></script>
     <script src="js/gallery.js"></script>
     <script src="js/app.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script type="module">
+        import { auth } from './src/js/firebase-config.js';
+        import { Camera } from './src/js/camera.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Check authentication
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('user-email').textContent = user.email;
+            initializeApp();
+        });
+
+        function initializeApp() {
+            const video = document.getElementById('video');
+            const captureBtn = document.getElementById('capture-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const shareBtn = document.getElementById('share-btn');
+            const countdown = document.getElementById('countdown');
+            const slots = [
+                document.getElementById('slot-1'),
+                document.getElementById('slot-2'),
+                document.getElementById('slot-3')
+            ];
+            let currentSlot = 0;
+            let capturedPhotos = [];
+            let currentEffect = 'normal';
+            
+            const camera = new Camera(video, countdown);
+
+            // Initialize camera
+            camera.initialize().catch(err => {
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('error-message').textContent = err.message;
+                captureBtn.disabled = true;
+            });
+
+            // Xử lý hiệu ứng
+            document.querySelectorAll('.effect-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const effect = button.dataset.effect;
+                    document.querySelectorAll('.effect-button').forEach(b => b.classList.remove('active'));
+                    button.classList.add('active');
+                    currentEffect = effect;
+                    applyEffect(video, effect);
+                });
+            });
+
+            // Xử lý chụp ảnh
+            captureBtn.addEventListener('click', async () => {
+                if (currentSlot >= 3) {
+                    currentSlot = 0;
+                    capturedPhotos = [];
+                    slots.forEach(slot => {
+                        slot.innerHTML = `
+                            <div class="photo-placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        `;
+                    });
+                    downloadBtn.disabled = true;
+                    shareBtn.disabled = true;
+                }
+
+                captureBtn.disabled = true;
+                await camera.startCountdown();
+                
+                const photoData = await camera.takePhoto(currentEffect);
+                capturedPhotos.push(photoData);
+
+                const img = document.createElement('img');
+                img.src = photoData;
+                slots[currentSlot].innerHTML = '';
+                slots[currentSlot].appendChild(img);
+
+                currentSlot++;
+                if (currentSlot >= 3) {
+                    downloadBtn.disabled = false;
+                    shareBtn.disabled = false;
+                }
+                captureBtn.disabled = false;
+            });
+
+            // Xử lý tải ảnh
+            downloadBtn.addEventListener('click', () => {
+                const container = document.createElement('div');
+                container.style.backgroundColor = 'white';
+                container.style.padding = '20px';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '10px';
+
+                capturedPhotos.forEach(photoData => {
+                    const img = document.createElement('img');
+                    img.src = photoData;
+                    img.style.width = '600px';
+                    img.style.height = '800px';
+                    img.style.objectFit = 'cover';
+                    container.appendChild(img);
+                });
+
+                html2canvas(container).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'pica-pica-photos.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            });
+
+            // Xử lý chia sẻ
+            shareBtn.addEventListener('click', async () => {
+                try {
+                    const blob = await new Promise(resolve => {
+                        const container = document.createElement('div');
+                        container.style.backgroundColor = 'white';
+                        container.style.padding = '20px';
+                        container.style.display = 'flex';
+                        container.style.flexDirection = 'column';
+                        container.style.gap = '10px';
+
+                        capturedPhotos.forEach(photoData => {
+                            const img = document.createElement('img');
+                            img.src = photoData;
+                            img.style.width = '600px';
+                            img.style.height = '800px';
+                            img.style.objectFit = 'cover';
+                            container.appendChild(img);
+                        });
+
+                        html2canvas(container).then(canvas => {
+                            canvas.toBlob(resolve);
+                        });
+                    });
+
+                    const file = new File([blob], 'pica-pica-photos.png', { type: 'image/png' });
+                    const shareData = {
+                        files: [file],
+                        title: 'Pica Pica Photos',
+                        text: 'Ảnh chụp từ Pica Pica Booth!'
+                    };
+
+                    if (navigator.share && navigator.canShare(shareData)) {
+                        await navigator.share(shareData);
+                    } else {
+                        throw new Error('Sharing not supported');
+                    }
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                    alert('Không thể chia sẻ ảnh. Vui lòng tải về và chia sẻ thủ công.');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                }
+            });
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                camera.stop();
+            });
+        }
+
+        // Hàm áp dụng hiệu ứng
+        function applyEffect(video, effect) {
+            const filters = {
+                normal: 'none',
+                grayscale: 'grayscale(100%)',
+                sepia: 'sepia(100%)',
+                vintage: 'sepia(50%) contrast(95%) brightness(95%)',
+                brightness: 'brightness(130%)',
+                contrast: 'contrast(150%)'
+            };
+            video.style.filter = filters[effect] || 'none';
+        }
+    </script>
 </body>
 </html>
 
