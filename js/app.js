@@ -5,6 +5,7 @@ class PhotoBooth {
         this.editor = new PhotoEditor();
         this.capturedImages = [];
         this.currentSlotIndex = 0;
+        this.isCapturing = false;
 
         this.initializeElements();
         this.setupEventListeners();
@@ -103,26 +104,40 @@ class PhotoBooth {
                 this.camera.startCountdown(() => this.capturePhoto());
             }
         });
-    }
+    }    capturePhoto() {
+        if (this.isCapturing) return; // Prevent multiple captures
+        this.isCapturing = true;
 
-    capturePhoto() {
         const dataURL = this.camera.capturePhoto();
-        if (!dataURL) return;
-
-        const img = document.createElement("img");
-        img.src = dataURL;
-        this.slots[this.currentSlotIndex].innerHTML = "";
-        this.slots[this.currentSlotIndex].appendChild(img);
-        this.capturedImages[this.currentSlotIndex] = dataURL;
-
-        this.currentSlotIndex++;
-        if (this.currentSlotIndex >= this.slots.length) {
-            this.camera.stopAutoCapture(); // Stop auto capture when all slots are filled
-            this.buttons.capture.textContent = "Chụp ảnh";
-            this.showSection('upload');
-            this.updateSubmitButton();
-            this.currentSlotIndex = 0;
+        if (!dataURL) {
+            this.isCapturing = false;
+            return;
         }
+
+        const img = new Image();
+        img.onload = () => {
+            this.slots[this.currentSlotIndex].innerHTML = "";
+            this.slots[this.currentSlotIndex].appendChild(img);
+            this.capturedImages[this.currentSlotIndex] = dataURL;
+
+            this.currentSlotIndex++;
+            if (this.currentSlotIndex >= this.slots.length) {
+                this.camera.stopAutoCapture();
+                this.buttons.capture.textContent = "Chụp ảnh";
+                this.showSection('upload');
+                this.updateSubmitButton();
+                this.currentSlotIndex = 0;
+            }
+
+            this.isCapturing = false;
+        };
+
+        img.onerror = () => {
+            console.error('Failed to load captured image');
+            this.isCapturing = false;
+        };
+
+        img.src = dataURL;
     }
 
     showSection(sectionName) {

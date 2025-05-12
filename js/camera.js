@@ -195,9 +195,10 @@ class Camera {
             return;
         }
         this.performCountdown(callback);
-    }
-
-    performCountdown(callback) {
+    }    performCountdown(callback) {
+        if (this.isCountingDown) return; // Prevent multiple countdown starts
+        
+        this.isCountingDown = true;
         const timeLeft = parseInt(this.captureInterval.value);
         this.countdown.style.display = "flex";
         this.countdown.textContent = timeLeft;
@@ -226,16 +227,20 @@ class Camera {
             }
         }, 1000);
 
-        setTimeout(() => {
-            clearInterval(timer);
+        setTimeout(() => {            clearInterval(timer);
             clearInterval(countdownInterval);
             this.countdown.style.display = "none";
             this.progressBar.style.width = '0%';
-            callback();
+            this.isCountingDown = false; // Reset countdown flag
+            
+            if (callback) callback();
 
             // Start next auto capture if enabled
             if (this.autoCapture.checked && this.isAutoCaptureActive) {
-                const cooldownTime = 1000; // 1 second cooldown between captures
+                const cooldownTime = 1500; // 1.5 second cooldown between captures
+                if (this.autoCaptureTimer) {
+                    clearTimeout(this.autoCaptureTimer);
+                }
                 this.autoCaptureTimer = setTimeout(() => {
                     this.startCountdown(callback);
                 }, cooldownTime);
