@@ -2,6 +2,19 @@
 const translations = {
     en: {
         flag: "🇺🇸",
+        // Admin translations
+        adminLogin: "Admin Login",
+        username: "Username",
+        password: "Password",
+        loginBtn: "Login",
+        logout: "Logout",
+        pendingReview: "Pending Review",
+        totalPhotos: "Total Photos",
+        photoModeration: "Photo Moderation",
+        allPhotos: "All Photos",
+        approveBtn: "Approve",
+        rejectBtn: "Reject",
+        invalidCredentials: "Invalid username or password",
         takePicture: "Take a Picture",
         uploadPhotos: "Upload your photo(s)!",
         submit: "Submit Images",
@@ -32,9 +45,21 @@ const translations = {
         approved: "Approved",
         rejected: "Not Approved",
         moderationMessage: "Thank you for sharing! Your photo will be reviewed shortly."
-    },
-    vi: {
+    },    vi: {
         flag: "🇻🇳",
+        // Admin translations
+        adminLogin: "Đăng Nhập Admin",
+        username: "Tên đăng nhập",
+        password: "Mật khẩu",
+        loginBtn: "Đăng nhập",
+        logout: "Đăng xuất",
+        pendingReview: "Chờ duyệt",
+        totalPhotos: "Tổng số ảnh",
+        photoModeration: "Kiểm duyệt ảnh",
+        allPhotos: "Tất cả ảnh",
+        approveBtn: "Duyệt",
+        rejectBtn: "Từ chối",
+        invalidCredentials: "Sai tên đăng nhập hoặc mật khẩu",
         takePicture: "Chụp Ảnh",
         uploadPhotos: "Tải ảnh của bạn lên!",
         submit: "Xác Nhận",
@@ -98,9 +123,21 @@ const translations = {
         approved: "承認済み",
         rejected: "非承認",
         moderationMessage: "共有ありがとうございます！写真は確認後に表示されます。"
-    },
-    ko: {
+    },    ko: {
         flag: "🇰🇷",
+        // Admin translations
+        adminLogin: "관리자 로그인",
+        username: "사용자 이름",
+        password: "비밀번호",
+        loginBtn: "로그인",
+        logout: "로그아웃",
+        pendingReview: "검토 대기",
+        totalPhotos: "총 사진",
+        photoModeration: "사진 관리",
+        allPhotos: "모든 사진",
+        approveBtn: "승인",
+        rejectBtn: "거절",
+        invalidCredentials: "잘못된 사용자 이름 또는 비밀번호",
         takePicture: "사진 찍기",
         uploadPhotos: "사진 업로드!",
         submit: "확인",

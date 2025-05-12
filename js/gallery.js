@@ -36,65 +36,39 @@ class Gallery {
             `;
             document.querySelector('.container').insertAdjacentHTML('beforeend', galleryHTML);
         }
-    }
-
-    loadPhotos() {
-        // Simulate loading photos from a server
-        // In a real app, this would be an API call
-        const mockPhotos = [
-            {
-                id: 1,
-                imageUrl: 'path/to/image1.jpg',
-                username: 'user1',
-                date: new Date(),
-                filter: 'none'
-            },
-            // Add more mock photos here
-        ];
-
-        this.photos = [...this.photos, ...mockPhotos];
+    }    loadPhotos() {
+        // Load photos from localStorage
+        this.photos = JSON.parse(localStorage.getItem('photos') || '[]');
         this.displayPhotos();
-    }
-
-    submitForModeration(photoData) {
-        // In a real app, this would be an API call
+    }    submitForModeration(photoData) {
         const submission = {
+            id: 'photo_' + Date.now(),
             ...photoData,
             status: 'pending',
-            submittedAt: new Date(),
+            submittedAt: new Date().toISOString(),
             moderatedAt: null
         };
 
+        // Add to photos array and save
+        this.photos.unshift(submission);
+        localStorage.setItem('photos', JSON.stringify(this.photos));
+
         // Show confirmation message
         this.showModerationMessage();
-        
-        // Simulate moderation process (in reality, this would be done by admins)
-        setTimeout(() => {
-            // Randomly approve or reject for demo purposes
-            submission.status = Math.random() > 0.2 ? 'approved' : 'rejected';
-            submission.moderatedAt = new Date();
-            
-            if (submission.status === 'approved') {
-                this.photos.unshift(submission);
-                this.displayPhotos();
-            }
-        }, 30000); // Simulate 30-second review process
-    }
-
-    showModerationMessage() {
+    }    showModerationMessage() {
         const message = document.createElement('div');
         message.className = 'moderation-message';
-        message.textContent = translations[getCurrentLanguage()].moderationMessage;
+        message.textContent = translations[this.getCurrentLanguage()].moderationMessage;
         
         document.body.appendChild(message);
         
         setTimeout(() => {
             message.remove();
-        }, 5000);
-    }
-
-    displayPhotos() {
+        }, 3000);
+    }displayPhotos() {
         const grid = document.querySelector('.gallery-grid');
+        if (!grid) return;
+        
         const filteredPhotos = this.filterPhotos();
         
         if (filteredPhotos.length === 0) {
@@ -106,10 +80,9 @@ class Gallery {
         
         grid.innerHTML = photosToShow.map((photo, index) => `
             <div class="gallery-item" style="animation-delay: ${index * 0.1}s">
-                <img src="${photo.imageUrl}" alt="Gallery photo" style="filter: ${this.getFilterStyle(photo.filter)}">
+                <img src="${photo.url}" alt="Gallery photo" style="filter: ${this.getFilterStyle(photo.filter)}">
                 ${this.getModerationBadge(photo.status)}
                 <div class="gallery-info">
-                    <div class="gallery-user">📸 ${photo.username}</div>
                     <div class="gallery-date">${this.formatDate(photo.date)}</div>
                 </div>
             </div>

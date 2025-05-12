@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Booth Admin</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-page">
+    <div class="container">
+        <!-- Login Form -->
+        <div id="login-section" class="section active">
+            <h2>Admin Login</h2>
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Username" />
+                <input type="password" id="password" placeholder="Password" />
+                <button id="login-btn" class="button">Login</button>
+                <p id="login-error" class="error-message"></p>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="dashboard-section" class="section">
+            <div class="admin-header">
+                <h2>Admin Dashboard</h2>
+                <button id="logout-btn" class="button">Logout</button>
+            </div>
+            
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <h3>Pending Review</h3>
+                    <p id="pending-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Photos</h3>
+                    <p id="total-count">0</p>
+                </div>
+            </div>
+
+            <div class="photo-management">
+                <h3>Photo Moderation</h3>
+                <div class="filter-controls">
+                    <select id="status-filter">
+                        <option value="all">All Photos</option>
+                        <option value="pending">Pending Review</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <input type="date" id="date-filter" />
+                </div>
+                
+                <div id="photos-grid" class="photos-grid">
+                    <!-- Photos will be loaded here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/admin.js"></script>
+</body>
+</html>
