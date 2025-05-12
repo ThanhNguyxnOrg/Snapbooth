@@ -455,3 +455,81 @@ class Camera {
         setTimeout(() => toast.remove(), 3000);
     }
 }
+
+class CameraManager {
+    constructor() {
+        this.video = document.getElementById('video');
+        this.currentCamera = 'user';
+        this.stream = null;
+        this.initializeCamera();
+        this.setupCameraSwitch();
+    }
+
+    async initializeCamera() {
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: this.currentCamera,
+                    // Add advanced constraints for better mobile handling
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            });
+            this.video.srcObject = this.stream;
+            // Fix mobile camera orientation
+            this.fixMobileOrientation();
+        } catch (error) {
+            console.error("Error accessing camera:", error);
+            document.getElementById("error-message").style.display = "block";
+            document.getElementById("error-message").textContent = 
+                "Unable to access camera. Please check permissions.";
+        }
+    }
+
+    fixMobileOrientation() {
+        // Check if running on mobile
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            if (this.currentCamera === 'user') {
+                // For front camera, mirror the video
+                this.video.style.transform = 'scaleX(-1)';
+            } else {
+                // For back camera, normal orientation
+                this.video.style.transform = 'scaleX(1)';
+            }
+        }
+    }
+
+    async switchCamera() {
+        if (this.stream) {
+            // Stop all tracks before switching
+            this.stream.getTracks().forEach(track => track.stop());
+        }
+
+        // Toggle camera facing mode
+        this.currentCamera = this.currentCamera === 'user' ? 'environment' : 'user';
+
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: this.currentCamera,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            });
+            this.video.srcObject = this.stream;
+            this.fixMobileOrientation();
+        } catch (error) {
+            console.error("Error switching camera:", error);
+            // Revert to previous camera if switch fails
+            this.currentCamera = this.currentCamera === 'user' ? 'environment' : 'user';
+            this.initializeCamera();
+        }
+    }
+
+    setupCameraSwitch() {
+        const switchBtn = document.getElementById('switch-camera');
+        if (switchBtn) {
+            switchBtn.addEventListener('click', () => this.switchCamera());
+        }
+    }
+}

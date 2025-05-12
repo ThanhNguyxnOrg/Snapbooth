@@ -440,3 +440,86 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = new PhotoBooth();
     app.camera.initialize();
 });
+
+class App {
+    constructor() {
+        this.initializeThemes();
+        this.setupNavigation();
+        this.setupLanguage();
+        new Gallery(); // Initialize gallery functionality
+    }
+
+    initializeThemes() {
+        const savedTheme = localStorage.getItem('theme') || 'pink';
+        document.body.className = `theme-${savedTheme}`;
+        
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            if (btn.dataset.theme === savedTheme) {
+                btn.classList.add('active');
+            }
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                document.body.className = `theme-${theme}`;
+                localStorage.setItem('theme', theme);
+                
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    }
+
+    setupNavigation() {
+        const sections = ['capture', 'gallery', 'scrapbook'];
+        const navBtns = document.querySelectorAll('.nav-btn');
+
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetSection = btn.dataset.section;
+                
+                navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                sections.forEach(section => {
+                    const el = document.getElementById(`${section}-section`);
+                    if (el) el.classList.remove('active');
+                });
+
+                const targetEl = document.getElementById(`${targetSection}-section`);
+                if (targetEl) targetEl.classList.add('active');
+            });
+        });
+    }
+
+    setupLanguage() {
+        const langBtns = document.querySelectorAll('.lang-btn');
+        const savedLang = localStorage.getItem('language') || 'en';
+
+        this.setLanguage(savedLang);
+        document.querySelector(`[data-lang="${savedLang}"]`)?.classList.add('active');
+
+        langBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                this.setLanguage(lang);
+                localStorage.setItem('language', lang);
+
+                langBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    }
+
+    setLanguage(lang) {
+        document.querySelectorAll('[data-translate]').forEach(element => {
+            const key = element.dataset.translate;
+            if (translations[lang] && translations[lang][key]) {
+                element.textContent = translations[lang][key];
+            }
+        });
+    }
+}
+
+// Initialize the application
+window.addEventListener('DOMContentLoaded', () => {
+    const app = new App();
+});

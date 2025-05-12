@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="css/capture.css">
     <link rel="stylesheet" href="css/upload.css">
     <link rel="stylesheet" href="css/scrapbook.css">
+    <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="css/privacy.css">
     
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
@@ -52,12 +54,14 @@
     </style>
 </head>
 <body class="theme-pink">
-    <div class="theme-switcher">
-        <button class="theme-btn pink active" data-theme="pink" title="Pink Theme">🎀</button>
-        <button class="theme-btn purple" data-theme="purple" title="Purple Theme">💜</button>
-        <button class="theme-btn mint" data-theme="mint" title="Mint Theme">🌿</button>
-    </div>
     <div class="container">
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button class="nav-btn active" data-section="capture">📸 Chụp ảnh</button>
+            <button class="nav-btn" data-section="gallery">🖼️ Gallery</button>
+            <button class="nav-btn" data-section="scrapbook">📚 Scrapbook</button>
+        </div>
+
         <!-- Language Selector -->
         <div class="language-bar">
             <div class="language-selector">
@@ -189,6 +193,25 @@
                         Enable Date
                     </label>
                 </div>
+                <!-- Privacy Controls -->
+                <div class="control-section privacy-controls">
+                    <label>Privacy Settings</label>
+                    <div class="privacy-options">
+                        <label class="privacy-option">
+                            <input type="radio" name="privacy" value="private" checked>
+                            <span class="privacy-icon">🔒</span>
+                            <span data-translate="privateOnly">Private Only</span>
+                        </label>
+                        <label class="privacy-option">
+                            <input type="radio" name="privacy" value="gallery">
+                            <span class="privacy-icon">🖼️</span>
+                            <span data-translate="shareToGallery">Share to Gallery</span>
+                        </label>
+                    </div>
+                    <p class="privacy-note" data-translate="privacyNote">
+                        * Shared photos will be reviewed before appearing in the gallery
+                    </p>
+                </div>
                 <div class="action-buttons">
                     <button id="preview-btn" class="button">Preview</button>
                     <button id="download-btn" class="button">Download</button>
@@ -232,6 +255,46 @@
     <script src="js/translations.js"></script>
     <script src="js/camera.js"></script>
     <script src="js/editor.js"></script>
+    <script src="js/gallery.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
+
+<style>
+.container {
+    // ...existing code...
+}
+
+/* Navigation bar */
+.nav-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 15px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    color: #666;
+}
+
+.nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 153, 204, 0.3);
+}
+</style>
