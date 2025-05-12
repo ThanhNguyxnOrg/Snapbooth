@@ -32,32 +32,39 @@ video {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 120px;
+    font-size: clamp(60px, 15vw, 120px);
     color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     display: none;
+    z-index: 100;
 }
 
 #photos {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
+    gap: clamp(0.5rem, 2vw, 1rem);
+    margin-top: 1rem;
+    padding: 0 1rem;
+    width: 100%;
+    max-width: 640px;
 }
 
 .photo-slot {
-    width: 160px;
-    height: 160px;
+    width: clamp(100px, 30vw, 160px);
+    height: clamp(100px, 30vw, 160px);
     background-color: #fff;
     border: 2px solid #ccc;
     border-radius: 10px;
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    touch-action: manipulation;
 }
 
-.photo-slot:hover {
-    transform: scale(1.05);
+.photo-slot:active {
+    transform: scale(0.95);
     border-color: #ff99cc;
 }
 
@@ -66,14 +73,148 @@ video {
     height: 100%;
     object-fit: cover;
     border-radius: 8px;
+    pointer-events: none;
 }
 
 #error-message {
-    color: red;
-    margin-top: 10px;
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
     display: none;
-    padding: 10px;
-    background-color: #ffe6e6;
-    border-radius: 5px;
-    border: 1px solid #ffcccc;
+    z-index: 1000;
+    text-align: center;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* Camera settings styles */
+.camera-settings {
+    position: relative;
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 640px;
+}
+
+.settings-btn {
+  background: linear-gradient(135deg, #fff5f8 0%, #ffe9f3 100%);
+  color: #333;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.settings-btn:hover {
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #ffe9f3 0%, #ffd6e7 100%);
+}
+
+.settings-panel {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.95);
+    width: 90%;
+    max-width: 300px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    touch-action: none;
+}
+
+.settings-panel.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+}
+
+.setting-group {
+    margin-bottom: 1rem;
+}
+
+.setting-group:last-child {
+  margin-bottom: 0;
+}
+
+.setting-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #333;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+.setting-group input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    accent-color: #ff99cc;
+}
+
+.setting-group input[type="number"] {
+    width: 4rem;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.setting-group input[type="number"]::-webkit-outer-spin-button,
+.setting-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#capture-interval {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* Progress indicator for auto capture */
+.capture-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 4px;
+    background: linear-gradient(90deg, #ff99cc, #ff66b2);
+    transition: width 0.1s linear;
+    border-radius: 0 2px 2px 0;
 }

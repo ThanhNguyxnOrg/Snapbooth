@@ -8,6 +8,8 @@ body {
   margin: 0;
   min-height: 100vh;
   color: #2c3e50;
+  touch-action: manipulation; /* Tối ưu cho touch events */
+  -webkit-tap-highlight-color: transparent; /* Loại bỏ highlight khi tap trên mobile */
 }
 
 .container {
@@ -23,6 +25,9 @@ body {
   max-width: 1200px;
   width: 95%;
   margin: 2rem auto;
+  padding: var(--container-padding);
+  width: 100%;
+  max-width: var(--content-max-width);
 }
 
 .footer {
@@ -120,5 +125,135 @@ body {
     }
     100% {
         transform: rotate(360deg) scale(1);
+    }
+}
+
+/* Mobile-first responsive design */
+:root {
+    --container-padding: 1rem;
+    --content-max-width: 1200px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    :root {
+        --container-padding: 0.5rem;
+    }
+
+    .video-container {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 4/3;
+    }
+
+    .photo-slot {
+        width: 120px !important;
+        height: 120px !important;
+    }
+
+    .editor {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    .photostrip-container {
+        width: 100% !important;
+        overflow-x: hidden;
+    }
+
+    .photostrip img {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1;
+    }
+
+    .controls {
+        width: 100% !important;
+    }
+
+    .stickers {
+        grid-template-columns: repeat(6, 1fr) !important;
+    }
+
+    .language-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .editor {
+        gap: 1rem !important;
+    }
+
+    .photostrip-container {
+        width: 45% !important;
+    }
+
+    .controls {
+        width: 55% !important;
+    }
+
+    .stickers {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    .button:hover {
+        transform: none !important;
+    }
+
+    .sticker-btn::after,
+    .sticker-btn::before {
+        display: none; /* Disable hover tooltips on touch devices */
+    }
+
+    .upload-slot {
+        min-height: 150px; /* Larger touch target */
+    }
+}
+
+/* Orientation handling */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+    .container {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .video-container {
+        width: 50% !important;
+    }
+
+    #photos {
+        width: 45% !important;
+        flex-direction: column;
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    body {
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+        color: #fff;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .button {
+        background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
     }
 }

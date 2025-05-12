@@ -1,8 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PhotoBooth by ThanhNguyxn</title>    <!-- CSS files -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="description" content="A fun photo booth web app with filters, stickers and multi-language support">
+    <meta name="keywords" content="photo booth, webcam, filters, stickers, photos">
+    <meta name="theme-color" content="#ff99cc">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>PhotoBooth by ThanhNguyxn</title>
+    <!-- Add favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <!-- Add manifest for PWA -->
+    <link rel="manifest" href="manifest.json">
+    <!-- CSS files -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/buttons.css">
     <link rel="stylesheet" href="css/editor.css">
@@ -30,6 +42,22 @@
 
         <!-- Capture Section -->
         <div class="capture-section active" id="capture-section">
+            <div class="camera-settings">
+                <button id="settings-btn" class="button settings-btn" title="Camera Settings">⚙️</button>
+                <div class="settings-panel">
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="auto-capture" checked>
+                            Auto Capture Mode
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>Time between photos (seconds):
+                            <input type="number" id="capture-interval" value="3" min="2" max="10">
+                        </label>
+                    </div>
+                </div>
+            </div>
             <button id="capture-btn" class="button">Take a Photo</button>
             <div class="video-container">
                 <video id="video" autoplay></video>
@@ -71,26 +99,25 @@
                     <div class="date" id="date-stamp"></div>
                 </div>
             </div>
-            <div class="controls">
-                <div class="control-section stickers">
-                    <label>Cute Stickers</label>
-                    <button data-sticker="🦄" class="button" title="Unicorn"></button>
-                    <button data-sticker="🌸" class="button" title="Cherry Blossom"></button>
-                    <button data-sticker="🎀" class="button" title="Ribbon"></button>
-                    <button data-sticker="💝" class="button" title="Heart with Ribbon"></button>
-                    <button data-sticker="🌟" class="button" title="Glowing Star"></button>
-                    <button data-sticker="🦋" class="button" title="Butterfly"></button>
-                    <button data-sticker="🌈" class="button" title="Rainbow"></button>
-                    <button data-sticker="💖" class="button" title="Sparkling Heart"></button>
-                    <button data-sticker="🎪" class="button" title="Circus Tent"></button>
-                    <button data-sticker="🌺" class="button" title="Hibiscus"></button>
-                    <button data-sticker="🍭" class="button" title="Lollipop"></button>
-                    <button data-sticker="✨" class="button" title="Sparkles"></button>
-                    <button data-sticker="🎠" class="button" title="Carousel"></button>
-                    <button data-sticker="🐰" class="button" title="Bunny"></button>
-                    <button data-sticker="🎵" class="button" title="Musical Note"></button>
-                    <button data-sticker="💫" class="button" title="Dizzy"></button>
-                </div>
+            <div class="controls">          <div class="control-section stickers">
+            <label>Cute Stickers</label>
+            <button data-sticker="🦄" class="button sticker-btn" title="Unicorn">🦄</button>
+            <button data-sticker="🌸" class="button sticker-btn" title="Cherry Blossom">🌸</button>
+            <button data-sticker="🎀" class="button sticker-btn" title="Ribbon">🎀</button>
+            <button data-sticker="💝" class="button sticker-btn" title="Heart with Ribbon">💝</button>
+            <button data-sticker="🌟" class="button sticker-btn" title="Glowing Star">🌟</button>
+            <button data-sticker="🦋" class="button sticker-btn" title="Butterfly">🦋</button>
+            <button data-sticker="🌈" class="button sticker-btn" title="Rainbow">🌈</button>
+            <button data-sticker="💖" class="button sticker-btn" title="Sparkling Heart">💖</button>
+            <button data-sticker="🎪" class="button sticker-btn" title="Circus Tent">🎪</button>
+            <button data-sticker="🌺" class="button sticker-btn" title="Hibiscus">🌺</button>
+            <button data-sticker="🍭" class="button sticker-btn" title="Lollipop">🍭</button>
+            <button data-sticker="✨" class="button sticker-btn" title="Sparkles">✨</button>
+            <button data-sticker="🎠" class="button sticker-btn" title="Carousel">🎠</button>
+            <button data-sticker="🐰" class="button sticker-btn" title="Bunny">🐰</button>
+            <button data-sticker="🎵" class="button sticker-btn" title="Musical Note">🎵</button>
+            <button data-sticker="💫" class="button sticker-btn" title="Dizzy">💫</button>
+          </div>
                 <div class="control-section backgrounds">
                     <label>Photostrip Background</label>
                     <button style="background-color: #000;" data-bg="#000" class="button"></button>

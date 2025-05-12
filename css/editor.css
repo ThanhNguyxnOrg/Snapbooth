@@ -74,6 +74,53 @@
   background-color: #fff0f5;
 }
 
+/* Sticker preview tooltip styles */
+.sticker-btn {
+    position: relative;
+    cursor: pointer;
+}
+
+.sticker-btn::after {
+    content: attr(data-sticker);
+    position: absolute;
+    left: 50%;
+    top: -70px;
+    transform: translateX(-50%) scale(0);
+    font-size: 40px;
+    background: linear-gradient(135deg, #fff5f8 0%, #ffe9f3 100%);
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.sticker-btn:hover::after {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+}
+
+.sticker-btn::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    transform: translateX(-50%) scale(0);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #ffe9f3;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 99;
+}
+
+.sticker-btn:hover::before {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+}
+
 /* Backgrounds section */
 .backgrounds button {
   width: 40px;

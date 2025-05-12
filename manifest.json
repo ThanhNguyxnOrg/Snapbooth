@@ -1,0 +1,16 @@
+{
+  "name": "Photo Booth",
+  "short_name": "PhotoBooth",
+  "description": "A fun photo booth web app with filters, stickers and multi-language support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f5d5",
+  "theme_color": "#ff99cc",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
