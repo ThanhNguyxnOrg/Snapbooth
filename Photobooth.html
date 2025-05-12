@@ -8,6 +8,142 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
+      /* Reset default styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        color: #333;
+        position: relative;
+      }
+
+      #mainContent {
+        display: none;
+      }
+
+      #loginSection {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: linear-gradient(135deg, #f6d5e7 0%, #fbe9f1 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .login-container {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        margin: 20px;
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .guest-btn {
+        background: linear-gradient(45deg, #4CAF50, #45a049);
+        color: white;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+      }
+
+      .guest-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+      }
+
+      .login-form {
+        margin-top: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #666;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus {
+        border-color: #FF6B6B;
+        outline: none;
+      }
+
+      .social-login {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .social-btn {
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .social-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .google-btn {
+        background: white;
+        color: #333;
+        border: 2px solid #eee;
+      }
+
+      .facebook-btn {
+        background: #1877f2;
+        color: white;
+      }
+
       body {
         display: flex;
         justify-content: center;
@@ -15,6 +151,7 @@
         background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
         font-family: 'Poppins', sans-serif;
         margin: 0;
+        padding: 0;
         min-height: 100vh;
         color: #333;
       }
@@ -27,6 +164,7 @@
         max-width: 1000px;
         width: 95%;
         margin: 20px;
+        display: none; /* Hide main content by default */
       }
 
       .capture-section, .upload-section, .editor, .scrapbook {
@@ -130,82 +268,88 @@
       }
 
       .editor {
-        display: grid;
+        display: none;
         grid-template-columns: 1fr 300px;
-        gap: 20px;
+        gap: 30px;
         padding: 20px;
-        background: white;
-        border-radius: 20px;
-        margin-top: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .editor.active {
+        display: grid;
+        opacity: 1;
       }
 
       .preview-section {
-        position: sticky;
-        top: 20px;
+        flex: 1;
+        padding: 20px;
       }
 
       .photostrip-container {
         background: white;
         padding: 20px;
         border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 0 auto;
       }
 
-      .controls-section {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 15px;
+      .live-preview {
         display: flex;
         flex-direction: column;
         gap: 15px;
       }
 
-      .control-group {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      }
-
-      .control-group h3 {
-        margin: 0 0 10px 0;
-        font-size: 16px;
-        color: #333;
-      }
-
-      .live-preview {
-        margin-bottom: 20px;
-      }
-
       .live-preview img {
         width: 100%;
         border-radius: 10px;
-        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .controls-section {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .control-group {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+
+      .control-group h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .filters button {
+        padding: 8px 15px;
+        font-size: 14px;
+        background: white;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        cursor: pointer;
         transition: all 0.3s ease;
       }
 
-      .controls {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 15px;
-      }
-
-      .control-section {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      }
-
-      .control-section label {
-        font-weight: 600;
-        color: #444;
-        margin-bottom: 10px;
-        display: block;
+      .filters button.active {
+        background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+        color: white;
+        border-color: transparent;
       }
 
       .stickers {
@@ -215,31 +359,63 @@
       }
 
       .stickers button {
-        width: 50px;
-        height: 50px;
-        font-size: 24px;
-        border-radius: 12px;
-        border: 2px solid #f0f0f0;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        border: 2px solid #eee;
+        border-radius: 8px;
         background: white;
+        cursor: pointer;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .stickers button:hover {
         transform: scale(1.1);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       }
 
-      .photostrip {
-        background: white;
-        padding: 20px;
-        border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      .backgrounds {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
       }
 
-      .photostrip img {
-        border-radius: 15px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      .backgrounds button {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .backgrounds button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .backgrounds button.active {
+        border-color: #FF6B6B;
+      }
+
+      .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .action-buttons .button {
+        width: 100%;
+      }
+
+      .date {
+        text-align: right;
+        font-size: 12px;
+        color: #666;
       }
 
       .footer {
@@ -281,6 +457,10 @@
         .preview-section {
           position: relative;
           top: 0;
+        }
+
+        .controls-section {
+          max-width: 100%;
         }
       }
 
@@ -382,8 +562,8 @@
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        height: 100vh;
+        background: linear-gradient(135deg, #f6d5e7 0%, #fbe9f1 100%);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -397,6 +577,7 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         width: 100%;
         max-width: 400px;
+        margin: 20px;
       }
 
       .login-header {
@@ -491,16 +672,6 @@
 
       .admin-controls.visible {
         display: block;
-      }
-
-      .guest-btn {
-        background: linear-gradient(45deg, #4CAF50, #45a049);
-        width: 100%;
-        margin: 20px 0;
-      }
-
-      .guest-btn:hover {
-        background: linear-gradient(45deg, #45a049, #3d8b40);
       }
 
       .divider {
@@ -784,8 +955,8 @@
           <div class="control-group">
             <h3>Background</h3>
             <div class="backgrounds">
-              <button style="background: #fff" data-bg="#fff"></button>
-              <button style="background: #000" data-bg="#000"></button>
+              <button style="background: #ffffff" data-bg="#ffffff"></button>
+              <button style="background: #000000" data-bg="#000000"></button>
               <button style="background: #f0f0f0" data-bg="#f0f0f0"></button>
               <button style="background: #ffd1dc" data-bg="#ffd1dc"></button>
             </div>
@@ -793,9 +964,9 @@
 
           <div class="control-group">
             <h3>Options</h3>
-            <label>
+            <label class="option">
               <input type="checkbox" id="enable-date" checked>
-              Show Date
+              <span>Show Date</span>
             </label>
           </div>
 
