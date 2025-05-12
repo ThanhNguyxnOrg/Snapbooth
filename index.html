@@ -44,21 +44,28 @@
         <div class="capture-section active" id="capture-section">
             <div class="camera-settings">
                 <button id="settings-btn" class="button settings-btn" title="Camera Settings">⚙️</button>
-                <div class="settings-panel">
+                <div id="settings-panel" class="settings-panel">
                     <div class="setting-group">
                         <label>
                             <input type="checkbox" id="auto-capture" checked>
-                            Auto Capture Mode
+                            Chụp tự động
                         </label>
                     </div>
                     <div class="setting-group">
-                        <label>Time between photos (seconds):
-                            <input type="number" id="capture-interval" value="3" min="2" max="10">
+                        <label>Thời gian giữa các ảnh:
+                            <input type="number" id="capture-interval" value="3" min="2" max="10" step="1">
+                            giây
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="enable-sound" checked>
+                            Âm thanh đếm ngược
                         </label>
                     </div>
                 </div>
             </div>
-            <button id="capture-btn" class="button">Take a Photo</button>
+            <button id="capture-btn" class="button">Chụp ảnh</button>
             <div class="video-container">
                 <video id="video" autoplay></video>
                 <div id="countdown"></div>
