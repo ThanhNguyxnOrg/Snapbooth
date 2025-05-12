@@ -287,6 +287,60 @@ class PhotoBooth {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize language from localStorage or default to 'en'
+    const currentLang = localStorage.getItem('photoboothLang') || 'en';
+    updateLanguage(currentLang);
+
+    // Setup language switcher
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.getAttribute('data-lang');
+            updateLanguage(lang);
+            localStorage.setItem('photoboothLang', lang);
+        });
+    });
+
+    // Update UI elements with translations
+    function updateLanguage(lang) {
+        const t = translations[lang];
+        
+        // Update active state of language buttons
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+        });
+
+        // Update text content
+        document.getElementById('capture-btn').textContent = t.takePicture;
+        document.getElementById('submit-btn').textContent = t.submit;
+        document.getElementById('preview-btn').textContent = t.preview;
+        document.getElementById('download-btn').textContent = t.download;
+        document.getElementById('retake-btn').textContent = t.retake;
+        
+        document.querySelector('.upload-section h2').textContent = t.uploadPhotos;
+        document.querySelector('.upload-section p').textContent = t.uploadInstruction;
+        document.querySelector('.stickers label').textContent = t.cuteStickers;
+        document.querySelector('.backgrounds label').textContent = t.photoBackground;
+        document.querySelector('.filters label').textContent = t.filters;
+        
+        // Update enable date label
+        const dateLabel = document.querySelector('label[for="enable-date"]');
+        if (dateLabel) {
+            const checkbox = dateLabel.querySelector('input');
+            dateLabel.innerHTML = `
+                ${checkbox.outerHTML}
+                ${t.enableDate}
+            `;
+        }
+
+        // Add animation to the decorative icons when language changes
+        document.querySelectorAll('.deco-icon').forEach(icon => {
+            icon.style.animation = 'none';
+            icon.offsetHeight; // Trigger reflow
+            icon.style.animation = null;
+        });
+    }
+
+    // Initialize the rest of the application
     const app = new PhotoBooth();
     app.camera.initialize();
 });
