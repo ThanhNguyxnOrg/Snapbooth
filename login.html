@@ -6,24 +6,44 @@
     <title>Photo Booth - Đăng nhập</title>
     <link rel="stylesheet" href="src/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
+    <div class="login-page">
         <div class="login-container">
-            <h2>Đăng nhập Photo Booth</h2>
+            <h2>✨ Photo Booth ✨</h2>
             <div id="error-message"></div>
+            
             <form id="login-form">
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required>
+                    <label for="email">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="email" required placeholder="Nhập email của bạn">
                 </div>
                 <div class="form-group">
-                    <label for="password">Mật khẩu</label>
-                    <input type="password" id="password" required>
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Mật khẩu
+                    </label>
+                    <input type="password" id="password" required placeholder="Nhập mật khẩu">
                 </div>
-                <button type="submit">Đăng nhập</button>
+                <button type="submit">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
             </form>
-            <p>Chưa có tài khoản? <a href="#" id="register-link">Đăng ký</a></p>
+
+            <div class="login-options">
+                <button id="guest-btn" class="guest-button">
+                    <i class="fas fa-user-alt"></i> Tiếp tục không cần đăng nhập
+                </button>
+            </div>
+
+            <div class="login-links">
+                <a href="#" id="register-link">
+                    <i class="fas fa-user-plus"></i> Đăng ký
+                </a>
+            </div>
+
             <div class="loading-spinner" id="loading-spinner"></div>
             <p class="author-credit">Made with 💖 by ThanhNguyxn</p>
         </div>
@@ -35,18 +55,24 @@
 
         const loginForm = document.getElementById('login-form');
         const registerLink = document.getElementById('register-link');
+        const guestBtn = document.getElementById('guest-btn');
         const errorMessage = document.getElementById('error-message');
         const loadingSpinner = document.getElementById('loading-spinner');
         let isRegistering = false;
 
+        // Xử lý chuyển đổi đăng ký/đăng nhập
         registerLink.addEventListener('click', (e) => {
             e.preventDefault();
             isRegistering = !isRegistering;
-            document.querySelector('h2').textContent = isRegistering ? 'Đăng ký Photo Booth' : 'Đăng nhập Photo Booth';
-            registerLink.textContent = isRegistering ? 'Quay lại đăng nhập' : 'Đăng ký';
+            document.querySelector('h2').textContent = isRegistering ? '✨ Đăng ký Photo Booth ✨' : '✨ Photo Booth ✨';
+            document.querySelector('button[type="submit"]').innerHTML = 
+                isRegistering ? '<i class="fas fa-user-plus"></i> Đăng ký' : '<i class="fas fa-sign-in-alt"></i> Đăng nhập';
+            registerLink.innerHTML = 
+                isRegistering ? '<i class="fas fa-sign-in-alt"></i> Quay lại đăng nhập' : '<i class="fas fa-user-plus"></i> Đăng ký';
             errorMessage.style.display = 'none';
         });
 
+        // Xử lý đăng nhập/đăng ký
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -68,6 +94,13 @@
             } finally {
                 loadingSpinner.style.display = 'none';
             }
+        });
+
+        // Xử lý chế độ khách
+        guestBtn.addEventListener('click', () => {
+            // Lưu trạng thái khách vào localStorage
+            localStorage.setItem('guestMode', 'true');
+            window.location.href = 'index.html';
         });
 
         // Kiểm tra nếu đã đăng nhập
