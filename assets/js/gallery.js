@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeLightbox = document.querySelector('.close-lightbox');
   const downloadButton = document.getElementById('download-button');
   const languageDropdown = document.getElementById('language-dropdown');
+  const selectedFlag = document.getElementById('selected-flag');
   const userInfoContainer = document.getElementById('user-info');
   const userAvatar = document.getElementById('user-avatar');
   const userName = document.getElementById('user-name');
@@ -58,6 +59,15 @@ document.addEventListener('DOMContentLoaded', function() {
       languageDropdown.value = savedLanguage;
     }
     
+    // Update flag icon for the selected language
+    if (selectedFlag && languageDropdown) {
+      const selectedOption = languageDropdown.options[languageDropdown.selectedIndex];
+      const flagCode = selectedOption.getAttribute('data-flag');
+      if (flagCode) {
+        selectedFlag.className = 'flag-icon flag-icon-' + flagCode;
+      }
+    }
+    
     // Initialize translations if i18n is available
     if (window.i18n && typeof window.i18n.changeLanguage === 'function') {
       if (savedLanguage) {
@@ -72,6 +82,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (languageDropdown && window.i18n) {
       languageDropdown.addEventListener('change', function() {
         window.i18n.changeLanguage(this.value);
+        
+        // Update flag when language changes
+        if (selectedFlag) {
+          const selectedOption = languageDropdown.options[languageDropdown.selectedIndex];
+          const flagCode = selectedOption.getAttribute('data-flag');
+          if (flagCode) {
+            selectedFlag.className = 'flag-icon flag-icon-' + flagCode;
+          }
+        }
       });
     }
   }

@@ -36,8 +36,10 @@ function translateText(key, params = {}) {
 
 // Apply translations to the entire page
 function applyTranslations() {
-  // Update document title
-  document.title = translations[currentLanguage].login + " - Photo Booth";
+  // Update document title if on login page
+  if (document.title.includes('Login') || document.title.includes('Photo Booth')) {
+    document.title = translateText('login') + " - Photo Booth";
+  }
   
   // Translate all elements with data-i18n attribute
   document.querySelectorAll('[data-i18n]').forEach(element => {
@@ -58,6 +60,26 @@ function changeLanguage(languageCode) {
     currentLanguage = languageCode;
     localStorage.setItem('language', languageCode);
     applyTranslations();
+    updateFlagIcon();
+  }
+}
+
+// Update flag icon based on selected language
+function updateFlagIcon() {
+  const selectedFlag = document.getElementById('selected-flag');
+  const languageDropdown = document.getElementById('language-dropdown');
+  
+  if (selectedFlag && languageDropdown) {
+    const selectedOption = languageDropdown.options[languageDropdown.selectedIndex];
+    const flagCode = selectedOption.getAttribute('data-flag');
+    
+    // Remove all existing flag classes
+    selectedFlag.className = 'flag-icon';
+    
+    // Add the correct flag class
+    if (flagCode) {
+      selectedFlag.classList.add(`flag-icon-${flagCode}`);
+    }
   }
 }
 
@@ -74,6 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Apply initial translations
     applyTranslations();
     
+    // Set up initial flag
+    updateFlagIcon();
+    
     // Set up language change event
     languageDropdown.addEventListener('change', function() {
       changeLanguage(this.value);
@@ -85,5 +110,6 @@ document.addEventListener('DOMContentLoaded', function() {
 window.i18n = {
   translate: translateText,
   changeLanguage: changeLanguage,
-  getCurrentLanguage: () => currentLanguage
+  getCurrentLanguage: () => currentLanguage,
+  updateFlag: updateFlagIcon
 }; 

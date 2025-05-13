@@ -7,6 +7,8 @@
     <link rel="icon" href="assets/img/icons/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/css/auth.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Flag Icons CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <!-- Add Firebase Auth service -->
@@ -17,12 +19,20 @@
       <div class="auth-card">
         <div class="language-selector">
           <select id="language-dropdown" class="language-dropdown">
-            <option value="en">English</option>
-            <option value="vi">Tiếng Việt</option>
-            <option value="fr">Français</option>
-            <option value="es">Español</option>
-            <option value="ja">日本語</option>
+            <option value="en" data-flag="gb">English</option>
+            <option value="vi" data-flag="vn">Tiếng Việt</option>
+            <option value="fr" data-flag="fr">Français</option>
+            <option value="es" data-flag="es">Español</option>
+            <option value="ja" data-flag="jp">日本語</option>
+            <option value="de" data-flag="de">Deutsch</option>
+            <option value="it" data-flag="it">Italiano</option>
+            <option value="ru" data-flag="ru">Русский</option>
+            <option value="zh" data-flag="cn">中文</option>
+            <option value="ko" data-flag="kr">한국어</option>
+            <option value="pt" data-flag="pt">Português</option>
+            <option value="ar" data-flag="sa">العربية</option>
           </select>
+          <span id="selected-flag" class="flag-icon"></span>
         </div>
 
         <div class="logo">
