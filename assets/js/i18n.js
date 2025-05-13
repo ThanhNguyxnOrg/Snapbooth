@@ -60,56 +60,104 @@ function changeLanguage(languageCode) {
     currentLanguage = languageCode;
     localStorage.setItem('language', languageCode);
     applyTranslations();
-    updateFlagIcon();
+    updateCustomSelect();
   }
 }
 
-// Update flag icon based on selected language
-function updateFlagIcon() {
-  const selectedFlag = document.getElementById('selected-flag');
+// Update the custom language dropdown display
+function updateCustomSelect() {
+  const languageDropdown = document.getElementById('language-dropdown');
+  const selectedLanguageEl = document.getElementById('selected-language');
+  const selectedFlagEl = document.getElementById('selected-flag');
+  const customSelect = document.querySelector('.custom-select');
+  
+  if (languageDropdown && selectedLanguageEl && selectedFlagEl && customSelect) {
+    // Update the hidden native select value
+    languageDropdown.value = currentLanguage;
+    
+    // Find the matching option data
+    const option = [...languageDropdown.options].find(opt => opt.value === currentLanguage);
+    
+    if (option) {
+      const flagCode = option.getAttribute('data-flag');
+      
+      // Update display text
+      selectedLanguageEl.textContent = option.textContent;
+      
+      // Update flag
+      selectedFlagEl.className = 'flag-icon';
+      if (flagCode) {
+        selectedFlagEl.classList.add(`flag-icon-${flagCode}`);
+      }
+      
+      // Mark the selected item in the dropdown
+      const allItems = customSelect.querySelectorAll('.select-item');
+      allItems.forEach(item => {
+        if (item.getAttribute('data-value') === currentLanguage) {
+          item.classList.add('selected');
+        } else {
+          item.classList.remove('selected');
+        }
+      });
+      
+      // Update RTL if needed
+      document.body.style.direction = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+    }
+  }
+}
+
+// Initialize the custom language dropdown
+function initCustomSelect() {
+  const customSelect = document.querySelector('.custom-select');
+  const selectSelected = document.querySelector('.select-selected');
+  const selectItems = document.querySelector('.select-items');
   const languageDropdown = document.getElementById('language-dropdown');
   
-  if (selectedFlag && languageDropdown) {
-    const selectedOption = languageDropdown.options[languageDropdown.selectedIndex];
-    const flagCode = selectedOption.getAttribute('data-flag');
+  if (customSelect && selectSelected && selectItems && languageDropdown) {
+    // Toggle dropdown when clicking the selected item
+    selectSelected.addEventListener('click', function(e) {
+      e.stopPropagation();
+      selectItems.classList.toggle('select-hide');
+      selectSelected.classList.toggle('active');
+    });
     
-    // Remove all existing flag classes
-    selectedFlag.className = 'flag-icon';
+    // Handle item selection
+    const items = document.querySelectorAll('.select-item');
+    items.forEach(item => {
+      item.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        changeLanguage(value);
+        selectItems.classList.add('select-hide');
+        selectSelected.classList.remove('active');
+      });
+    });
     
-    // Add the correct flag class
-    if (flagCode) {
-      selectedFlag.classList.add(`flag-icon-${flagCode}`);
-    }
+    // Close dropdown when clicking elsewhere
+    document.addEventListener('click', function() {
+      selectItems.classList.add('select-hide');
+      selectSelected.classList.remove('active');
+    });
   }
 }
 
 // Initialize the language system when the page loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Set up the language dropdown
-  const languageDropdown = document.getElementById('language-dropdown');
+  // Set up the language
+  currentLanguage = detectLanguage();
   
-  if (languageDropdown) {
-    // Detect and set the initial language
-    currentLanguage = detectLanguage();
-    languageDropdown.value = currentLanguage;
-    
-    // Apply initial translations
-    applyTranslations();
-    
-    // Set up initial flag
-    updateFlagIcon();
-    
-    // Set up language change event
-    languageDropdown.addEventListener('change', function() {
-      changeLanguage(this.value);
-    });
-  }
+  // Initialize custom select
+  initCustomSelect();
+  
+  // Update display
+  updateCustomSelect();
+  
+  // Apply initial translations
+  applyTranslations();
 });
 
 // Expose the translation functions globally
 window.i18n = {
   translate: translateText,
   changeLanguage: changeLanguage,
-  getCurrentLanguage: () => currentLanguage,
-  updateFlag: updateFlagIcon
+  getCurrentLanguage: () => currentLanguage
 }; 

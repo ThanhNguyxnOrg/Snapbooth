@@ -18,21 +18,77 @@
     <div class="auth-container">
       <div class="auth-card">
         <div class="language-selector">
-          <select id="language-dropdown" class="language-dropdown">
-            <option value="en" data-flag="gb">English</option>
-            <option value="vi" data-flag="vn">Tiếng Việt</option>
-            <option value="fr" data-flag="fr">Français</option>
-            <option value="es" data-flag="es">Español</option>
-            <option value="ja" data-flag="jp">日本語</option>
-            <option value="de" data-flag="de">Deutsch</option>
-            <option value="it" data-flag="it">Italiano</option>
-            <option value="ru" data-flag="ru">Русский</option>
-            <option value="zh" data-flag="cn">中文</option>
-            <option value="ko" data-flag="kr">한국어</option>
-            <option value="pt" data-flag="pt">Português</option>
-            <option value="ar" data-flag="sa">العربية</option>
-          </select>
-          <span id="selected-flag" class="flag-icon"></span>
+          <div class="custom-select">
+            <div class="select-selected">
+              <span id="selected-flag" class="flag-icon"></span>
+              <span id="selected-language">English</span>
+            </div>
+            <div class="select-items select-hide">
+              <div class="select-item" data-value="en" data-flag="gb">
+                <span class="flag-icon flag-icon-gb"></span>
+                <span>English</span>
+              </div>
+              <div class="select-item" data-value="vi" data-flag="vn">
+                <span class="flag-icon flag-icon-vn"></span>
+                <span>Tiếng Việt</span>
+              </div>
+              <div class="select-item" data-value="fr" data-flag="fr">
+                <span class="flag-icon flag-icon-fr"></span>
+                <span>Français</span>
+              </div>
+              <div class="select-item" data-value="es" data-flag="es">
+                <span class="flag-icon flag-icon-es"></span>
+                <span>Español</span>
+              </div>
+              <div class="select-item" data-value="ja" data-flag="jp">
+                <span class="flag-icon flag-icon-jp"></span>
+                <span>日本語</span>
+              </div>
+              <div class="select-item" data-value="de" data-flag="de">
+                <span class="flag-icon flag-icon-de"></span>
+                <span>Deutsch</span>
+              </div>
+              <div class="select-item" data-value="it" data-flag="it">
+                <span class="flag-icon flag-icon-it"></span>
+                <span>Italiano</span>
+              </div>
+              <div class="select-item" data-value="ru" data-flag="ru">
+                <span class="flag-icon flag-icon-ru"></span>
+                <span>Русский</span>
+              </div>
+              <div class="select-item" data-value="zh" data-flag="cn">
+                <span class="flag-icon flag-icon-cn"></span>
+                <span>中文</span>
+              </div>
+              <div class="select-item" data-value="ko" data-flag="kr">
+                <span class="flag-icon flag-icon-kr"></span>
+                <span>한국어</span>
+              </div>
+              <div class="select-item" data-value="pt" data-flag="pt">
+                <span class="flag-icon flag-icon-pt"></span>
+                <span>Português</span>
+              </div>
+              <div class="select-item" data-value="ar" data-flag="sa">
+                <span class="flag-icon flag-icon-sa"></span>
+                <span>العربية</span>
+              </div>
+            </div>
+            <!-- Hidden actual select for form submission if needed -->
+            <select id="language-dropdown" class="language-dropdown" style="display: none;">
+              <option value="en" data-flag="gb">English</option>
+              <option value="vi" data-flag="vn">Tiếng Việt</option>
+              <option value="fr" data-flag="fr">Français</option>
+              <option value="es" data-flag="es">Español</option>
+              <option value="ja" data-flag="jp">日本語</option>
+              <option value="de" data-flag="de">Deutsch</option>
+              <option value="it" data-flag="it">Italiano</option>
+              <option value="ru" data-flag="ru">Русский</option>
+              <option value="zh" data-flag="cn">中文</option>
+              <option value="ko" data-flag="kr">한국어</option>
+              <option value="pt" data-flag="pt">Português</option>
+              <option value="ar" data-flag="sa">العربية</option>
+            </select>
+          </div>
         </div>
 
         <div class="logo">
@@ -42,7 +98,15 @@
 
         <div id="login-form" class="form-container active">
           <h2 data-i18n="login">Login</h2>
-          <form id="loginForm">
+          
+          <!-- Login method tabs -->
+          <div class="auth-tabs">
+            <button class="auth-tab active" data-target="email-login" data-i18n="emailTab">Email</button>
+            <button class="auth-tab" data-target="phone-login" data-i18n="phoneTab">Phone</button>
+          </div>
+          
+          <!-- Email login form -->
+          <form id="loginForm" class="auth-form active" data-form="email-login">
             <div class="form-group">
               <label for="email" data-i18n="email">Email</label>
               <input type="email" id="email" data-i18n-placeholder="emailPlaceholder" placeholder="Enter your email" required>
@@ -53,6 +117,25 @@
             </div>
             <div class="error-message" id="login-error"></div>
             <button type="submit" class="btn primary-btn" data-i18n="loginButton">Login</button>
+          </form>
+          
+          <!-- Phone login form -->
+          <form id="phoneLoginForm" class="auth-form" data-form="phone-login">
+            <div class="form-group">
+              <label for="phone" data-i18n="phoneNumber">Phone Number</label>
+              <input type="tel" id="phone" data-i18n-placeholder="phonePlaceholder" placeholder="Enter your phone number" required>
+              <div class="phone-format-hint">Format: +1234567890</div>
+            </div>
+            <div id="recaptcha-container" class="recaptcha-container"></div>
+            <div class="form-group verification-code-group" style="display: none;">
+              <label for="verification-code" data-i18n="verificationCode">Verification Code</label>
+              <input type="text" id="verification-code" data-i18n-placeholder="verificationCodePlaceholder" placeholder="Enter verification code" required>
+              <div class="resend-code">
+                <button type="button" id="resend-code-btn" class="link-btn" data-i18n="resendCode">Resend code</button>
+              </div>
+            </div>
+            <div class="error-message" id="phone-login-error"></div>
+            <button type="submit" id="phone-login-btn" class="btn primary-btn" data-i18n="sendCode">Send verification code</button>
           </form>
           
           <div class="separator">
@@ -82,7 +165,15 @@
 
         <div id="register-form" class="form-container">
           <h2 data-i18n="register">Register</h2>
-          <form id="registerForm">
+          
+          <!-- Register method tabs -->
+          <div class="auth-tabs">
+            <button class="auth-tab active" data-target="email-register" data-i18n="emailTab">Email</button>
+            <button class="auth-tab" data-target="phone-register" data-i18n="phoneTab">Phone</button>
+          </div>
+          
+          <!-- Email register form -->
+          <form id="registerForm" class="auth-form active" data-form="email-register">
             <div class="form-group">
               <label for="reg-email" data-i18n="email">Email</label>
               <input type="email" id="reg-email" data-i18n-placeholder="emailPlaceholder" placeholder="Enter your email" required>
@@ -97,6 +188,29 @@
             </div>
             <div class="error-message" id="register-error"></div>
             <button type="submit" class="btn primary-btn" data-i18n="registerButton">Register</button>
+          </form>
+          
+          <!-- Phone register form -->
+          <form id="phoneRegisterForm" class="auth-form" data-form="phone-register">
+            <div class="form-group">
+              <label for="reg-phone" data-i18n="phoneNumber">Phone Number</label>
+              <input type="tel" id="reg-phone" data-i18n-placeholder="phonePlaceholder" placeholder="Enter your phone number" required>
+              <div class="phone-format-hint">Format: +1234567890</div>
+            </div>
+            <div id="register-recaptcha-container" class="recaptcha-container"></div>
+            <div class="form-group verification-code-group" style="display: none;">
+              <label for="reg-verification-code" data-i18n="verificationCode">Verification Code</label>
+              <input type="text" id="reg-verification-code" data-i18n-placeholder="verificationCodePlaceholder" placeholder="Enter verification code" required>
+              <div class="resend-code">
+                <button type="button" id="reg-resend-code-btn" class="link-btn" data-i18n="resendCode">Resend code</button>
+              </div>
+            </div>
+            <div class="form-group user-profile-group" style="display: none;">
+              <label for="reg-display-name" data-i18n="displayName">Display Name</label>
+              <input type="text" id="reg-display-name" data-i18n-placeholder="displayNamePlaceholder" placeholder="Enter your name" required>
+            </div>
+            <div class="error-message" id="phone-register-error"></div>
+            <button type="submit" id="phone-register-btn" class="btn primary-btn" data-i18n="sendCode">Send verification code</button>
           </form>
           
           <div class="separator">

@@ -71,7 +71,27 @@ const translations = {
     photoTitle: "Photo Title",
     photoTitlePlaceholder: "Enter a title for your photo",
     sharePublicly: "Share publicly",
-    cancel: "Cancel"
+    cancel: "Cancel",
+
+    // Phone Auth
+    emailTab: "Email",
+    phoneTab: "Phone",
+    phoneNumber: "Phone Number",
+    phonePlaceholder: "Enter your phone number",
+    verificationCode: "Verification Code",
+    verificationCodePlaceholder: "Enter 6-digit code",
+    sendCode: "Send verification code",
+    verifyCode: "Verify code",
+    resendCode: "Resend code",
+    displayName: "Display Name",
+    displayNamePlaceholder: "Enter your name",
+    phoneAuthError: "Phone authentication error",
+    invalidPhoneNumber: "Invalid phone number format",
+    invalidVerificationCode: "Invalid verification code",
+    codeSent: "Verification code has been sent",
+    phoneRegistered: "Phone number already registered",
+    phoneRegisterSuccess: "Successfully registered with phone number!",
+    phoneLoginSuccess: "Successfully logged in with phone number!"
   },
   
   // Vietnamese
@@ -145,7 +165,27 @@ const translations = {
     photoTitle: "Tiêu đề ảnh",
     photoTitlePlaceholder: "Nhập tiêu đề cho ảnh của bạn",
     sharePublicly: "Chia sẻ công khai",
-    cancel: "Hủy bỏ"
+    cancel: "Hủy bỏ",
+
+    // Phone Auth
+    emailTab: "Email",
+    phoneTab: "Điện thoại",
+    phoneNumber: "Số điện thoại",
+    phonePlaceholder: "Nhập số điện thoại của bạn",
+    verificationCode: "Mã xác thực",
+    verificationCodePlaceholder: "Nhập mã 6 chữ số",
+    sendCode: "Gửi mã xác thực",
+    verifyCode: "Xác thực mã",
+    resendCode: "Gửi lại mã",
+    displayName: "Tên hiển thị",
+    displayNamePlaceholder: "Nhập tên của bạn",
+    phoneAuthError: "Lỗi xác thực số điện thoại",
+    invalidPhoneNumber: "Định dạng số điện thoại không hợp lệ",
+    invalidVerificationCode: "Mã xác thực không hợp lệ",
+    codeSent: "Mã xác thực đã được gửi",
+    phoneRegistered: "Số điện thoại đã được đăng ký",
+    phoneRegisterSuccess: "Đăng ký thành công bằng số điện thoại!",
+    phoneLoginSuccess: "Đăng nhập thành công bằng số điện thoại!"
   },
   
   // French
@@ -219,7 +259,27 @@ const translations = {
     photoTitle: "Titre de la photo",
     photoTitlePlaceholder: "Entrez un titre pour votre photo",
     sharePublicly: "Partager publiquement",
-    cancel: "Annuler"
+    cancel: "Annuler",
+
+    // Phone Auth
+    emailTab: "Email",
+    phoneTab: "Téléphone",
+    phoneNumber: "Numéro de téléphone",
+    phonePlaceholder: "Entrez votre numéro de téléphone",
+    verificationCode: "Code de vérification",
+    verificationCodePlaceholder: "Entrez le code à 6 chiffres",
+    sendCode: "Envoyer le code de vérification",
+    verifyCode: "Vérifier le code",
+    resendCode: "Renvoyer le code",
+    displayName: "Nom d'affichage",
+    displayNamePlaceholder: "Entrez votre nom",
+    phoneAuthError: "Erreur d'authentification par téléphone",
+    invalidPhoneNumber: "Format de numéro de téléphone invalide",
+    invalidVerificationCode: "Code de vérification invalide",
+    codeSent: "Le code de vérification a été envoyé",
+    phoneRegistered: "Numéro de téléphone déjà enregistré",
+    phoneRegisterSuccess: "Inscription réussie avec numéro de téléphone !",
+    phoneLoginSuccess: "Connexion réussie avec numéro de téléphone !"
   },
   
   // Spanish
@@ -293,7 +353,27 @@ const translations = {
     photoTitle: "Título de la foto",
     photoTitlePlaceholder: "Ingrese un título para su foto",
     sharePublicly: "Compartir públicamente",
-    cancel: "Cancelar"
+    cancel: "Cancelar",
+
+    // Phone Auth
+    emailTab: "Email",
+    phoneTab: "Teléfono",
+    phoneNumber: "Número de teléfono",
+    phonePlaceholder: "Ingrese su número de teléfono",
+    verificationCode: "Código de verificación",
+    verificationCodePlaceholder: "Ingrese código de 6 dígitos",
+    sendCode: "Enviar código de verificación",
+    verifyCode: "Verificar código",
+    resendCode: "Reenviar código",
+    displayName: "Nombre para mostrar",
+    displayNamePlaceholder: "Ingrese su nombre",
+    phoneAuthError: "Error de autenticación telefónica",
+    invalidPhoneNumber: "Formato de número de teléfono inválido",
+    invalidVerificationCode: "Código de verificación inválido",
+    codeSent: "El código de verificación ha sido enviado",
+    phoneRegistered: "Número de teléfono ya registrado",
+    phoneRegisterSuccess: "¡Registro exitoso con número de teléfono!",
+    phoneLoginSuccess: "¡Inicio de sesión exitoso con número de teléfono!"
   },
   
   // Japanese
@@ -367,7 +447,27 @@ const translations = {
     photoTitle: "写真のタイトル",
     photoTitlePlaceholder: "写真のタイトルを入力してください",
     sharePublicly: "公開で共有",
-    cancel: "キャンセル"
+    cancel: "キャンセル",
+
+    // Phone Auth
+    emailTab: "メール",
+    phoneTab: "電話",
+    phoneNumber: "電話番号",
+    phonePlaceholder: "電話番号を入力してください",
+    verificationCode: "確認コード",
+    verificationCodePlaceholder: "6桁のコードを入力",
+    sendCode: "確認コードを送信",
+    verifyCode: "コードを確認",
+    resendCode: "コードを再送信",
+    displayName: "表示名",
+    displayNamePlaceholder: "名前を入力してください",
+    phoneAuthError: "電話認証エラー",
+    invalidPhoneNumber: "無効な電話番号形式",
+    invalidVerificationCode: "無効な確認コード",
+    codeSent: "確認コードが送信されました",
+    phoneRegistered: "電話番号はすでに登録されています",
+    phoneRegisterSuccess: "電話番号での登録に成功しました！",
+    phoneLoginSuccess: "電話番号でのログインに成功しました！"
   },
   
   // German
@@ -441,7 +541,27 @@ const translations = {
     photoTitle: "Fototitel",
     photoTitlePlaceholder: "Geben Sie einen Titel für Ihr Foto ein",
     sharePublicly: "Öffentlich teilen",
-    cancel: "Abbrechen"
+    cancel: "Abbrechen",
+
+    // Phone Auth
+    emailTab: "E-Mail",
+    phoneTab: "Telefon",
+    phoneNumber: "Telefonnummer",
+    phonePlaceholder: "Geben Sie Ihre Telefonnummer ein",
+    verificationCode: "Bestätigungscode",
+    verificationCodePlaceholder: "6-stelligen Code eingeben",
+    sendCode: "Bestätigungscode senden",
+    verifyCode: "Code überprüfen",
+    resendCode: "Code erneut senden",
+    displayName: "Anzeigename",
+    displayNamePlaceholder: "Geben Sie Ihren Namen ein",
+    phoneAuthError: "Fehler bei der Telefonauthentifizierung",
+    invalidPhoneNumber: "Ungültiges Telefonnummerformat",
+    invalidVerificationCode: "Ungültiger Bestätigungscode",
+    codeSent: "Bestätigungscode wurde gesendet",
+    phoneRegistered: "Telefonnummer bereits registriert",
+    phoneRegisterSuccess: "Erfolgreich mit Telefonnummer registriert!",
+    phoneLoginSuccess: "Erfolgreich mit Telefonnummer angemeldet!"
   },
   
   // Italian
@@ -515,7 +635,27 @@ const translations = {
     photoTitle: "Titolo della foto",
     photoTitlePlaceholder: "Inserisci un titolo per la tua foto",
     sharePublicly: "Condividi pubblicamente",
-    cancel: "Annulla"
+    cancel: "Annulla",
+
+    // Phone Auth
+    emailTab: "Email",
+    phoneTab: "Telefono",
+    phoneNumber: "Numero di telefono",
+    phonePlaceholder: "Inserisci il tuo numero di telefono",
+    verificationCode: "Codice di verifica",
+    verificationCodePlaceholder: "Inserisci codice a 6 cifre",
+    sendCode: "Invia codice di verifica",
+    verifyCode: "Verifica codice",
+    resendCode: "Rinvia codice",
+    displayName: "Nome visualizzato",
+    displayNamePlaceholder: "Inserisci il tuo nome",
+    phoneAuthError: "Errore di autenticazione telefonica",
+    invalidPhoneNumber: "Formato numero di telefono non valido",
+    invalidVerificationCode: "Codice di verifica non valido",
+    codeSent: "Il codice di verifica è stato inviato",
+    phoneRegistered: "Numero di telefono già registrato",
+    phoneRegisterSuccess: "Registrazione con numero di telefono avvenuta con successo!",
+    phoneLoginSuccess: "Accesso con numero di telefono avvenuto con successo!"
   },
   
   // Russian
@@ -589,7 +729,27 @@ const translations = {
     photoTitle: "Заголовок фото",
     photoTitlePlaceholder: "Введите заголовок для вашего фото",
     sharePublicly: "Поделиться публично",
-    cancel: "Отмена"
+    cancel: "Отмена",
+
+    // Phone Auth
+    emailTab: "Эл. почта",
+    phoneTab: "Телефон",
+    phoneNumber: "Номер телефона",
+    phonePlaceholder: "Введите ваш номер телефона",
+    verificationCode: "Код подтверждения",
+    verificationCodePlaceholder: "Введите 6-значный код",
+    sendCode: "Отправить код подтверждения",
+    verifyCode: "Проверить код",
+    resendCode: "Отправить код повторно",
+    displayName: "Отображаемое имя",
+    displayNamePlaceholder: "Введите ваше имя",
+    phoneAuthError: "Ошибка аутентификации по телефону",
+    invalidPhoneNumber: "Неверный формат номера телефона",
+    invalidVerificationCode: "Неверный код подтверждения",
+    codeSent: "Код подтверждения отправлен",
+    phoneRegistered: "Номер телефона уже зарегистрирован",
+    phoneRegisterSuccess: "Успешная регистрация по номеру телефона!",
+    phoneLoginSuccess: "Успешный вход по номеру телефона!"
   },
   
   // Chinese
@@ -663,7 +823,27 @@ const translations = {
     photoTitle: "照片标题",
     photoTitlePlaceholder: "为您的照片输入标题",
     sharePublicly: "公开分享",
-    cancel: "取消"
+    cancel: "取消",
+
+    // Phone Auth
+    emailTab: "邮箱",
+    phoneTab: "手机",
+    phoneNumber: "手机号码",
+    phonePlaceholder: "输入您的手机号码",
+    verificationCode: "验证码",
+    verificationCodePlaceholder: "输入6位验证码",
+    sendCode: "发送验证码",
+    verifyCode: "验证",
+    resendCode: "重新发送",
+    displayName: "显示名称",
+    displayNamePlaceholder: "输入您的姓名",
+    phoneAuthError: "手机验证错误",
+    invalidPhoneNumber: "无效的手机号码格式",
+    invalidVerificationCode: "无效的验证码",
+    codeSent: "验证码已发送",
+    phoneRegistered: "手机号码已注册",
+    phoneRegisterSuccess: "使用手机号码注册成功！",
+    phoneLoginSuccess: "使用手机号码登录成功！"
   },
   
   // Korean
@@ -737,7 +917,27 @@ const translations = {
     photoTitle: "사진 제목",
     photoTitlePlaceholder: "사진 제목 입력",
     sharePublicly: "공개적으로 공유",
-    cancel: "취소"
+    cancel: "취소",
+
+    // Phone Auth
+    emailTab: "이메일",
+    phoneTab: "전화번호",
+    phoneNumber: "전화번호",
+    phonePlaceholder: "전화번호를 입력하세요",
+    verificationCode: "인증 코드",
+    verificationCodePlaceholder: "6자리 코드 입력",
+    sendCode: "인증 코드 전송",
+    verifyCode: "코드 확인",
+    resendCode: "코드 재전송",
+    displayName: "표시 이름",
+    displayNamePlaceholder: "이름을 입력하세요",
+    phoneAuthError: "전화 인증 오류",
+    invalidPhoneNumber: "유효하지 않은 전화번호 형식",
+    invalidVerificationCode: "유효하지 않은 인증 코드",
+    codeSent: "인증 코드가 전송되었습니다",
+    phoneRegistered: "이미 등록된 전화번호",
+    phoneRegisterSuccess: "전화번호로 성공적으로 등록했습니다!",
+    phoneLoginSuccess: "전화번호로 성공적으로 로그인했습니다!"
   },
   
   // Portuguese
@@ -811,7 +1011,27 @@ const translations = {
     photoTitle: "Título da Foto",
     photoTitlePlaceholder: "Digite um título para sua foto",
     sharePublicly: "Compartilhar publicamente",
-    cancel: "Cancelar"
+    cancel: "Cancelar",
+
+    // Phone Auth
+    emailTab: "Email",
+    phoneTab: "Telefone",
+    phoneNumber: "Número de telefone",
+    phonePlaceholder: "Digite seu número de telefone",
+    verificationCode: "Código de verificação",
+    verificationCodePlaceholder: "Digite o código de 6 dígitos",
+    sendCode: "Enviar código de verificação",
+    verifyCode: "Verificar código",
+    resendCode: "Reenviar código",
+    displayName: "Nome de exibição",
+    displayNamePlaceholder: "Digite seu nome",
+    phoneAuthError: "Erro de autenticação por telefone",
+    invalidPhoneNumber: "Formato de número de telefone inválido",
+    invalidVerificationCode: "Código de verificação inválido",
+    codeSent: "O código de verificação foi enviado",
+    phoneRegistered: "Número de telefone já registrado",
+    phoneRegisterSuccess: "Registrado com sucesso com número de telefone!",
+    phoneLoginSuccess: "Login com sucesso com número de telefone!"
   },
   
   // Arabic
@@ -885,6 +1105,26 @@ const translations = {
     photoTitle: "عنوان الصورة",
     photoTitlePlaceholder: "أدخل عنوانًا لصورتك",
     sharePublicly: "مشاركة علنية",
-    cancel: "إلغاء"
+    cancel: "إلغاء",
+
+    // Phone Auth
+    emailTab: "البريد الإلكتروني",
+    phoneTab: "الهاتف",
+    phoneNumber: "رقم الهاتف",
+    phonePlaceholder: "أدخل رقم هاتفك",
+    verificationCode: "رمز التحقق",
+    verificationCodePlaceholder: "أدخل الرمز المكون من 6 أرقام",
+    sendCode: "إرسال رمز التحقق",
+    verifyCode: "تحقق من الرمز",
+    resendCode: "إعادة إرسال الرمز",
+    displayName: "الاسم المعروض",
+    displayNamePlaceholder: "أدخل اسمك",
+    phoneAuthError: "خطأ في المصادقة بالهاتف",
+    invalidPhoneNumber: "تنسيق رقم الهاتف غير صالح",
+    invalidVerificationCode: "رمز التحقق غير صالح",
+    codeSent: "تم إرسال رمز التحقق",
+    phoneRegistered: "رقم الهاتف مسجل بالفعل",
+    phoneRegisterSuccess: "تم التسجيل بنجاح برقم الهاتف!",
+    phoneLoginSuccess: "تم تسجيل الدخول بنجاح برقم الهاتف!"
   }
 }; 

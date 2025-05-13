@@ -51,28 +51,109 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  z-index: 10;
 }
 
-.language-dropdown {
+/* Custom Select Dropdown */
+.custom-select {
+  position: relative;
+  min-width: 160px;
+  font-size: 14px;
+}
+
+.select-selected {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 6px 30px 6px 10px;
   border-radius: 4px;
   border: 1px solid var(--border-color);
   background-color: white;
-  font-size: 14px;
   cursor: pointer;
-  appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 12px;
+  transition: border-color 0.2s;
 }
 
+.select-selected:hover {
+  border-color: #ccc;
+}
+
+.select-selected.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color-dark);
+}
+
+.select-items {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: white;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 99;
+}
+
+.select-hide {
+  display: none;
+}
+
+.select-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.select-item:hover {
+  background-color: #f5f5f5;
+}
+
+.select-item.selected {
+  background-color: #f0f0f0;
+  font-weight: 500;
+  color: var(--primary-color-dark);
+}
+
+/* Making sure flag icons align properly */
 .flag-icon {
   width: 20px;
   height: 15px;
   border-radius: 2px;
   overflow: hidden;
-  pointer-events: none;
+  display: inline-block;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* RTL Support */
+[dir="rtl"] .language-selector {
+  left: 15px;
+  right: auto;
+}
+
+[dir="rtl"] .select-selected {
+  padding: 6px 10px 6px 30px;
+  background-position: left 8px center;
+}
+
+[dir="rtl"] .select-item {
+  text-align: right;
+}
+
+/* Hide the original select */
+.language-dropdown {
+  display: none;
 }
 
 /* Logo */
@@ -108,6 +189,99 @@ body {
   margin-bottom: 20px;
   color: var(--text-color);
   font-size: 20px;
+}
+
+/* Tabs for login/register methods */
+.auth-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #777;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.auth-tab:after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary-color);
+  transform: scaleX(0);
+  transition: transform 0.2s;
+}
+
+.auth-tab.active {
+  color: var(--primary-color);
+}
+
+.auth-tab.active:after {
+  transform: scaleX(1);
+}
+
+.auth-tab:hover {
+  color: var(--primary-color-dark);
+}
+
+/* Auth forms */
+.auth-form {
+  display: none;
+}
+
+.auth-form.active {
+  display: block;
+}
+
+/* Phone verification related styles */
+.phone-format-hint {
+  font-size: 12px;
+  color: #777;
+  margin-top: 4px;
+}
+
+.recaptcha-container {
+  margin: 15px 0;
+}
+
+.verification-code-group {
+  margin-top: 20px;
+}
+
+.resend-code {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 5px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.link-btn:hover {
+  color: var(--primary-color);
+}
+
+.user-profile-group {
+  margin-top: 20px;
 }
 
 /* Form Groups */
@@ -242,7 +416,8 @@ body {
 }
 
 /* Firebase Error Banner */
-.firebase-error-banner {
+.firebase-error-banner,
+.firebase-info-banner {
   margin-bottom: 20px;
 }
 
@@ -267,7 +442,12 @@ body {
     position: relative;
     top: unset;
     right: unset;
+    left: unset;
     justify-content: flex-end;
     margin-bottom: 15px;
+  }
+  
+  .select-items {
+    max-height: 220px;
   }
 } 

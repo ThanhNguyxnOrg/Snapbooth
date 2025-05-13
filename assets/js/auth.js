@@ -37,32 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
   
-  // Make sure Firebase is properly initialized
-  let auth;
-  try {
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-      auth = firebase.auth();
-    } else {
-      console.error('Firebase is not properly initialized');
-      showError(loginError, 'Firebase initialization failed. Please check your configuration.');
-      disableAuthForms();
-    }
-  } catch (e) {
-    console.error('Firebase initialization error:', e);
-    showError(loginError, 'Firebase initialization failed. Please check your configuration.');
-    disableAuthForms();
-  }
+  // Get Firebase Auth instance
+  const auth = firebase.auth();
   
-  // Configure providers if Firebase is available
-  let googleProvider, facebookProvider;
-  if (auth) {
-    try {
-      googleProvider = new firebase.auth.GoogleAuthProvider();
-      facebookProvider = new firebase.auth.FacebookAuthProvider();
-    } catch (e) {
-      console.error('Provider initialization error:', e);
-    }
-  }
+  // Configure providers
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+  const facebookProvider = new firebase.auth.FacebookAuthProvider();
   
   // Switch between login and register forms
   if (goToRegisterLink) {
@@ -87,11 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (loginFormEl) {
     loginFormEl.addEventListener('submit', function(e) {
       e.preventDefault();
-      
-      if (!auth) {
-        handleContinueWithoutLogin();
-        return;
-      }
       
       const email = loginEmail.value.trim();
       const password = loginPassword.value;
@@ -147,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
               showError(loginError, 'Network error. Please check your internet connection.');
               break;
             default:
-              showError(loginError, i18n.translate('loginError') + ': ' + error.message);
+              showError(loginError, i18n.translate('loginError') + (error.message ? ': ' + error.message : ''));
           }
           
           // Reset button state
@@ -161,11 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (registerFormEl) {
     registerFormEl.addEventListener('submit', function(e) {
       e.preventDefault();
-      
-      if (!auth) {
-        handleContinueWithoutLogin();
-        return;
-      }
       
       const email = regEmail.value.trim();
       const password = regPassword.value;
@@ -239,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
               showError(registerError, 'Network error. Please check your internet connection.');
               break;
             default:
-              showError(registerError, i18n.translate('registerError') + ': ' + error.message);
+              showError(registerError, i18n.translate('registerError') + (error.message ? ': ' + error.message : ''));
           }
           
           // Reset button state
@@ -251,11 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Google login handler
   function signInWithGoogle() {
-    if (!auth || !googleProvider) {
-      handleContinueWithoutLogin();
-      return;
-    }
-    
     clearErrors();
     
     auth.signInWithPopup(googleProvider)
@@ -283,19 +248,14 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (error.code === 'auth/popup-closed-by-user') {
           // User closed the popup, no need to show error
         } else {
-          showError(loginError, 'Google sign-in failed: ' + error.message);
-          showError(registerError, 'Google sign-in failed: ' + error.message);
+          showError(loginError, 'Google sign-in failed' + (error.message ? ': ' + error.message : ''));
+          showError(registerError, 'Google sign-in failed' + (error.message ? ': ' + error.message : ''));
         }
       });
   }
   
   // Facebook login handler
   function signInWithFacebook() {
-    if (!auth || !facebookProvider) {
-      handleContinueWithoutLogin();
-      return;
-    }
-    
     clearErrors();
     
     auth.signInWithPopup(facebookProvider)
@@ -323,8 +283,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (error.code === 'auth/popup-closed-by-user') {
           // User closed the popup, no need to show error
         } else {
-          showError(loginError, 'Facebook sign-in failed: ' + error.message);
-          showError(registerError, 'Facebook sign-in failed: ' + error.message);
+          showError(loginError, 'Facebook sign-in failed' + (error.message ? ': ' + error.message : ''));
+          showError(registerError, 'Facebook sign-in failed' + (error.message ? ': ' + error.message : ''));
         }
       });
   }
@@ -375,64 +335,34 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerError) registerError.textContent = '';
   }
   
-  // Helper function to disable auth forms when Firebase is not available
-  function disableAuthForms() {
-    // Disable form inputs and buttons
-    const forms = [loginFormEl, registerFormEl];
-    forms.forEach(form => {
-      if (form) {
-        const inputs = form.querySelectorAll('input');
-        const buttons = form.querySelectorAll('button:not(.secondary-btn)');
-        
-        inputs.forEach(input => input.disabled = true);
-        buttons.forEach(button => button.disabled = true);
-        
-        // Add notice about guest mode
-        const notice = document.createElement('div');
-        notice.className = 'auth-notice';
-        notice.textContent = 'Authentication is currently unavailable. You can continue as a guest.';
-        notice.style.color = '#e74c3c';
-        notice.style.margin = '10px 0';
-        notice.style.padding = '10px';
-        notice.style.border = '1px solid #e74c3c';
-        notice.style.borderRadius = '4px';
-        notice.style.backgroundColor = 'rgba(231, 76, 60, 0.1)';
-        
-        form.insertBefore(notice, form.firstChild);
-      }
-    });
-  }
-  
   // Check if user is already logged in
   function checkLoginStatus() {
-    if (auth) {
-      try {
-        auth.onAuthStateChanged(function(user) {
-          if (user) {
-            // User is already logged in, ensure session storage is updated
-            const userData = {
-              email: user.email,
-              uid: user.uid,
-              loginMethod: 'firebase',
-              displayName: user.displayName || user.email.split('@')[0],
-              photoURL: user.photoURL,
-              language: i18n.getCurrentLanguage()
-            };
-            
-            sessionStorage.setItem('currentUser', JSON.stringify(userData));
-            
-            // Redirect to main app if not already there
-            if (!window.location.href.includes('app.html')) {
-              window.location.href = 'app.html';
-            }
+    try {
+      auth.onAuthStateChanged(function(user) {
+        if (user) {
+          // User is already logged in, ensure session storage is updated
+          const userData = {
+            email: user.email,
+            uid: user.uid,
+            loginMethod: 'firebase',
+            displayName: user.displayName || user.email.split('@')[0],
+            photoURL: user.photoURL,
+            language: i18n.getCurrentLanguage()
+          };
+          
+          sessionStorage.setItem('currentUser', JSON.stringify(userData));
+          
+          // Redirect to main app if not already there
+          if (!window.location.href.includes('app.html')) {
+            window.location.href = 'app.html';
           }
-        });
-      } catch (e) {
-        console.error('Error checking login status:', e);
-      }
+        }
+      });
+    } catch (e) {
+      console.error('Error checking login status:', e);
     }
   }
   
-  // Check login status when page loads (with a slight delay to ensure Firebase is initialized)
+  // Check login status when page loads
   setTimeout(checkLoginStatus, 500);
 }); 
