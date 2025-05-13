@@ -151,6 +151,18 @@ body {
   flex-shrink: 0;
   object-fit: cover;
   border: 1px solid rgba(0,0,0,0.1);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Ensure flag icons have a white background if needed */
+#selected-flag {
+  background-color: #fff;
+}
+
+/* Ensure flags in dropdown have white background */
+.select-item .flag-icon {
+  background-color: #fff;
 }
 
 /* RTL Support */

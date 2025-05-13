@@ -7,6 +7,7 @@
     <link rel="icon" href="assets/img/icons/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/gallery.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- Flag Icons CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
@@ -25,21 +26,77 @@
         <h1 data-i18n="galleryTitle">Photo Booth Gallery</h1>
         <div class="header-controls">
           <div class="language-selector">
-            <select id="language-dropdown" class="language-dropdown">
-              <option value="en" data-flag="gb">English</option>
-              <option value="vi" data-flag="vn">Tiếng Việt</option>
-              <option value="fr" data-flag="fr">Français</option>
-              <option value="es" data-flag="es">Español</option>
-              <option value="ja" data-flag="jp">日本語</option>
-              <option value="de" data-flag="de">Deutsch</option>
-              <option value="it" data-flag="it">Italiano</option>
-              <option value="ru" data-flag="ru">Русский</option>
-              <option value="zh" data-flag="cn">中文</option>
-              <option value="ko" data-flag="kr">한국어</option>
-              <option value="pt" data-flag="pt">Português</option>
-              <option value="ar" data-flag="sa">العربية</option>
-            </select>
-            <span id="selected-flag" class="flag-icon"></span>
+            <div class="custom-select">
+              <div class="select-selected">
+                <span id="selected-flag" class="flag-icon"></span>
+                <span id="selected-language">English</span>
+              </div>
+              <div class="select-items select-hide">
+                <div class="select-item" data-value="en" data-flag="gb">
+                  <span class="flag-icon flag-icon-gb"></span>
+                  <span>English</span>
+                </div>
+                <div class="select-item" data-value="vi" data-flag="vn">
+                  <span class="flag-icon flag-icon-vn"></span>
+                  <span>Tiếng Việt</span>
+                </div>
+                <div class="select-item" data-value="fr" data-flag="fr">
+                  <span class="flag-icon flag-icon-fr"></span>
+                  <span>Français</span>
+                </div>
+                <div class="select-item" data-value="es" data-flag="es">
+                  <span class="flag-icon flag-icon-es"></span>
+                  <span>Español</span>
+                </div>
+                <div class="select-item" data-value="ja" data-flag="jp">
+                  <span class="flag-icon flag-icon-jp"></span>
+                  <span>日本語</span>
+                </div>
+                <div class="select-item" data-value="de" data-flag="de">
+                  <span class="flag-icon flag-icon-de"></span>
+                  <span>Deutsch</span>
+                </div>
+                <div class="select-item" data-value="it" data-flag="it">
+                  <span class="flag-icon flag-icon-it"></span>
+                  <span>Italiano</span>
+                </div>
+                <div class="select-item" data-value="ru" data-flag="ru">
+                  <span class="flag-icon flag-icon-ru"></span>
+                  <span>Русский</span>
+                </div>
+                <div class="select-item" data-value="zh" data-flag="cn">
+                  <span class="flag-icon flag-icon-cn"></span>
+                  <span>中文</span>
+                </div>
+                <div class="select-item" data-value="ko" data-flag="kr">
+                  <span class="flag-icon flag-icon-kr"></span>
+                  <span>한국어</span>
+                </div>
+                <div class="select-item" data-value="pt" data-flag="pt">
+                  <span class="flag-icon flag-icon-pt"></span>
+                  <span>Português</span>
+                </div>
+                <div class="select-item" data-value="ar" data-flag="sa">
+                  <span class="flag-icon flag-icon-sa"></span>
+                  <span>العربية</span>
+                </div>
+              </div>
+              <!-- Hidden actual select for form submission if needed -->
+              <select id="language-dropdown" class="language-dropdown" style="display: none;">
+                <option value="en" data-flag="gb">English</option>
+                <option value="vi" data-flag="vn">Tiếng Việt</option>
+                <option value="fr" data-flag="fr">Français</option>
+                <option value="es" data-flag="es">Español</option>
+                <option value="ja" data-flag="jp">日本語</option>
+                <option value="de" data-flag="de">Deutsch</option>
+                <option value="it" data-flag="it">Italiano</option>
+                <option value="ru" data-flag="ru">Русский</option>
+                <option value="zh" data-flag="cn">中文</option>
+                <option value="ko" data-flag="kr">한국어</option>
+                <option value="pt" data-flag="pt">Português</option>
+                <option value="ar" data-flag="sa">العربية</option>
+              </select>
+            </div>
           </div>
           
           <div id="user-info" class="user-info" style="display: none;">

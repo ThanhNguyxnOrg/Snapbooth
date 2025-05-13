@@ -84,7 +84,7 @@ function updateCustomSelect() {
       // Update display text
       selectedLanguageEl.textContent = option.textContent;
       
-      // Update flag
+      // Update flag - remove all flag classes first, then add the right one
       selectedFlagEl.className = 'flag-icon';
       if (flagCode) {
         selectedFlagEl.classList.add(`flag-icon-${flagCode}`);

@@ -1,11 +1,7 @@
-// Firebase configuration
+// Firebase configuration - MOCK VERSION
+// Remove real Firebase config to prevent errors with invalid API keys
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  mockMode: true // Đánh dấu rằng chúng ta đang sử dụng phiên bản giả lập
 };
 
 // Mock Firebase for development
@@ -269,49 +265,27 @@ function createMockFirebase() {
     auth: () => mockAuth,
     firestore: () => ({}), // Add mock firestore if needed
     storage: () => ({}),   // Add mock storage if needed
-    initializeApp: () => {}
+    initializeApp: () => {},
+    SDK_VERSION: 'mock-version'  // Add this to simulate a real Firebase instance
   };
 }
 
-// Try to initialize Firebase
-try {
-  // Check if Firebase SDK is available
-  if (typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized");
-    
-    // Try to enable Firebase Auth persistence
-    if (firebase.auth) {
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .catch((error) => {
-          console.warn("Firebase persistence error:", error);
-        });
-    } else {
-      console.warn("Firebase Auth not available, using mock implementation");
-      window.firebase = createMockFirebase();
-    }
-  } else {
-    console.warn("Firebase SDK not loaded, using mock implementation");
-    window.firebase = createMockFirebase();
-  }
-} catch (error) {
-  console.warn("Firebase initialization error:", error);
-  console.log("Using mock Firebase implementation instead");
-  window.firebase = createMockFirebase();
-}
+// Always use Mock Firebase to avoid API key errors
+console.log("Using mock Firebase implementation for the project");
+window.firebase = createMockFirebase();
 
 // Let the user know which implementation is being used
 document.addEventListener('DOMContentLoaded', function() {
-  const isUsingMock = !window.firebase.SDK_VERSION;
-  
-  if (isUsingMock && document.querySelector('.auth-container')) {
+  if (document.querySelector('.auth-container')) {
     const infoMessage = document.createElement('div');
     infoMessage.className = 'firebase-info-banner';
     infoMessage.innerHTML = `
       <div style="background-color: #e6f7ff; color: #0066cc; padding: 10px; 
                   border: 1px solid #99ccff; border-radius: 4px; margin-bottom: 20px; 
                   text-align: center;">
-        <p style="margin: 5px 0;">Đang sử dụng hệ thống đăng nhập offline. Bạn có thể đăng nhập với email: test@example.com, mật khẩu: password123</p>
+        <p style="margin: 5px 0;">Đang sử dụng hệ thống đăng nhập offline. Bạn có thể đăng nhập với:</p>
+        <p style="margin: 5px 0;">• Email: <strong>test@example.com</strong> / Password: <strong>password123</strong></p>
+        <p style="margin: 5px 0;">• Phone: <strong>+84987654321</strong> / Code: <strong>123456</strong></p>
       </div>
     `;
     
