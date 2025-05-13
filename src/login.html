@@ -3,339 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Booth - Login</title>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #f6d5e7 0%, #fbe9f1 100%);
-            padding: 20px;
-        }
-
-        .login-container {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header h1 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #eee;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            border-color: #FF6B6B;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .social-login {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .social-btn {
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .google-btn {
-            background: white;
-            color: #333;
-            border: 2px solid #eee;
-        }
-
-        .facebook-btn {
-            background: #1877f2;
-            color: white;
-        }
-
-        .divider {
-            text-align: center;
-            margin: 20px 0;
-            position: relative;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            width: 45%;
-            height: 1px;
-            background: #ddd;
-        }
-
-        .divider::before {
-            left: 0;
-        }
-
-        .divider::after {
-            right: 0;
-        }
-
-        .divider span {
-            background: white;
-            padding: 0 10px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .error-message {
-            color: #ff4444;
-            font-size: 14px;
-            text-align: center;
-            margin-top: 10px;
-            min-height: 20px;
-        }
-
-        .success-message {
-            color: #4CAF50;
-            font-size: 14px;
-            text-align: center;
-            margin-top: 10px;
-            min-height: 20px;
-        }
-    </style>
+    <title>Photo Booth - Đăng nhập</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>Welcome to Photo Booth</h1>
-            <p>Sign in to continue or use as guest</p>
-        </div>
+    <div class="login-page">
+        <div class="login-container">
+            <h2>✨ Photo Booth ✨</h2>
+            <div id="error-message" class="error-message"></div>
+              <form id="login-form" class="login__form">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Tên đăng nhập
+                    </label>
+                    <input type="text" class="input-login-username" id="username" required placeholder="Nhập tên đăng nhập">
+                </div>
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Mật khẩu
+                    </label>
+                    <input type="password" class="input-login-password" id="password" required placeholder="Nhập mật khẩu">
+                </div>
+                <div id="login-error" class="error-message"></div>
+                <button type="submit" class="primary-button login__signInButton">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
+            </form>
 
-        <button class="btn btn-secondary" id="guestLogin">
-            Continue as Guest
-        </button>
-
-        <div class="divider">
-            <span>or sign in</span>
-        </div>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" required placeholder="Enter your email">
+            <div class="login-options">
+                <button id="guest-btn" class="guest-button">
+                    <i class="fas fa-user-alt"></i> Tiếp tục với tư cách khách
+                </button>
+                <p class="guest-note">* Chế độ khách có thể sử dụng các tính năng cơ bản</p>
             </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required placeholder="Enter your password">
+            <div class="login-links">
+                <a href="#" id="register-link">
+                    <i class="fas fa-user-plus"></i> Đăng ký tài khoản mới
+                </a>
             </div>
 
-            <button type="submit" class="btn btn-primary">Sign In</button>
-            
-            <div class="error-message" id="errorMessage"></div>
-            <div class="success-message" id="successMessage"></div>
-        </form>
-
-        <div class="social-login">
-            <button class="social-btn google-btn" id="googleLogin">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18">
-                Google
-            </button>
-            <button class="social-btn facebook-btn" id="facebookLogin">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg" width="18" height="18">
-                Facebook
-            </button>
+            <div class="loading-spinner" id="loading-spinner"></div>
+            <p class="author-credit">Made with 💖 by ThanhNguyxn</p>
         </div>
-    </div>
-
-    <!-- Import Firebase config -->
-    <script type="module">
+    </div>    <script type="module">
+        // Import auth system
         import { auth } from './js/firebase-config.js';
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // DOM Elements
-        const loginForm = document.getElementById('loginForm');
-        const errorMessage = document.getElementById('errorMessage');
-        const successMessage = document.getElementById('successMessage');
-        const googleLogin = document.getElementById('googleLogin');
-        const facebookLogin = document.getElementById('facebookLogin');
-        const guestLogin = document.getElementById('guestLogin');
+        // Import local auth system
+        import { Auth } from './js/auth.js';
+        const localAuth = new Auth();
 
-        // Admin credentials
-        const ADMIN_CREDENTIALS = {
-            email: 'thanhnguyentuan2007@gmail.com',
-            password: 'Thanh17112007'
-        };
+        const loginForm = document.getElementById('login-form');
+        const registerLink = document.getElementById('register-link');
+        const guestBtn = document.getElementById('guest-btn');
+        const errorMessage = document.getElementById('error-message');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        let isRegistering = false;
 
-        // Regular email/password login
+        // Xử lý chuyển đổi đăng ký/đăng nhập
+        registerLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isRegistering = !isRegistering;
+            document.querySelector('h2').textContent = isRegistering ? '✨ Đăng ký Photo Booth ✨' : '✨ Photo Booth ✨';
+            document.querySelector('button[type="submit"]').innerHTML = 
+                isRegistering ? '<i class="fas fa-user-plus"></i> Đăng ký' : '<i class="fas fa-sign-in-alt"></i> Đăng nhập';
+            registerLink.innerHTML = 
+                isRegistering ? '<i class="fas fa-sign-in-alt"></i> Quay lại đăng nhập' : '<i class="fas fa-user-plus"></i> Đăng ký tài khoản mới';
+            errorMessage.style.display = 'none';
+        });        // Xử lý đăng nhập/đăng ký
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorMessage.textContent = '';
-            successMessage.textContent = '';
-
-            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
+            loadingSpinner.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            // Trước tiên thử đăng nhập local
             try {
-                // Check if trying to login as admin
-                if (email === ADMIN_CREDENTIALS.email) {
-                    if (password === ADMIN_CREDENTIALS.password) {
-                        successMessage.textContent = 'Login successful! Redirecting...';
-                        setTimeout(() => window.location.href = 'index.html', 1500);
-                    } else {
-                        errorMessage.textContent = 'Invalid admin credentials';
-                    }
-                } else {
-                    // Regular user login
-                    try {
-                        await auth.signInWithEmailAndPassword(email, password);
-                        successMessage.textContent = 'Login successful! Redirecting...';
-                        setTimeout(() => window.location.href = 'index.html', 1500);
-                    } catch (error) {
-                        if (error.code === 'auth/user-not-found') {
-                            // Create new account
-                            await auth.createUserWithEmailAndPassword(email, password);
-                            successMessage.textContent = 'Account created! Redirecting...';
-                            setTimeout(() => window.location.href = 'index.html', 1500);
-                        } else {
-                            errorMessage.textContent = error.message;
-                        }
-                    }
+                const isAdmin = username === 'admin' && password === 'admin123';
+                if (isAdmin || await localAuth.validateUserCredentials(username, password)) {
+                    await localAuth.handleRegularLogin(username, password);
+                    window.location.href = isAdmin ? 'admin.html' : 'index.html';
+                    return;
                 }
             } catch (error) {
-                errorMessage.textContent = error.message;
-            }
-        });
-
-        // Google login
-        googleLogin.addEventListener('click', async () => {
+                console.log('Local auth failed, trying Firebase...');            // Nếu không phải admin và không có tài khoản local, thử Firebase
             try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                await auth.signInWithPopup(provider);
-                successMessage.textContent = 'Login successful! Redirecting...';
-                setTimeout(() => window.location.href = 'index.html', 1500);
-            } catch (error) {
-                errorMessage.textContent = error.message;
-            }
-        });
-
-        // Facebook login
-        facebookLogin.addEventListener('click', async () => {
-            try {
-                const provider = new firebase.auth.FacebookAuthProvider();
-                await auth.signInWithPopup(provider);
-                successMessage.textContent = 'Login successful! Redirecting...';
-                setTimeout(() => window.location.href = 'index.html', 1500);
-            } catch (error) {
-                errorMessage.textContent = error.message;
-            }
-        });
-
-        // Guest login
-        guestLogin.addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
-
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
+                const email = username + '@photobooth.com'; // Tạo email từ username
+                if (isRegistering) {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    // Lưu thêm vào local storage
+                    await localAuth.handleSignup(username, password, email);
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
                 window.location.href = 'index.html';
+            } catch (error) {
+                errorMessage.textContent = getErrorMessage(error.code);
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingSpinner.style.display = 'none';
             }
         });
+
+        // Xử lý chế độ khách
+        guestBtn.addEventListener('click', () => {
+            localStorage.setItem('guestMode', 'true');
+            window.location.href = 'index.html';
+        });        // Kiểm tra nếu đã đăng nhập
+        function checkAuthState() {
+            const localUser = JSON.parse(localStorage.getItem('userData'));
+            const isGuestMode = localStorage.getItem('guestMode') === 'true';
+            
+            auth.onAuthStateChanged((firebaseUser) => {
+                if (firebaseUser || localUser || isGuestMode) {
+                    const redirectTo = localUser?.role === 'admin' ? 'admin.html' : 'index.html';
+                    window.location.href = redirectTo;
+                }
+            });
+        }
+        
+        checkAuthState();// Hàm xử lý thông báo lỗi
+        function getErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'auth/invalid-email':
+                    return 'Tên đăng nhập không hợp lệ';
+                case 'auth/user-disabled':
+                    return 'Tài khoản đã bị vô hiệu hóa';
+                case 'auth/user-not-found':
+                    return 'Không tìm thấy tài khoản';
+                case 'auth/wrong-password':
+                    return 'Mật khẩu không đúng';
+                case 'auth/email-already-in-use':
+                case 'local/user-exists':
+                    return 'Tên đăng nhập đã được sử dụng';
+                case 'auth/weak-password':
+                    return 'Mật khẩu phải có ít nhất 6 ký tự';
+                default:
+                    return 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+            }
+        }
     </script>
 </body>
 </html> 

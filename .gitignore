@@ -1,11 +1,44 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # Dependencies
 node_modules/
+vendor/
+
+# Environment files
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# IDE
-.vscode/
+# Build files
+dist/
+build/
+out/
+
+# IDE files
 .idea/
+.vscode/
+*.sublime-*
+.project
+.classpath
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+
+# Firebase cache
+.firebase/
+.firebaserc
+
+# Temporary files
+*.tmp
+*.temp
+*.bak

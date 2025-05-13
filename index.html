@@ -1,524 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="description" content="A fun and cute photo booth web app with filters, stickers and multi-language support">
-    <meta name="keywords" content="photo booth, webcam, filters, stickers, photos, cute">
-    <meta name="theme-color" content="#ff99cc" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#ff66b2" media="(prefers-color-scheme: dark)">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta property="og:title" content="✨ Cute Photo Booth ✨">
-    <meta property="og:description" content="Take cute photos with filters and stickers!">
-    <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
-    <title>✨ Photo Booth by ThanhNguyxn ✨</title>
-
-    <!-- CSS files -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/buttons.css">
-    <link rel="stylesheet" href="css/editor.css">
-    <link rel="stylesheet" href="css/capture.css">
-    <link rel="stylesheet" href="css/upload.css">
-    <link rel="stylesheet" href="css/scrapbook.css">
-    <link rel="stylesheet" href="css/gallery.css">
-    <link rel="stylesheet" href="css/privacy.css">
-    
-    <!-- Favicons -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
-    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
-    <link rel="icon" type="image/png" sizes="16x16" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
-    
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- Tab styling -->
-    <style>
-        /* Custom styles for browser tab */
-        @media (prefers-color-scheme: light) {
-            :root {
-                --tab-color: #ff99cc;
-            }
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --tab-color: #ff66b2;
-            }
-        }
-        /* Customize browser tab color */
-        meta[name="theme-color"] {
-            content: var(--tab-color);
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="theme-pink">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Booth</title>
+    <link rel="icon" href="assets/img/icons/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>✨ Photo Booth ✨</h1>
-            <p class="author-credit">Made with 💖 by ThanhNguyxn</p>
-            <div class="user-controls">
-                <span id="user-email"></span>
-                <button id="logout-btn">Logout</button>
-            </div>
+      <!-- Capture Section -->
+      <div class="capture-section active" id="capture-section">
+        <button id="capture-btn" class="button">Take a Photo</button>
+        <div class="video-container">
+          <video id="video" autoplay></video>
+          <div id="countdown"></div>
         </div>
-
-        <!-- Navigation Bar -->
-        <div class="nav-bar">
-            <button class="nav-btn active" data-section="capture">📸 Chụp ảnh</button>
-            <button class="nav-btn" data-section="gallery">🖼️ Gallery</button>
-            <button class="nav-btn" data-section="scrapbook">📚 Scrapbook</button>
+        <div id="photos">
+          <div class="photo-slot" id="slot-1"></div>
+          <div class="photo-slot" id="slot-2"></div>
+          <div class="photo-slot" id="slot-3"></div>
         </div>
+        <div id="error-message"></div>
+      </div>
 
-        <!-- Language Selector -->
-        <div class="language-bar">
-            <div class="language-selector">
-                <button class="lang-btn active" data-lang="en">🇺🇸</button>
-                <button class="lang-btn" data-lang="vi">🇻🇳</button>
-                <button class="lang-btn" data-lang="ja">🇯🇵</button>
-                <button class="lang-btn" data-lang="ko">🇰🇷</button>
-            </div>
-            <div class="decorative-icons">
-                <span class="deco-icon">📸</span>
-                <span class="deco-icon">✨</span>
-                <span class="deco-icon">🎀</span>
-                <span class="deco-icon">💝</span>
-            </div>
-        </div>
-
-        <!-- Capture Section -->
-        <div class="capture-section active" id="capture-section">
-            <div class="camera-settings">
-                <button id="settings-btn" class="button settings-btn" title="Camera Settings">⚙️</button>
-                <div id="settings-panel" class="settings-panel">
-                    <div class="setting-group camera-switch" id="camera-switch-group">
-                        <label>Camera:</label>
-                        <button id="switch-camera" class="button switch-camera-btn">
-                            <span class="camera-icon">📱</span>
-                            <span class="camera-text">Chuyển camera</span>
-                        </button>
-                    </div>
-                    <div class="setting-group">
-                        <label>
-                            <input type="checkbox" id="auto-capture" checked>
-                            Chụp tự động
-                        </label>
-                    </div>
-                    <div class="setting-group">
-                        <label>Thời gian giữa các ảnh:
-                            <input type="number" id="capture-interval" value="3" min="2" max="10" step="1">
-                            giây
-                        </label>
-                    </div>
-                    <div class="setting-group">
-                        <label>
-                            <input type="checkbox" id="enable-sound" checked>
-                            Âm thanh đếm ngược
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="button-container">
-                <button id="capture-btn">
-                    <i class="fas fa-camera"></i> Chụp ảnh
-                </button>
-            </div>
-            <div id="video-container">
-                <video id="video" autoplay playsinline></video>
-                <div id="countdown"></div>
-            </div>
-            <div id="photos">
-                <div class="photo-slot" id="slot-1">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-image"></i>
-                    </div>
-                </div>
-                <div class="photo-slot" id="slot-2">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-image"></i>
-                    </div>
-                </div>
-                <div class="photo-slot" id="slot-3">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-image"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="button-container">
-                <button id="download-btn" disabled>
-                    <i class="fas fa-download"></i> Tải ảnh
-                </button>
-                <button id="share-btn" disabled>
-                    <i class="fas fa-share-alt"></i> Chia sẻ
-                </button>
-            </div>
-            <div id="error-message"></div>
-        </div>
-
-        <!-- Upload Section -->
-        <div class="upload-section" id="upload-section">
-            <h2>Upload your photo(s)!</h2>
-            <div class="upload-slots">
-                <div class="upload-slot" id="upload-slot-1">
-                    <input type="file" id="upload-1" accept="image/*" />
-                </div>
-                <div class="upload-slot" id="upload-slot-2">
-                    <input type="file" id="upload-2" accept="image/*" />
-                </div>
-                <div class="upload-slot" id="upload-slot-3">
-                    <input type="file" id="upload-3" accept="image/*" />
-                </div>
-            </div>
-            <button id="submit-btn" class="button">Submit Images</button>
-            <p>Upload at least 1 image to submit</p>
-        </div>
-
-        <!-- Editor Section -->
-        <div class="editor" id="editor">
-            <div class="photostrip-container">
-                <div class="photostrip" id="photostrip">
-                    <div><img id="photo-1" src="" alt="Photo 1" /></div>
-                    <div><img id="photo-2" src="" alt="Photo 2" /></div>
-                    <div><img id="photo-3" src="" alt="Photo 3" /></div>
-                    <div class="date" id="date-stamp"></div>
-                </div>
-            </div>
-            <div class="controls">          <div class="control-section stickers">
-            <label>Cute Stickers</label>
-            <button data-sticker="🦄" class="button sticker-btn" title="Unicorn">🦄</button>
-            <button data-sticker="🌸" class="button sticker-btn" title="Cherry Blossom">🌸</button>
-            <button data-sticker="🎀" class="button sticker-btn" title="Ribbon">🎀</button>
-            <button data-sticker="💝" class="button sticker-btn" title="Heart with Ribbon">💝</button>
-            <button data-sticker="🌟" class="button sticker-btn" title="Glowing Star">🌟</button>
-            <button data-sticker="🦋" class="button sticker-btn" title="Butterfly">🦋</button>
-            <button data-sticker="🌈" class="button sticker-btn" title="Rainbow">🌈</button>
-            <button data-sticker="💖" class="button sticker-btn" title="Sparkling Heart">💖</button>
-            <button data-sticker="🎪" class="button sticker-btn" title="Circus Tent">🎪</button>
-            <button data-sticker="🌺" class="button sticker-btn" title="Hibiscus">🌺</button>
-            <button data-sticker="🍭" class="button sticker-btn" title="Lollipop">🍭</button>
-            <button data-sticker="✨" class="button sticker-btn" title="Sparkles">✨</button>
-            <button data-sticker="🎠" class="button sticker-btn" title="Carousel">🎠</button>
-            <button data-sticker="🐰" class="button sticker-btn" title="Bunny">🐰</button>
-            <button data-sticker="🎵" class="button sticker-btn" title="Musical Note">🎵</button>
-            <button data-sticker="💫" class="button sticker-btn" title="Dizzy">💫</button>
+      <!-- Upload Section -->
+      <div class="upload-section" id="upload-section">
+        <h2>Upload your photo(s)!</h2>
+        <div class="upload-slots">
+          <div class="upload-slot" id="upload-slot-1">
+            <input type="file" id="upload-1" accept="image/*" />
           </div>
-                <div class="control-section backgrounds">
-                    <label>Photostrip Background</label>
-                    <button style="background-color: #000;" data-bg="#000" class="button"></button>
-                    <button style="background-color: #fff;" data-bg="#fff" class="button"></button>
-                    <button style="background-color: #f0f0f0;" data-bg="#f0f0f0" class="button"></button>
-                    <button style="background-color: #add8e6;" data-bg="#add8e6" class="button"></button>
-                    <button style="background-color: #ff99cc;" data-bg="#ff99cc" class="button"></button>
-                </div>
-                <div class="control-section filters">
-                    <label>Filters</label>
-                    <button data-filter="black-and-white" class="button">B&W</button>
-                    <button data-filter="sepia" class="button">Sepia</button>
-                    <button data-filter="warm" class="button">Warm</button>
-                    <button data-filter="cold" class="button">Cold</button>
-                    <button data-filter="cool" class="button">Cool</button>
-                    <button data-filter="none" class="button active">None</button>
-                </div>
-                <div class="control-section">
-                    <label>
-                        <input type="checkbox" id="enable-date" checked />
-                        Enable Date
-                    </label>
-                </div>
-                <!-- Privacy Controls -->
-                <div class="control-section privacy-controls">
-                    <label>Privacy Settings</label>
-                    <div class="privacy-options">
-                        <label class="privacy-option">
-                            <input type="radio" name="privacy" value="private" checked>
-                            <span class="privacy-icon">🔒</span>
-                            <span data-translate="privateOnly">Private Only</span>
-                        </label>
-                        <label class="privacy-option">
-                            <input type="radio" name="privacy" value="gallery">
-                            <span class="privacy-icon">🖼️</span>
-                            <span data-translate="shareToGallery">Share to Gallery</span>
-                        </label>
-                    </div>
-                    <p class="privacy-note" data-translate="privacyNote">
-                        * Shared photos will be reviewed before appearing in the gallery
-                    </p>
-                </div>
-                <div class="action-buttons">
-                    <button id="preview-btn" class="button">Preview</button>
-                    <button id="download-btn" class="button">Download</button>
-                    <button id="retake-btn" class="button">Retake</button>
-                </div>
-            </div>
+          <div class="upload-slot" id="upload-slot-2">
+            <input type="file" id="upload-2" accept="image/*" />
+          </div>
+          <div class="upload-slot" id="upload-slot-3">
+            <input type="file" id="upload-3" accept="image/*" />
+          </div>
         </div>
+        <button id="submit-btn" class="button">Submit Images</button>
+        <p>Upload at least 1 image to submit</p>
+      </div>
 
-        <!-- Scrapbook Section -->
-        <div class="scrapbook" id="scrapbook">
-            <div class="photostrip" style="left: 20px; top: 20px;">
-                <img id="scrap-photo-1" src="" alt="Photo 1" />
-                <img id="scrap-photo-2" src="" alt="Photo 2" />
-                <img id="scrap-photo-3" src="" alt="Photo 3" />
-                <div class="date"></div>
+      <!-- Editor Section -->
+      <div class="editor" id="editor">
+        <div class="photostrip-container">
+          <div class="photostrip" id="photostrip">
+            <div>
+              <img id="photo-1" src="" alt="Photo 1" />
             </div>
-            <div class="photostrip" style="right: 20px; top: 20px;">
-                <img id="scrap-photo-4" src="" alt="Photo 4" />
-                <img id="scrap-photo-5" src="" alt="Photo 5" />
-                <img id="scrap-photo-6" src="" alt="Photo 6" />
-                <div class="date"></div>
+            <div>
+              <img id="photo-2" src="" alt="Photo 2" />
             </div>
-            <div class="thumbnail" style="left: 150px; top: 80px;"><img id="thumb-1" src="" alt="Thumbnail 1" /></div>
-            <div class="thumbnail" style="left: 150px; top: 180px;"><img id="thumb-2" src="" alt="Thumbnail 2" /></div>
-            <div class="thumbnail" style="left: 250px; top: 120px;"><img id="thumb-3" src="" alt="Thumbnail 3" /></div>
-            <div class="thumbnail" style="left: 300px; top: 200px;"><img id="thumb-4" src="" alt="Thumbnail 4" /></div>
-            <div class="thumbnail" style="right: 150px; top: 80px;"><img id="thumb-5" src="" alt="Thumbnail 5" /></div>
-            <div class="thumbnail" style="right: 150px; top: 180px;"><img id="thumb-6" src="" alt="Thumbnail 6" /></div>
-            <div class="decor" style="left: 50px; top: 50px;">🌸</div>
-            <div class="decor" style="left: 50px; top: 300px;">💖</div>
-            <div class="decor" style="right: 50px; top: 50px;">🌸</div>
-            <div class="decor" style="right: 50px; top: 300px;">💖</div>
-            <div class="decor" style="left: 200px; top: 150px;">🌟</div>
-            <div class="decor" style="right: 200px; top: 150px;">🌟</div>
+            <div>
+              <img id="photo-3" src="" alt="Photo 3" />
+            </div>
+            <div class="date" id="date-stamp">March 16, 2025</div>
+          </div>
         </div>
-
-        <div class="footer">
-            <p>✨ Made by ThanhNguyxn ✨</p>
+        <div class="controls">
+          <div class="control-section stickers">
+            <label>Stickers</label>
+            <button data-sticker="🦄" class="button"></button>
+            <button data-sticker="🐾" class="button"></button>
+            <button data-sticker="🐼" class="button"></button>
+            <button data-sticker="✨" class="button"></button>
+          </div>
+          <div class="control-section backgrounds">
+            <label>Photostrip Background</label>
+            <button style="background-color: #000;" data-bg="#000" class="button"></button>
+            <button style="background-color: #fff;" data-bg="#fff" class="button"></button>
+            <button style="background-color: #f0f0f0;" data-bg="#f0f0f0" class="button"></button>
+            <button style="background-color: #add8e6;" data-bg="#add8e6" class="button"></button>
+            <button style="background-color: #ff99cc;" data-bg="#ff99cc" class="button"></button>
+          </div>
+          <div class="control-section filters">
+            <label>Filters</label>
+            <button data-filter="black-and-whitewhite" class="button">B&W</button>
+            <button data-filter="sepia" class="button">Sepia</button>
+            <button data-filter="warm" class="button">Warm</button>
+            <button data-filter="cold" class="button">Cold</button>
+            <button data-filter="cool" class="button">Cool</button>
+            <button data-filter="none" class="button active">None</button>
+          </div>
+          <div class="control-section">
+            <label>
+              <input type="checkbox" id="enable-date" checked />
+              Enable Date
+            </label>
+          </div>
+          <div class="action-buttons">
+            <button id="preview-btn" class="button">Preview</button>
+            <button id="download-btn" class="button">Download</button>
+            <button id="retake-btn" class="button">Retake</button>
+          </div>
         </div>
-    </div>    <!-- JavaScript files -->
-    <script src="js/translations.js"></script>
-    <script src="js/camera.js"></script>
-    <script src="js/editor.js"></script>
-    <script src="js/gallery.js"></script>
-    <script src="js/app.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script type="module">
-        import { auth } from './src/js/firebase-config.js';
-        import { Camera } from './src/js/camera.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      </div>
 
-        // Check authentication
-        onAuthStateChanged(auth, (user) => {
-            const isGuestMode = localStorage.getItem('guestMode') === 'true';
-            if (!user && !isGuestMode) {
-                window.location.href = 'login.html';
-                return;
-            }
-            if (user) {
-                document.getElementById('user-email').textContent = user.email;
-            } else {
-                document.getElementById('user-email').textContent = 'Guest User';
-            }
-            initializeApp();
-        });
+      <!-- Scrapbook Section -->
+      <div class="scrapbook" id="scrapbook">
+        <div class="photostrip" style="left: 20px; top: 20px;">
+          <img id="scrap-photo-1" src="" alt="Photo 1" />
+          <img id="scrap-photo-2" src="" alt="Photo 2" />
+          <img id="scrap-photo-3" src="" alt="Photo 3" />
+          <div class="date">March 16, 2025</div>
+        </div>
+        <div class="photostrip" style="right: 20px; top: 20px;">
+          <img id="scrap-photo-4" src="" alt="Photo 4" />
+          <img id="scrap-photo-5" src="" alt="Photo 5" />
+          <img id="scrap-photo-6" src="" alt="Photo 6" />
+          <div class="date">March 16, 2025</div>
+        </div>
+        <div class="thumbnail" style="left: 150px; top: 80px;"><img id="thumb-1" src="" alt="Thumbnail 1" /></div>
+        <div class="thumbnail" style="left: 150px; top: 180px;"><img id="thumb-2" src="" alt="Thumbnail 2" /></div>
+        <div class="thumbnail" style="left: 250px; top: 120px;"><img id="thumb-3" src="" alt="Thumbnail 3" /></div>
+        <div class="thumbnail" style="left: 300px; top: 200px;"><img id="thumb-4" src="" alt="Thumbnail 4" /></div>
+        <div class="thumbnail" style="right: 150px; top: 80px;"><img id="thumb-5" src="" alt="Thumbnail 5" /></div>
+        <div class="thumbnail" style="right: 150px; top: 180px;"><img id="thumb-6" src="" alt="Thumbnail 6" /></div>
+        <div class="decor" style="left: 50px; top: 50px;">🌸</div>
+        <div class="decor" style="left: 50px; top: 300px;">💖</div>
+        <div class="decor" style="right: 50px; top: 50px;">🌸</div>
+        <div class="decor" style="right: 50px; top: 300px;">💖</div>
+        <div class="decor" style="left: 200px; top: 150px;">🌟</div>
+        <div class="decor" style="right: 200px; top: 150px;">🌟</div>
+      </div>
 
-        function initializeApp() {
-            const video = document.getElementById('video');
-            const captureBtn = document.getElementById('capture-btn');
-            const downloadBtn = document.getElementById('download-btn');
-            const shareBtn = document.getElementById('share-btn');
-            const countdown = document.getElementById('countdown');
-            const slots = [
-                document.getElementById('slot-1'),
-                document.getElementById('slot-2'),
-                document.getElementById('slot-3')
-            ];
-            let currentSlot = 0;
-            let capturedPhotos = [];
-            let currentEffect = 'normal';
-            
-            const camera = new Camera(video, countdown);
-
-            // Initialize camera
-            camera.initialize().catch(err => {
-                document.getElementById('error-message').style.display = 'block';
-                document.getElementById('error-message').textContent = err.message;
-                captureBtn.disabled = true;
-            });
-
-            // Xử lý hiệu ứng
-            document.querySelectorAll('.effect-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const effect = button.dataset.effect;
-                    document.querySelectorAll('.effect-button').forEach(b => b.classList.remove('active'));
-                    button.classList.add('active');
-                    currentEffect = effect;
-                    applyEffect(video, effect);
-                });
-            });
-
-            // Xử lý chụp ảnh
-            captureBtn.addEventListener('click', async () => {
-                if (currentSlot >= 3) {
-                    currentSlot = 0;
-                    capturedPhotos = [];
-                    slots.forEach(slot => {
-                        slot.innerHTML = `
-                            <div class="photo-placeholder">
-                                <i class="fas fa-image"></i>
-                            </div>
-                        `;
-                    });
-                    downloadBtn.disabled = true;
-                    shareBtn.disabled = true;
-                }
-
-                captureBtn.disabled = true;
-                await camera.startCountdown();
-                
-                const photoData = await camera.takePhoto(currentEffect);
-                capturedPhotos.push(photoData);
-
-                const img = document.createElement('img');
-                img.src = photoData;
-                slots[currentSlot].innerHTML = '';
-                slots[currentSlot].appendChild(img);
-
-                currentSlot++;
-                if (currentSlot >= 3) {
-                    downloadBtn.disabled = false;
-                    shareBtn.disabled = false;
-                }
-                captureBtn.disabled = false;
-            });
-
-            // Xử lý tải ảnh
-            downloadBtn.addEventListener('click', () => {
-                const container = document.createElement('div');
-                container.style.backgroundColor = 'white';
-                container.style.padding = '20px';
-                container.style.display = 'flex';
-                container.style.flexDirection = 'column';
-                container.style.gap = '10px';
-
-                capturedPhotos.forEach(photoData => {
-                    const img = document.createElement('img');
-                    img.src = photoData;
-                    img.style.width = '600px';
-                    img.style.height = '800px';
-                    img.style.objectFit = 'cover';
-                    container.appendChild(img);
-                });
-
-                html2canvas(container).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = 'pica-pica-photos.png';
-                    link.href = canvas.toDataURL();
-                    link.click();
-                });
-            });
-
-            // Xử lý chia sẻ
-            shareBtn.addEventListener('click', async () => {
-                try {
-                    const blob = await new Promise(resolve => {
-                        const container = document.createElement('div');
-                        container.style.backgroundColor = 'white';
-                        container.style.padding = '20px';
-                        container.style.display = 'flex';
-                        container.style.flexDirection = 'column';
-                        container.style.gap = '10px';
-
-                        capturedPhotos.forEach(photoData => {
-                            const img = document.createElement('img');
-                            img.src = photoData;
-                            img.style.width = '600px';
-                            img.style.height = '800px';
-                            img.style.objectFit = 'cover';
-                            container.appendChild(img);
-                        });
-
-                        html2canvas(container).then(canvas => {
-                            canvas.toBlob(resolve);
-                        });
-                    });
-
-                    const file = new File([blob], 'pica-pica-photos.png', { type: 'image/png' });
-                    const shareData = {
-                        files: [file],
-                        title: 'Pica Pica Photos',
-                        text: 'Ảnh chụp từ Pica Pica Booth!'
-                    };
-
-                    if (navigator.share && navigator.canShare(shareData)) {
-                        await navigator.share(shareData);
-                    } else {
-                        throw new Error('Sharing not supported');
-                    }
-                } catch (err) {
-                    console.error('Error sharing:', err);
-                    alert('Không thể chia sẻ ảnh. Vui lòng tải về và chia sẻ thủ công.');
-                }
-            });
-
-            // Logout
-            document.getElementById('logout-btn').addEventListener('click', async () => {
-                try {
-                    await signOut(auth);
-                    window.location.href = 'login.html';
-                } catch (error) {
-                    console.error('Error signing out:', error);
-                }
-            });
-
-            // Cleanup on page unload
-            window.addEventListener('beforeunload', () => {
-                camera.stop();
-            });
-        }
-
-        // Hàm áp dụng hiệu ứng
-        function applyEffect(video, effect) {
-            const filters = {
-                normal: 'none',
-                grayscale: 'grayscale(100%)',
-                sepia: 'sepia(100%)',
-                vintage: 'sepia(50%) contrast(95%) brightness(95%)',
-                brightness: 'brightness(130%)',
-                contrast: 'contrast(150%)'
-            };
-            video.style.filter = filters[effect] || 'none';
-        }
-    </script>
-</body>
+      <div class="footer">
+        <p>Photo Booth App v1.0</p>
+      </div>
+    </div>
+    <script src="assets/js/photobooth.js"></script>
+  </body>
 </html>
-
-<style>
-.container {
-    // ...existing code...
-}
-
-/* Navigation bar */
-.nav-bar {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding: 10px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-.nav-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 15px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 16px;
-    color: #666;
-}
-
-.nav-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.nav-btn.active {
-    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(255, 153, 204, 0.3);
-}
-</style>

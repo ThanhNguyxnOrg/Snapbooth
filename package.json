@@ -1,16 +1,26 @@
 {
   "name": "photo-booth",
   "version": "1.0.0",
-  "description": "A modern web-based photo booth application",
-  "main": "src/index.html",
+  "description": "Ứng dụng Photo Booth cho phép chụp ảnh, chỉnh sửa và tạo photostrip",
+  "main": "index.html",
   "scripts": {
-    "start": "serve src"
+    "start": "npx http-server -o -c-1",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "firebase": "^9.6.1",
-    "nsfwjs": "^2.4.2"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/photo-booth.git"
   },
+  "keywords": [
+    "photo",
+    "booth",
+    "webcam",
+    "photo-strip",
+    "camera"
+  ],
+  "author": "Photo Booth App",
+  "license": "MIT",
   "devDependencies": {
-    "serve": "^14.2.1"
+    "http-server": "^14.1.1"
   }
-} 
+}

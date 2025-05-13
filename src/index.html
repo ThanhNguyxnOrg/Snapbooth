@@ -1,1072 +1,524 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Photo Booth</title>
-    <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    
-    <!-- Add NSFW.JS for content moderation -->
-    <script src="https://unpkg.com/nsfwjs@2.4.2/dist/nsfw.min.js"></script>
-    
-    <!-- Add CSS -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="description" content="A fun and cute photo booth web app with filters, stickers and multi-language support">
+    <meta name="keywords" content="photo booth, webcam, filters, stickers, photos, cute">
+    <meta name="theme-color" content="#ff99cc" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#ff66b2" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta property="og:title" content="✨ Cute Photo Booth ✨">
+    <meta property="og:description" content="Take cute photos with filters and stickers!">
+    <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
+    <title>✨ Photo Booth by ThanhNguyxn ✨</title>
+
+    <!-- CSS files -->
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/capture.css">
+    <link rel="stylesheet" href="css/upload.css">
+    <link rel="stylesheet" href="css/scrapbook.css">
+    <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="css/privacy.css">
     
-    <!-- Add custom fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
+    <link rel="icon" type="image/png" sizes="16x16" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📸</text></svg>">
     
-    <!-- Import Firebase config -->
-    <script type="module" src="js/firebase-config.js"></script>
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
     
-    <!-- Import camera functionality -->
-    <script type="module" src="js/camera.js"></script>
-    
-    <!-- Import main app logic -->
-    <script type="module" src="js/app.js" defer></script>
-    
+    <!-- Tab styling -->
     <style>
-      /* Reset default styles */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: 'Poppins', sans-serif;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-        color: #333;
-        position: relative;
-      }
-
-      #mainContent {
-        display: none;
-      }
-
-      #loginSection {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background: linear-gradient(135deg, #f6d5e7 0%, #fbe9f1 100%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      .login-container {
-        background: white;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        max-width: 400px;
-        margin: 20px;
-        animation: fadeIn 0.5s ease;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
+        /* Custom styles for browser tab */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --tab-color: #ff99cc;
+            }
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --tab-color: #ff66b2;
+            }
         }
-      }
-
-      .guest-btn {
-        background: linear-gradient(45deg, #4CAF50, #45a049);
-        color: white;
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        margin: 20px 0;
-        transition: all 0.3s ease;
-      }
-
-      .guest-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-      }
-
-      .login-form {
-        margin-top: 20px;
-      }
-
-      .form-group {
-        margin-bottom: 15px;
-      }
-
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        color: #666;
-      }
-
-      .form-group input {
-        width: 100%;
-        padding: 12px;
-        border: 2px solid #eee;
-        border-radius: 8px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-      }
-
-      .form-group input:focus {
-        border-color: #FF6B6B;
-        outline: none;
-      }
-
-      .social-login {
-        margin-top: 20px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .social-btn {
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: all 0.3s ease;
-      }
-
-      .social-btn:hover {
-        transform: translateY(-2px);
-      }
-
-      .google-btn {
-        background: white;
-        color: #333;
-        border: 2px solid #eee;
-      }
-
-      .facebook-btn {
-        background: #1877f2;
-        color: white;
-      }
-
-      body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-        font-family: 'Poppins', sans-serif;
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        color: #333;
-      }
-
-      .container {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        max-width: 1000px;
-        width: 95%;
-        margin: 20px;
-        display: none; /* Hide main content by default */
-      }
-
-      .capture-section, .upload-section, .editor, .scrapbook {
-        display: none;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-      }
-
-      .capture-section.active, .upload-section.active, .editor.active, .scrapbook.active {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        opacity: 1;
-      }
-
-      .button {
-        background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        margin: 10px 0;
-        border-radius: 50px;
-        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .button:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-      }
-
-      .button:disabled {
-        background: linear-gradient(45deg, #ccc, #ddd);
-        cursor: not-allowed;
-      }
-
-      .video-container {
-        position: relative;
-        width: 640px;
-        height: 480px;
-        margin: 20px auto;
-        border-radius: 10px;
-        overflow: hidden;
-        background: #000;
-      }
-
-      #video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transform: scaleX(-1); /* Mirror the video */
-      }
-
-      #countdown {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        font-size: 120px;
-        color: white;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 10;
-      }
-
-      #photos {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-top: 20px;
-      }
-
-      .photo-slot {
-        width: 200px;
-        height: 150px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #f5f5f5;
-        margin: 10px;
-      }
-
-      .photo-slot img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .editor {
-        display: none;
-        grid-template-columns: 1fr 300px;
-        gap: 30px;
-        padding: 20px;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      .editor.active {
-        display: grid;
-        opacity: 1;
-      }
-
-      .preview-section {
-        flex: 1;
-        padding: 20px;
-      }
-
-      .photostrip-container {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
-      .live-preview {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .live-preview img {
-        width: 100%;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .controls-section {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 300px;
-      }
-
-      .control-group {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-      }
-
-      .control-group h3 {
-        margin: 0 0 15px 0;
-        color: #333;
-        font-size: 16px;
-        font-weight: 600;
-      }
-
-      .filters {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-
-      .filters button {
-        padding: 8px 15px;
-        font-size: 14px;
-        background: white;
-        border: 2px solid #eee;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      .filters button.active {
-        background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
-        color: white;
-        border-color: transparent;
-      }
-
-      .stickers {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-      }
-
-      .stickers button {
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
-        border: 2px solid #eee;
-        border-radius: 8px;
-        background: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .stickers button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      .backgrounds {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-      }
-
-      .backgrounds button {
-        width: 40px;
-        height: 40px;
-        border: 2px solid #eee;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      .backgrounds button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      .backgrounds button.active {
-        border-color: #FF6B6B;
-      }
-
-      .action-buttons {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px;
-        margin-top: 20px;
-      }
-
-      .action-buttons .button {
-        width: 100%;
-      }
-
-      .date {
-        text-align: right;
-        font-size: 12px;
-        color: #666;
-      }
-
-      .footer {
-        margin-top: 30px;
-        text-align: center;
-        font-size: 14px;
-        color: #666;
-      }
-
-      .footer p {
-        background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 600;
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          padding: 15px;
+        /* Customize browser tab color */
+        meta[name="theme-color"] {
+            content: var(--tab-color);
         }
-
-        .video-container {
-          width: 100%;
-          height: auto;
-        }
-
-        #photos {
-          flex-wrap: wrap;
-        }
-
-        .photo-slot {
-          width: 100%;
-        }
-
-        .editor {
-          grid-template-columns: 1fr;
-        }
-        
-        .preview-section {
-          position: relative;
-          top: 0;
-        }
-
-        .controls-section {
-          max-width: 100%;
-        }
-      }
-
-      .upload-section h2 {
-        margin-bottom: 20px;
-        color: #333;
-      }
-
-      .upload-slots {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-
-      .upload-slot {
-        width: 200px;
-        height: 200px;
-        background-color: #fff;
-        border: 2px dashed #ccc;
-        border-radius: 10px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        position: relative;
-      }
-
-      .upload-slot img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 10px;
-      }
-
-      .upload-slot input {
-        display: none;
-      }
-
-      .upload-slot::before {
-        content: "🖼️";
-        font-size: 40px;
-        color: #ccc;
-        position: absolute;
-      }
-
-      .upload-section p {
-        margin-top: 10px;
-        color: #666;
-        font-size: 14px;
-      }
-
-      .scrapbook {
-        display: none;
-        background-color: #d2b48c; /* Tan background */
-        padding: 20px;
-        border-radius: 10px;
-        position: relative;
-        margin-top: 20px;
-        width: 90%;
-        max-width: 800px;
-        min-height: 400px;
-      }
-
-      .scrapbook .photostrip {
-        position: absolute;
-      }
-
-      .scrapbook .thumbnail {
-        position: absolute;
-        width: 80px;
-        height: 80px;
-        border: 2px solid #ff99cc;
-        border-radius: 5px;
-        background-color: #fff;
-      }
-
-      .scrapbook .thumbnail img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 3px;
-      }
-
-      .scrapbook .decor {
-        position: absolute;
-        width: 40px;
-        height: 40px;
-        background-color: #fff;
-        border: 2px solid #ff99cc;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 20px;
-      }
-
-      .login-section {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background: linear-gradient(135deg, #f6d5e7 0%, #fbe9f1 100%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      .login-container {
-        background: white;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        max-width: 400px;
-        margin: 20px;
-      }
-
-      .login-header {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-
-      .login-header h2 {
-        color: #333;
-        margin-bottom: 10px;
-      }
-
-      .login-form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      .form-group label {
-        font-weight: 500;
-        color: #666;
-      }
-
-      .form-group input {
-        padding: 12px;
-        border: 2px solid #eee;
-        border-radius: 8px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-      }
-
-      .form-group input:focus {
-        border-color: #FF6B6B;
-        outline: none;
-      }
-
-      .social-login {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-      }
-
-      .social-btn {
-        flex: 1;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: transform 0.2s;
-      }
-
-      .social-btn:hover {
-        transform: translateY(-2px);
-      }
-
-      .google-btn {
-        background: #fff;
-        color: #333;
-        border: 2px solid #eee;
-      }
-
-      .facebook-btn {
-        background: #1877f2;
-        color: white;
-      }
-
-      .error-message {
-        color: #ff4444;
-        font-size: 14px;
-        text-align: center;
-        margin-top: 10px;
-      }
-
-      .admin-controls {
-        display: none;
-        margin-top: 20px;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 15px;
-      }
-
-      .admin-controls.visible {
-        display: block;
-      }
-
-      .divider {
-        text-align: center;
-        margin: 20px 0;
-        position: relative;
-      }
-
-      .divider::before,
-      .divider::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 45%;
-        height: 1px;
-        background: #ddd;
-      }
-
-      .divider::before {
-        left: 0;
-      }
-
-      .divider::after {
-        right: 0;
-      }
-
-      .divider span {
-        background: white;
-        padding: 0 10px;
-        color: #666;
-        font-size: 14px;
-      }
-
-      .user-status {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        padding: 10px 20px;
-        border-radius: 50px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 1000;
-      }
-
-      .user-status .avatar {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-      }
-
-      .login-button {
-        background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 50px;
-        cursor: pointer;
-        font-size: 14px;
-      }
-
-      /* Gallery Styles */
-      .gallery-section {
-        padding: 20px;
-        background: white;
-        border-radius: 20px;
-        margin-top: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-
-      .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-      }
-
-      .gallery-item {
-        position: relative;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s;
-      }
-
-      .gallery-item:hover {
-        transform: translateY(-5px);
-      }
-
-      .gallery-item img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-      }
-
-      .gallery-item .info {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 10px;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        font-size: 12px;
-      }
-
-      .photo-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-      }
-
-      .publish-toggle {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 10px;
-      }
-
-      .publish-toggle input {
-        width: 40px;
-        height: 20px;
-      }
-
-      .moderation-status {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 500;
-      }
-
-      .status-pending {
-        background: #ffd700;
-        color: #000;
-      }
-
-      .status-approved {
-        background: #4CAF50;
-        color: white;
-      }
-
-      .status-rejected {
-        background: #ff4444;
-        color: white;
-      }
-
-      #mainContent {
-        display: none; /* Hide main content by default */
-      }
-      
-      #loginSection {
-        display: flex; /* Show login section by default */
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #f6d5e7 0%, #fbe9f1 100%);
-      }
     </style>
-  </head>
-  <body>
-    <!-- Login Section -->
-    <div class="login-section" id="loginSection">
-      <div class="login-container">
-        <div class="login-header">
-          <h2>Welcome to Photo Booth</h2>
-          <p>Sign in to save your photos or continue as guest</p>
-        </div>
-        <button class="button guest-btn" id="skipLogin">
-          Continue as Guest
-        </button>
-        <div class="divider">
-          <span>or sign in to save your photos</span>
-        </div>
-        <form class="login-form" id="loginForm">
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" required placeholder="Enter your email">
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" required placeholder="Enter your password">
-          </div>
-          <button type="submit" class="button">Sign In</button>
-          <div class="error-message" id="auth-error"></div>
-          <div class="social-login">
-            <button type="button" class="social-btn google-btn" id="googleLogin">
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18">
-              Google
-            </button>
-            <button type="button" class="social-btn facebook-btn" id="facebookLogin">
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg" width="18" height="18">
-              Facebook
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="container" style="display: none;" id="mainContent">
-      <!-- Capture Section -->
-      <div class="capture-section active" id="capture-section">
-        <div class="video-container">
-          <video id="video" autoplay playsinline></video>
-          <div id="countdown"></div>
-        </div>
-        
-        <div id="error-message"></div>
-        
-        <div style="text-align: center;">
-          <button id="capture-btn" class="button">Take Photo</button>
-        </div>
-
-        <div id="photos">
-          <div class="photo-slot" id="slot-1"></div>
-          <div class="photo-slot" id="slot-2"></div>
-          <div class="photo-slot" id="slot-3"></div>
-        </div>
-      </div>
-
-      <!-- Upload Section -->
-      <div class="upload-section" id="upload-section">
-        <h2>Upload your photo(s)!</h2>
-        <div class="upload-slots">
-          <div class="upload-slot" id="upload-slot-1">
-            <input type="file" id="upload-1" accept="image/*" />
-          </div>
-          <div class="upload-slot" id="upload-slot-2">
-            <input type="file" id="upload-2" accept="image/*" />
-          </div>
-          <div class="upload-slot" id="upload-slot-3">
-            <input type="file" id="upload-3" accept="image/*" />
-          </div>
-        </div>
-        <button id="submit-btn" class="button">Submit Images</button>
-        <p>Upload at least 1 image to submit</p>
-      </div>
-
-      <!-- Editor Section -->
-      <div class="editor" id="editor" style="display: none;">
-        <div class="preview-section">
-          <div class="photostrip-container">
-            <div class="live-preview">
-              <img id="preview-photo-1" src="" alt="Preview 1">
-              <img id="preview-photo-2" src="" alt="Preview 2">
-              <img id="preview-photo-3" src="" alt="Preview 3">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="theme-pink">
+    <div class="container">
+        <div class="header">
+            <h1>✨ Photo Booth ✨</h1>
+            <p class="author-credit">Made with 💖 by ThanhNguyxn</p>
+            <div class="user-controls">
+                <span id="user-email"></span>
+                <button id="logout-btn">Logout</button>
             </div>
-          </div>
         </div>
-        
-        <div class="controls-section">
-          <div class="control-group">
-            <h3>Filters</h3>
-            <div class="filters">
-              <button data-filter="none" class="button active">None</button>
-              <button data-filter="grayscale" class="button">B&W</button>
-              <button data-filter="sepia" class="button">Sepia</button>
-              <button data-filter="vintage" class="button">Vintage</button>
-              <button data-filter="warm" class="button">Warm</button>
-              <button data-filter="cool" class="button">Cool</button>
+
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button class="nav-btn active" data-section="capture">📸 Chụp ảnh</button>
+            <button class="nav-btn" data-section="gallery">🖼️ Gallery</button>
+            <button class="nav-btn" data-section="scrapbook">📚 Scrapbook</button>
+        </div>
+
+        <!-- Language Selector -->
+        <div class="language-bar">
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="en">🇺🇸</button>
+                <button class="lang-btn" data-lang="vi">🇻🇳</button>
+                <button class="lang-btn" data-lang="ja">🇯🇵</button>
+                <button class="lang-btn" data-lang="ko">🇰🇷</button>
             </div>
-          </div>
-
-          <div class="control-group">
-            <h3>Stickers</h3>
-            <div class="stickers">
-              <button data-sticker="🦄">🦄</button>
-              <button data-sticker="🌸">🌸</button>
-              <button data-sticker="🎀">🎀</button>
-              <button data-sticker="💝">💝</button>
-              <button data-sticker="🌟">🌟</button>
-              <button data-sticker="🦋">🦋</button>
-              <button data-sticker="🌈">🌈</button>
-              <button data-sticker="💖">💖</button>
+            <div class="decorative-icons">
+                <span class="deco-icon">📸</span>
+                <span class="deco-icon">✨</span>
+                <span class="deco-icon">🎀</span>
+                <span class="deco-icon">💝</span>
             </div>
-          </div>
+        </div>
 
-          <div class="control-group">
-            <h3>Background</h3>
-            <div class="backgrounds">
-              <button style="background: #ffffff" data-bg="#ffffff"></button>
-              <button style="background: #000000" data-bg="#000000"></button>
-              <button style="background: #f0f0f0" data-bg="#f0f0f0"></button>
-              <button style="background: #ffd1dc" data-bg="#ffd1dc"></button>
+        <!-- Capture Section -->
+        <div class="capture-section active" id="capture-section">
+            <div class="camera-settings">
+                <button id="settings-btn" class="button settings-btn" title="Camera Settings">⚙️</button>
+                <div id="settings-panel" class="settings-panel">
+                    <div class="setting-group camera-switch" id="camera-switch-group">
+                        <label>Camera:</label>
+                        <button id="switch-camera" class="button switch-camera-btn">
+                            <span class="camera-icon">📱</span>
+                            <span class="camera-text">Chuyển camera</span>
+                        </button>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="auto-capture" checked>
+                            Chụp tự động
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>Thời gian giữa các ảnh:
+                            <input type="number" id="capture-interval" value="3" min="2" max="10" step="1">
+                            giây
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="enable-sound" checked>
+                            Âm thanh đếm ngược
+                        </label>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div class="control-group">
-            <h3>Options</h3>
-            <label class="option">
-              <input type="checkbox" id="enable-date" checked>
-              <span>Show Date</span>
-            </label>
-          </div>
-
-          <div class="action-buttons">
-            <button id="download-btn" class="button">Download</button>
-            <button id="share-btn" class="button">Share</button>
-            <button id="retake-btn" class="button">Retake</button>
-          </div>
+            <div class="button-container">
+                <button id="capture-btn">
+                    <i class="fas fa-camera"></i> Chụp ảnh
+                </button>
+            </div>
+            <div id="video-container">
+                <video id="video" autoplay playsinline></video>
+                <div id="countdown"></div>
+            </div>
+            <div id="photos">
+                <div class="photo-slot" id="slot-1">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="photo-slot" id="slot-2">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="photo-slot" id="slot-3">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button id="download-btn" disabled>
+                    <i class="fas fa-download"></i> Tải ảnh
+                </button>
+                <button id="share-btn" disabled>
+                    <i class="fas fa-share-alt"></i> Chia sẻ
+                </button>
+            </div>
+            <div id="error-message"></div>
         </div>
-      </div>
 
-      <!-- Scrapbook Section -->
-      <div class="scrapbook" id="scrapbook">
-        <div class="photostrip" style="left: 20px; top: 20px;">
-          <img id="scrap-photo-1" src="" alt="Photo 1" />
-          <img id="scrap-photo-2" src="" alt="Photo 2" />
-          <img id="scrap-photo-3" src="" alt="Photo 3" />
-          <div class="date">March 16, 2025</div>
+        <!-- Upload Section -->
+        <div class="upload-section" id="upload-section">
+            <h2>Upload your photo(s)!</h2>
+            <div class="upload-slots">
+                <div class="upload-slot" id="upload-slot-1">
+                    <input type="file" id="upload-1" accept="image/*" />
+                </div>
+                <div class="upload-slot" id="upload-slot-2">
+                    <input type="file" id="upload-2" accept="image/*" />
+                </div>
+                <div class="upload-slot" id="upload-slot-3">
+                    <input type="file" id="upload-3" accept="image/*" />
+                </div>
+            </div>
+            <button id="submit-btn" class="button">Submit Images</button>
+            <p>Upload at least 1 image to submit</p>
         </div>
-        <div class="photostrip" style="right: 20px; top: 20px;">
-          <img id="scrap-photo-4" src="" alt="Photo 4" />
-          <img id="scrap-photo-5" src="" alt="Photo 5" />
-          <img id="scrap-photo-6" src="" alt="Photo 6" />
-          <div class="date">March 16, 2025</div>
+
+        <!-- Editor Section -->
+        <div class="editor" id="editor">
+            <div class="photostrip-container">
+                <div class="photostrip" id="photostrip">
+                    <div><img id="photo-1" src="" alt="Photo 1" /></div>
+                    <div><img id="photo-2" src="" alt="Photo 2" /></div>
+                    <div><img id="photo-3" src="" alt="Photo 3" /></div>
+                    <div class="date" id="date-stamp"></div>
+                </div>
+            </div>
+            <div class="controls">          <div class="control-section stickers">
+            <label>Cute Stickers</label>
+            <button data-sticker="🦄" class="button sticker-btn" title="Unicorn">🦄</button>
+            <button data-sticker="🌸" class="button sticker-btn" title="Cherry Blossom">🌸</button>
+            <button data-sticker="🎀" class="button sticker-btn" title="Ribbon">🎀</button>
+            <button data-sticker="💝" class="button sticker-btn" title="Heart with Ribbon">💝</button>
+            <button data-sticker="🌟" class="button sticker-btn" title="Glowing Star">🌟</button>
+            <button data-sticker="🦋" class="button sticker-btn" title="Butterfly">🦋</button>
+            <button data-sticker="🌈" class="button sticker-btn" title="Rainbow">🌈</button>
+            <button data-sticker="💖" class="button sticker-btn" title="Sparkling Heart">💖</button>
+            <button data-sticker="🎪" class="button sticker-btn" title="Circus Tent">🎪</button>
+            <button data-sticker="🌺" class="button sticker-btn" title="Hibiscus">🌺</button>
+            <button data-sticker="🍭" class="button sticker-btn" title="Lollipop">🍭</button>
+            <button data-sticker="✨" class="button sticker-btn" title="Sparkles">✨</button>
+            <button data-sticker="🎠" class="button sticker-btn" title="Carousel">🎠</button>
+            <button data-sticker="🐰" class="button sticker-btn" title="Bunny">🐰</button>
+            <button data-sticker="🎵" class="button sticker-btn" title="Musical Note">🎵</button>
+            <button data-sticker="💫" class="button sticker-btn" title="Dizzy">💫</button>
+          </div>
+                <div class="control-section backgrounds">
+                    <label>Photostrip Background</label>
+                    <button style="background-color: #000;" data-bg="#000" class="button"></button>
+                    <button style="background-color: #fff;" data-bg="#fff" class="button"></button>
+                    <button style="background-color: #f0f0f0;" data-bg="#f0f0f0" class="button"></button>
+                    <button style="background-color: #add8e6;" data-bg="#add8e6" class="button"></button>
+                    <button style="background-color: #ff99cc;" data-bg="#ff99cc" class="button"></button>
+                </div>
+                <div class="control-section filters">
+                    <label>Filters</label>
+                    <button data-filter="black-and-white" class="button">B&W</button>
+                    <button data-filter="sepia" class="button">Sepia</button>
+                    <button data-filter="warm" class="button">Warm</button>
+                    <button data-filter="cold" class="button">Cold</button>
+                    <button data-filter="cool" class="button">Cool</button>
+                    <button data-filter="none" class="button active">None</button>
+                </div>
+                <div class="control-section">
+                    <label>
+                        <input type="checkbox" id="enable-date" checked />
+                        Enable Date
+                    </label>
+                </div>
+                <!-- Privacy Controls -->
+                <div class="control-section privacy-controls">
+                    <label>Privacy Settings</label>
+                    <div class="privacy-options">
+                        <label class="privacy-option">
+                            <input type="radio" name="privacy" value="private" checked>
+                            <span class="privacy-icon">🔒</span>
+                            <span data-translate="privateOnly">Private Only</span>
+                        </label>
+                        <label class="privacy-option">
+                            <input type="radio" name="privacy" value="gallery">
+                            <span class="privacy-icon">🖼️</span>
+                            <span data-translate="shareToGallery">Share to Gallery</span>
+                        </label>
+                    </div>
+                    <p class="privacy-note" data-translate="privacyNote">
+                        * Shared photos will be reviewed before appearing in the gallery
+                    </p>
+                </div>
+                <div class="action-buttons">
+                    <button id="preview-btn" class="button">Preview</button>
+                    <button id="download-btn" class="button">Download</button>
+                    <button id="retake-btn" class="button">Retake</button>
+                </div>
+            </div>
         </div>
-        <div class="thumbnail" style="left: 150px; top: 80px;"><img id="thumb-1" src="" alt="Thumbnail 1" /></div>
-        <div class="thumbnail" style="left: 150px; top: 180px;"><img id="thumb-2" src="" alt="Thumbnail 2" /></div>
-        <div class="thumbnail" style="left: 250px; top: 120px;"><img id="thumb-3" src="" alt="Thumbnail 3" /></div>
-        <div class="thumbnail" style="left: 300px; top: 200px;"><img id="thumb-4" src="" alt="Thumbnail 4" /></div>
-        <div class="thumbnail" style="right: 150px; top: 80px;"><img id="thumb-5" src="" alt="Thumbnail 5" /></div>
-        <div class="thumbnail" style="right: 150px; top: 180px;"><img id="thumb-6" src="" alt="Thumbnail 6" /></div>
-        <div class="decor" style="left: 50px; top: 50px;">🌸</div>
-        <div class="decor" style="left: 50px; top: 300px;">💖</div>
-        <div class="decor" style="right: 50px; top: 50px;">🌸</div>
-        <div class="decor" style="right: 50px; top: 300px;">💖</div>
-        <div class="decor" style="left: 200px; top: 150px;">🌟</div>
-        <div class="decor" style="right: 200px; top: 150px;">🌟</div>
-      </div>      <div class="footer">
-        <p style="font-style: italic; font-family: 'Segoe UI', Arial, sans-serif; color: #666;">
-          ✨ Made by ThanhNguyxn ✨
-        </p>
-      </div>
 
-      <!-- Admin Controls -->
-      <div class="admin-controls" id="adminControls">
-        <h3>Admin Controls</h3>
-        <button class="button" id="viewUsers">View All Users</button>
-        <button class="button" id="viewStats">View Statistics</button>
-        <button class="button" id="managePhotos">Manage Photos</button>
-      </div>
+        <!-- Scrapbook Section -->
+        <div class="scrapbook" id="scrapbook">
+            <div class="photostrip" style="left: 20px; top: 20px;">
+                <img id="scrap-photo-1" src="" alt="Photo 1" />
+                <img id="scrap-photo-2" src="" alt="Photo 2" />
+                <img id="scrap-photo-3" src="" alt="Photo 3" />
+                <div class="date"></div>
+            </div>
+            <div class="photostrip" style="right: 20px; top: 20px;">
+                <img id="scrap-photo-4" src="" alt="Photo 4" />
+                <img id="scrap-photo-5" src="" alt="Photo 5" />
+                <img id="scrap-photo-6" src="" alt="Photo 6" />
+                <div class="date"></div>
+            </div>
+            <div class="thumbnail" style="left: 150px; top: 80px;"><img id="thumb-1" src="" alt="Thumbnail 1" /></div>
+            <div class="thumbnail" style="left: 150px; top: 180px;"><img id="thumb-2" src="" alt="Thumbnail 2" /></div>
+            <div class="thumbnail" style="left: 250px; top: 120px;"><img id="thumb-3" src="" alt="Thumbnail 3" /></div>
+            <div class="thumbnail" style="left: 300px; top: 200px;"><img id="thumb-4" src="" alt="Thumbnail 4" /></div>
+            <div class="thumbnail" style="right: 150px; top: 80px;"><img id="thumb-5" src="" alt="Thumbnail 5" /></div>
+            <div class="thumbnail" style="right: 150px; top: 180px;"><img id="thumb-6" src="" alt="Thumbnail 6" /></div>
+            <div class="decor" style="left: 50px; top: 50px;">🌸</div>
+            <div class="decor" style="left: 50px; top: 300px;">💖</div>
+            <div class="decor" style="right: 50px; top: 50px;">🌸</div>
+            <div class="decor" style="right: 50px; top: 300px;">💖</div>
+            <div class="decor" style="left: 200px; top: 150px;">🌟</div>
+            <div class="decor" style="right: 200px; top: 150px;">🌟</div>
+        </div>
 
-      <!-- Add Public Gallery Section -->
-      <div class="gallery-section" id="gallerySection" style="display: none;">
-        <h2>Public Gallery</h2>
-        <div class="gallery-grid" id="publicGallery"></div>
-      </div>
-    </div>
-
-    <!-- Add user status bar -->
-    <div class="user-status" id="userStatus" style="display: none;">
-      <div class="avatar">
-        <span id="userAvatar">G</span>
-      </div>
-      <span id="userName">Guest</span>
-      <button class="login-button" id="loginBtn" style="display: none;">Sign In</button>
-      <button class="login-button" id="logoutBtn" style="display: none;">Sign Out</button>
-    </div>
-
+        <div class="footer">
+            <p>✨ Made by ThanhNguyxn ✨</p>
+        </div>
+    </div>    <!-- JavaScript files -->
+    <script src="js/translations.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/gallery.js"></script>
+    <script src="js/app.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script type="module">
-      import { auth } from './js/firebase-config.js';
-      import { initCamera } from './js/camera.js';
+        import { auth } from './src/js/firebase-config.js';
+        import { Camera } from './src/js/camera.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-      // Check auth state
-      auth.onAuthStateChanged((user) => {
-        if (!user) {
-          window.location.href = 'login.html';
+        // Check authentication
+        onAuthStateChanged(auth, (user) => {
+            const isGuestMode = localStorage.getItem('guestMode') === 'true';
+            if (!user && !isGuestMode) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (user) {
+                document.getElementById('user-email').textContent = user.email;
+            } else {
+                document.getElementById('user-email').textContent = 'Guest User';
+            }
+            initializeApp();
+        });
+
+        function initializeApp() {
+            const video = document.getElementById('video');
+            const captureBtn = document.getElementById('capture-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const shareBtn = document.getElementById('share-btn');
+            const countdown = document.getElementById('countdown');
+            const slots = [
+                document.getElementById('slot-1'),
+                document.getElementById('slot-2'),
+                document.getElementById('slot-3')
+            ];
+            let currentSlot = 0;
+            let capturedPhotos = [];
+            let currentEffect = 'normal';
+            
+            const camera = new Camera(video, countdown);
+
+            // Initialize camera
+            camera.initialize().catch(err => {
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('error-message').textContent = err.message;
+                captureBtn.disabled = true;
+            });
+
+            // Xử lý hiệu ứng
+            document.querySelectorAll('.effect-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const effect = button.dataset.effect;
+                    document.querySelectorAll('.effect-button').forEach(b => b.classList.remove('active'));
+                    button.classList.add('active');
+                    currentEffect = effect;
+                    applyEffect(video, effect);
+                });
+            });
+
+            // Xử lý chụp ảnh
+            captureBtn.addEventListener('click', async () => {
+                if (currentSlot >= 3) {
+                    currentSlot = 0;
+                    capturedPhotos = [];
+                    slots.forEach(slot => {
+                        slot.innerHTML = `
+                            <div class="photo-placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        `;
+                    });
+                    downloadBtn.disabled = true;
+                    shareBtn.disabled = true;
+                }
+
+                captureBtn.disabled = true;
+                await camera.startCountdown();
+                
+                const photoData = await camera.takePhoto(currentEffect);
+                capturedPhotos.push(photoData);
+
+                const img = document.createElement('img');
+                img.src = photoData;
+                slots[currentSlot].innerHTML = '';
+                slots[currentSlot].appendChild(img);
+
+                currentSlot++;
+                if (currentSlot >= 3) {
+                    downloadBtn.disabled = false;
+                    shareBtn.disabled = false;
+                }
+                captureBtn.disabled = false;
+            });
+
+            // Xử lý tải ảnh
+            downloadBtn.addEventListener('click', () => {
+                const container = document.createElement('div');
+                container.style.backgroundColor = 'white';
+                container.style.padding = '20px';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '10px';
+
+                capturedPhotos.forEach(photoData => {
+                    const img = document.createElement('img');
+                    img.src = photoData;
+                    img.style.width = '600px';
+                    img.style.height = '800px';
+                    img.style.objectFit = 'cover';
+                    container.appendChild(img);
+                });
+
+                html2canvas(container).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'pica-pica-photos.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            });
+
+            // Xử lý chia sẻ
+            shareBtn.addEventListener('click', async () => {
+                try {
+                    const blob = await new Promise(resolve => {
+                        const container = document.createElement('div');
+                        container.style.backgroundColor = 'white';
+                        container.style.padding = '20px';
+                        container.style.display = 'flex';
+                        container.style.flexDirection = 'column';
+                        container.style.gap = '10px';
+
+                        capturedPhotos.forEach(photoData => {
+                            const img = document.createElement('img');
+                            img.src = photoData;
+                            img.style.width = '600px';
+                            img.style.height = '800px';
+                            img.style.objectFit = 'cover';
+                            container.appendChild(img);
+                        });
+
+                        html2canvas(container).then(canvas => {
+                            canvas.toBlob(resolve);
+                        });
+                    });
+
+                    const file = new File([blob], 'pica-pica-photos.png', { type: 'image/png' });
+                    const shareData = {
+                        files: [file],
+                        title: 'Pica Pica Photos',
+                        text: 'Ảnh chụp từ Pica Pica Booth!'
+                    };
+
+                    if (navigator.share && navigator.canShare(shareData)) {
+                        await navigator.share(shareData);
+                    } else {
+                        throw new Error('Sharing not supported');
+                    }
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                    alert('Không thể chia sẻ ảnh. Vui lòng tải về và chia sẻ thủ công.');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                }
+            });
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                camera.stop();
+            });
         }
-      });
 
-      // Initialize camera when page loads
-      document.addEventListener('DOMContentLoaded', () => {
-        initCamera();
-      });
+        // Hàm áp dụng hiệu ứng
+        function applyEffect(video, effect) {
+            const filters = {
+                normal: 'none',
+                grayscale: 'grayscale(100%)',
+                sepia: 'sepia(100%)',
+                vintage: 'sepia(50%) contrast(95%) brightness(95%)',
+                brightness: 'brightness(130%)',
+                contrast: 'contrast(150%)'
+            };
+            video.style.filter = filters[effect] || 'none';
+        }
     </script>
-  </body>
+</body>
 </html>
+
+<style>
+.container {
+    // ...existing code...
+}
+
+/* Navigation bar */
+.nav-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 15px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    color: #666;
+}
+
+.nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 153, 204, 0.3);
+}
+</style>
