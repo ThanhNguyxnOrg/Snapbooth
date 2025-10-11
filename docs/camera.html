@@ -82,7 +82,7 @@
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                <span data-i18n="camera.back">Back to Home</span>
+                <span>Back to Home</span>
             </a>
             
             <!-- Language Selector -->
@@ -124,13 +124,13 @@
             
             <div class="text-white text-right">
                 <p class="font-bold" id="layout-info">Layout A - 4 Poses</p>
-                <p class="text-sm" id="photo-count"><span data-i18n="camera.photosTaken">Photo</span> 0/4</p>
+                <p class="text-sm" id="photo-count"><span>Photo</span> 0/4</p>
             </div>
         </div>
         
         <!-- Source Selection (Camera or Upload) -->
         <div id="source-selection" class="glass-effect rounded-3xl p-8 text-center mb-4">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4" data-i18n="camera.chooseSource">Choose Photo Source</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Choose Photo Source</h2>
             <p class="text-gray-600 mb-8">How would you like to add your photos?</p>
             <div class="flex gap-4 justify-center flex-wrap">
                 <button id="use-camera-btn" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-6 px-12 rounded-2xl text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition flex flex-col items-center gap-3">
@@ -138,13 +138,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <span data-i18n="camera.useCamera">Use Camera</span>
+                    <span>Use Camera</span>
                 </button>
                 <button id="upload-photos-btn" class="bg-gradient-to-r from-pink-500 to-red-600 text-white font-bold py-6 px-12 rounded-2xl text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition flex flex-col items-center gap-3">
                     <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <span data-i18n="camera.uploadPhotos">Upload Photos</span>
+                    <span>Upload Photos</span>
                 </button>
             </div>
             <input type="file" id="file-input" class="hidden" accept="image/*" multiple>
@@ -178,31 +178,31 @@
                 
                 <!-- Filters -->
                 <div class="mt-4">
-                    <p class="text-gray-700 font-semibold mb-2" data-i18n="camera.selectFilter">Filters:</p>
+                    <p class="text-gray-700 font-semibold mb-2">Filters:</p>
                     <div class="flex gap-2 overflow-x-auto pb-2">
                         <button class="filter-btn active bg-white rounded-lg p-3 border-2 border-gray-300" data-filter="none">
                             <div class="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded"></div>
-                            <p class="text-xs mt-1 text-center" data-i18n="camera.none">None</p>
+                            <p class="text-xs mt-1 text-center">None</p>
                         </button>
                         <button class="filter-btn bg-white rounded-lg p-3 border-2 border-gray-300" data-filter="grayscale">
                             <div class="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-600 rounded"></div>
-                            <p class="text-xs mt-1 text-center" data-i18n="camera.blackWhite">B&W</p>
+                            <p class="text-xs mt-1 text-center">B&W</p>
                         </button>
                         <button class="filter-btn bg-white rounded-lg p-3 border-2 border-gray-300" data-filter="sepia">
                             <div class="w-16 h-16 bg-gradient-to-br from-yellow-600 to-orange-700 rounded"></div>
-                            <p class="text-xs mt-1 text-center" data-i18n="camera.sepia">Sepia</p>
+                            <p class="text-xs mt-1 text-center">Sepia</p>
                         </button>
                         <button class="filter-btn bg-white rounded-lg p-3 border-2 border-gray-300" data-filter="vintage">
                             <div class="w-16 h-16 bg-gradient-to-br from-red-300 to-yellow-300 rounded"></div>
-                            <p class="text-xs mt-1 text-center" data-i18n="camera.vintage">Vintage</p>
+                            <p class="text-xs mt-1 text-center">Vintage</p>
                         </button>
                         <button class="filter-btn bg-white rounded-lg p-3 border-2 border-gray-300" data-filter="cool">
                             <div class="w-16 h-16 bg-gradient-to-br from-blue-300 to-cyan-300 rounded"></div>
-                            <p class="text-xs mt-1 text-center" data-i18n="camera.cool">Cool</p>
+                            <p class="text-xs mt-1 text-center">Cool</p>
                         </button>
                         <button class="filter-btn bg-white rounded-lg p-3 border-2 border-gray-300" data-filter="warm">
                             <div class="w-16 h-16 bg-gradient-to-br from-orange-300 to-pink-300 rounded"></div>
-                            <p class="text-xs mt-1 text-center" data-i18n="camera.warm">Warm</p>
+                            <p class="text-xs mt-1 text-center">Warm</p>
                         </button>
                     </div>
                 </div>
@@ -210,10 +210,10 @@
                 <!-- Capture Button -->
                 <div class="mt-4 text-center">
                     <button id="start-btn" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 px-12 rounded-full text-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition">
-                        <span data-i18n="camera.takePhoto">Start Taking Photos</span>
+                        <span>Start Taking Photos</span>
                     </button>
                     <button id="retake-btn" class="hidden bg-gray-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl hover:bg-gray-700 transition ml-2">
-                        <span data-i18n="camera.retake">Retake All</span>
+                        <span>Retake All</span>
                     </button>
                 </div>
             </div>
@@ -237,12 +237,12 @@
                 
                 <!-- Download Button -->
                 <button id="download-btn" class="hidden w-full mt-4 bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition">
-                    <span data-i18n="camera.download">📥 Download Photo Strip</span>
+                    <span>📥 Download Photo Strip</span>
                 </button>
                 
                 <!-- Share Button -->
                 <button id="share-btn" class="hidden w-full mt-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition">
-                    <span data-i18n="camera.share">📤 Share</span>
+                    <span>📤 Share</span>
                 </button>
             </div>
             

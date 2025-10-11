@@ -114,49 +114,10 @@
                     <a href="contact.html" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition">Contact</a>
                 </div>
                 
-                <!-- Language Selector -->
-                <div class="relative">
-                    <button id="language-button" class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-purple-600 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-                        </svg>
-                        <span id="current-language">EN</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div id="language-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto border border-gray-200">
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="en">
-                            <span class="text-xl">🇬🇧</span> English
-                        </button>
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="vi">
-                            <span class="text-xl">🇻🇳</span> Tiếng Việt
-                        </button>
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="es">
-                            <span class="text-xl">🇪🇸</span> Español
-                        </button>
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="fr">
-                            <span class="text-xl">🇫🇷</span> Français
-                        </button>
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="de">
-                            <span class="text-xl">🇩🇪</span> Deutsch
-                        </button>
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="ja">
-                            <span class="text-xl">🇯🇵</span> 日本語
-                        </button>
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="ko">
-                            <span class="text-xl">🇰🇷</span> 한국어
-                        </button>
-                        <button class="language-option w-full text-left px-4 py-2 hover:bg-purple-50 transition flex items-center gap-2" data-lang="zh">
-                            <span class="text-xl">🇨🇳</span> 中文
-                        </button>
-                    </div>
-                </div>
-                
                 <!-- Star on GitHub Button -->
                 <div class="flex-shrink-0">
                     <a href="https://github.com/ThanhNguyxn/Photo-Booth" target="_blank" rel="noopener noreferrer" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded-lg transition shadow-md flex items-center gap-2">
-                        ⭐ <span data-i18n="nav.star"></span>Star on GitHub</span>
+                        ⭐ <span></span>Star on GitHub</span>
                     </a>
                 </div>
                 
@@ -170,10 +131,10 @@
             </div>
             
             <div id="mobile-menu" class="hidden md:hidden pb-4">
-                <a href="index.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="nav.home">Home</a>
-                <a href="faq.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="nav.faq">FAQ</a>
-                <a href="privacy-policy.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="nav.privacy">Privacy Policy</a>
-                <a href="contact.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="nav.contact">Contact</a>
+                <a href="index.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition">Home</a>
+                <a href="faq.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition">FAQ</a>
+                <a href="privacy-policy.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition">Privacy Policy</a>
+                <a href="contact.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition">Contact</a>
             </div>
         </div>
     </nav>
@@ -183,8 +144,8 @@
         <div class="max-w-6xl mx-auto">
             
             <div class="glass-effect rounded-3xl shadow-2xl p-8 md:p-12">
-                <h1 class="text-4xl font-bold text-gray-800 mb-4 text-center" data-i18n="layout.title">Choose your layout</h1>
-                <p class="text-xl text-gray-600 mb-12 text-center" data-i18n="layout.subtitle">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4 text-center">Choose your layout</h1>
+                <p class="text-xl text-gray-600 mb-12 text-center">
                     Select a layout for your photo session. You can choose from different styles and poses.
                 </p>
                 
@@ -293,7 +254,7 @@
                 <!-- Continue Button -->
                 <div class="text-center">
                     <button id="continue-btn" class="btn-continue text-white font-bold py-4 px-16 rounded-full text-xl shadow-2xl" disabled>
-                        <span data-i18n="layout.continue">Continue</span>
+                        <span>Continue</span>
                     </button>
                     <p id="selection-message" class="text-gray-500 mt-4 text-sm">
                         Please select a layout to continue
@@ -308,21 +269,18 @@
     <footer class="mt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="glass-effect rounded-2xl p-8 text-center">
-                <p class="text-gray-700 font-semibold mb-2" data-i18n="footer.tagline">
+                <p class="text-gray-700 font-semibold mb-2">
                     SnapStrip Studio - Create Amazing Photo Strips
                 </p>
-                <p class="text-gray-600 mb-2" data-i18n="footer.made">
+                <p class="text-gray-600 mb-2">
                     Made with ❤️ by developers who love photography
                 </p>
-                <p class="text-gray-500 text-sm" data-i18n="footer.copyright">
+                <p class="text-gray-500 text-sm">
                     © 2025 SnapStrip Studio. All Rights Reserved.
                 </p>
             </div>
         </div>
     </footer>
-    
-    <!-- i18n Script -->
-    <script src="i18n.js"></script>
     
     <!-- Scripts -->
     <script>
@@ -333,23 +291,6 @@
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
-        
-        // Language Selector
-        const languageButton = document.getElementById('language-button');
-        const languageDropdown = document.getElementById('language-dropdown');
-        
-        if (languageButton) {
-            languageButton.addEventListener('click', () => {
-                languageDropdown.classList.toggle('hidden');
-            });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!languageButton.contains(e.target) && !languageDropdown.contains(e.target)) {
-                    languageDropdown.classList.add('hidden');
-                }
-            });
-        }
         
         // Layout Selection
         const layoutCards = document.querySelectorAll('.layout-card');
