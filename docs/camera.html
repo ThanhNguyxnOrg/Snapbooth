@@ -791,24 +791,52 @@
         function navigateToPreview() {
             console.log('🎯 Navigating to preview page...');
             
-            // Create final canvas with all photos
-            const finalCanvas = document.createElement('canvas');
-            const finalCtx = finalCanvas.getContext('2d');
-            finalCanvas.width = templateCanvas.width;
-            finalCanvas.height = templateCanvas.height;
-            finalCtx.drawImage(templateCanvas, 0, 0);
+            // Load all photos first to get actual dimensions
+            const promises = capturedPhotos.map((photoData) => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.src = photoData;
+                });
+            });
             
-            console.log('📸 Canvas size:', finalCanvas.width, 'x', finalCanvas.height);
-            
-            // Save to localStorage
-            const dataURL = finalCanvas.toDataURL('image/png');
-            localStorage.setItem('finalCanvas', dataURL);
-            console.log('💾 Canvas saved to localStorage, size:', dataURL.length, 'bytes');
-            
-            // Navigate to preview page
-            const url = `preview.html?layout=${layout}&poses=${poses}&template=${template}`;
-            console.log('🔗 Redirecting to:', url);
-            window.location.href = url;
+            Promise.all(promises).then((images) => {
+                // Use actual image dimensions (all should be same size)
+                const firstImg = images[0];
+                const photoWidth = firstImg.width;
+                const photoHeight = firstImg.height;
+                const brandingHeight = 100;
+                
+                // Create final canvas with all photos
+                const finalCanvas = document.createElement('canvas');
+                const finalCtx = finalCanvas.getContext('2d');
+                finalCanvas.width = photoWidth;
+                finalCanvas.height = (photoHeight * poses) + brandingHeight;
+                
+                console.log('📸 Canvas size:', finalCanvas.width, 'x', finalCanvas.height);
+                
+                // Draw template background
+                drawTemplateBackground(finalCtx, finalCanvas.width, finalCanvas.height);
+                
+                // Draw each photo
+                images.forEach((img, index) => {
+                    const y = index * photoHeight;
+                    finalCtx.drawImage(img, 0, y, photoWidth, photoHeight);
+                });
+                
+                // Add branding
+                drawTemplateBranding(finalCtx, finalCanvas.width, finalCanvas.height, brandingHeight);
+                
+                // Save to localStorage
+                const dataURL = finalCanvas.toDataURL('image/png');
+                localStorage.setItem('finalCanvas', dataURL);
+                console.log('💾 Canvas saved to localStorage, size:', dataURL.length, 'bytes');
+                
+                // Navigate to preview page
+                const url = `preview.html?layout=${layout}&poses=${poses}&template=${template}`;
+                console.log('🔗 Redirecting to:', url);
+                window.location.href = url;
+            });
         }
         
         // Download photo strip
