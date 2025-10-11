@@ -656,96 +656,182 @@
         function drawPhotoTemplateFrame(ctx, x, y, width, height, index) {
             switch(template) {
                 case 'newspaper':
-                    ctx.fillStyle = '#FEF3C7';
+                    // Vintage newspaper with aged paper effect
+                    const newsGrad = ctx.createLinearGradient(x, y, x, y + height);
+                    newsGrad.addColorStop(0, '#FEF3C7');
+                    newsGrad.addColorStop(1, '#FDE68A');
+                    ctx.fillStyle = newsGrad;
                     ctx.fillRect(x, y, width, height);
+                    // Double border for classic newspaper look
                     ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 4;
-                    ctx.strokeRect(x + 5, y + 5, width - 10, height - 10);
+                    ctx.lineWidth = 6;
+                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 18, y + 18, width - 36, height - 36);
                     break;
+                    
                 case 'magazine':
-                    ctx.fillStyle = '#FDF2F8';
+                    // Glamorous magazine with gradient background
+                    const magGrad = ctx.createLinearGradient(x, y, x + width, y + height);
+                    magGrad.addColorStop(0, '#FDF2F8');
+                    magGrad.addColorStop(0.5, '#FCE7F3');
+                    magGrad.addColorStop(1, '#FAE8FF');
+                    ctx.fillStyle = magGrad;
                     ctx.fillRect(x, y, width, height);
+                    // Elegant pink border with shadow
+                    ctx.shadowColor = 'rgba(236, 72, 153, 0.3)';
+                    ctx.shadowBlur = 12;
                     ctx.strokeStyle = '#EC4899';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
-                    break;
-                case 'comic':
-                    ctx.fillStyle = '#FEF08A';
-                    ctx.fillRect(x, y, width, height);
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 5;
-                    ctx.strokeRect(x + 6, y + 6, width - 12, height - 12);
-                    break;
-                case 'polaroid':
-                    ctx.fillStyle = '#FFF';
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-                    ctx.shadowBlur = 8;
-                    ctx.fillRect(x, y, width, height);
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
                     ctx.shadowColor = 'transparent';
                     break;
+                    
+                case 'comic':
+                    // Bold comic book style with halftone pattern
+                    const comicGrad = ctx.createRadialGradient(x + width/2, y + height/2, 0, x + width/2, y + height/2, Math.max(width, height));
+                    comicGrad.addColorStop(0, '#FEF08A');
+                    comicGrad.addColorStop(1, '#FCA5A5');
+                    ctx.fillStyle = comicGrad;
+                    ctx.fillRect(x, y, width, height);
+                    // Thick black border with inner accent
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 8;
+                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    ctx.strokeStyle = '#FFF';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 14, y + 14, width - 28, height - 28);
+                    break;
+                    
+                case 'polaroid':
+                    // Classic polaroid with thick white border and shadow
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+                    ctx.shadowOffsetX = 4;
+                    ctx.shadowOffsetY = 4;
+                    ctx.shadowBlur = 15;
+                    ctx.fillRect(x, y, width, height);
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    break;
+                    
                 case 'passport':
+                    // Official passport style with gradient and gold trim
                     const passGrad = ctx.createLinearGradient(x, y, x + width, y);
                     passGrad.addColorStop(0, '#1E3A8A');
+                    passGrad.addColorStop(0.5, '#7C2D12');
                     passGrad.addColorStop(1, '#991B1B');
                     ctx.fillStyle = passGrad;
                     ctx.fillRect(x, y, width, height);
+                    // Gold double border
+                    ctx.strokeStyle = '#FCD34D';
+                    ctx.lineWidth = 6;
+                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
+                    ctx.strokeStyle = '#92400E';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 16, y + 16, width - 32, height - 32);
+                    break;
+                    
+                case 'movie':
+                    // Cinematic film strip with perforations
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(x, y, width, height);
+                    // Gold border
                     ctx.strokeStyle = '#FCD34D';
                     ctx.lineWidth = 4;
-                    ctx.strokeRect(x + 6, y + 6, width - 12, height - 12);
+                    ctx.strokeRect(x + 15, y + 15, width - 30, height - 30);
+                    // Film perforations on sides
+                    ctx.fillStyle = '#FCD34D';
+                    for (let i = 0; i < 8; i++) {
+                        const perfY = y + 25 + (i * ((height - 50) / 7));
+                        ctx.fillRect(x + 5, perfY, 8, 12);
+                        ctx.fillRect(x + width - 13, perfY, 8, 12);
+                    }
                     break;
-                case 'movie':
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(x, y, width, height);
-                    ctx.strokeStyle = '#FCD34D';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
-                    break;
+                    
                 case 'vintage':
-                    ctx.fillStyle = '#FEF3C7';
+                    // Aged vintage photo with ornate border
+                    const vintGrad = ctx.createLinearGradient(x, y, x, y + height);
+                    vintGrad.addColorStop(0, '#FEF3C7');
+                    vintGrad.addColorStop(1, '#F59E0B');
+                    ctx.fillStyle = vintGrad;
                     ctx.fillRect(x, y, width, height);
+                    // Ornate double border
                     ctx.strokeStyle = '#92400E';
-                    ctx.lineWidth = 8;
-                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    ctx.lineWidth = 10;
+                    ctx.strokeRect(x + 15, y + 15, width - 30, height - 30);
+                    ctx.strokeStyle = '#FEF3C7';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x + 22, y + 22, width - 44, height - 44);
                     break;
+                    
                 case 'neon':
+                    // Cyberpunk neon glow effect
                     ctx.fillStyle = '#000';
                     ctx.fillRect(x, y, width, height);
-                    ctx.shadowColor = index % 2 === 0 ? '#EC4899' : '#06B6D4';
-                    ctx.shadowBlur = 15;
-                    ctx.strokeStyle = ctx.shadowColor;
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
+                    const neonColors = ['#EC4899', '#06B6D4', '#A855F7', '#FACC15'];
+                    const neonColor = neonColors[index % neonColors.length];
+                    ctx.shadowColor = neonColor;
+                    ctx.shadowBlur = 20;
+                    ctx.strokeStyle = neonColor;
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
+                    // Inner glow
+                    ctx.shadowBlur = 30;
+                    ctx.strokeStyle = '#FFF';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x + 14, y + 14, width - 28, height - 28);
                     ctx.shadowColor = 'transparent';
                     break;
+                    
                 case 'scrapbook':
+                    // Handmade scrapbook with pattern
                     const scrapGrad = ctx.createLinearGradient(x, y, x + width, y + height);
                     scrapGrad.addColorStop(0, '#FEF3F2');
-                    scrapGrad.addColorStop(1, '#EFF6FF');
+                    scrapGrad.addColorStop(0.33, '#DBEAFE');
+                    scrapGrad.addColorStop(0.66, '#FEF3C7');
+                    scrapGrad.addColorStop(1, '#FCE7F3');
                     ctx.fillStyle = scrapGrad;
                     ctx.fillRect(x, y, width, height);
+                    // Decorative dashed border
                     ctx.save();
-                    ctx.setLineDash([8, 4]);
-                    ctx.strokeStyle = ['#EC4899', '#06B6D4', '#FACC15'][index % 3];
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    ctx.setLineDash([10, 5]);
+                    const scrapColors = ['#EC4899', '#06B6D4', '#FACC15', '#A855F7'];
+                    ctx.strokeStyle = scrapColors[index % scrapColors.length];
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
                     ctx.setLineDash([]);
                     ctx.restore();
                     break;
+                    
                 case 'minimalist':
-                    ctx.fillStyle = '#FFF';
+                    // Clean minimal design with subtle shadow
+                    ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(x, y, width, height);
-                    ctx.strokeStyle = '#D1D5DB';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
+                    ctx.shadowBlur = 8;
+                    ctx.strokeStyle = '#E5E7EB';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x + 20, y + 20, width - 40, height - 40);
+                    ctx.shadowColor = 'transparent';
                     break;
+                    
                 case 'instagram':
+                    // Instagram-style gradient frame
                     const instaGrad = ctx.createLinearGradient(x, y, x + width, y + height);
-                    instaGrad.addColorStop(0, '#A855F7');
-                    instaGrad.addColorStop(0.5, '#EC4899');
-                    instaGrad.addColorStop(1, '#FACC15');
+                    instaGrad.addColorStop(0, '#833AB4');
+                    instaGrad.addColorStop(0.3, '#C13584');
+                    instaGrad.addColorStop(0.6, '#E1306C');
+                    instaGrad.addColorStop(0.8, '#FD1D1D');
+                    instaGrad.addColorStop(1, '#FCAF45');
                     ctx.fillStyle = instaGrad;
                     ctx.fillRect(x, y, width, height);
+                    // White inner frame
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(x + 8, y + 8, width - 16, height - 16);
                     break;
+                    
                 case 'classic':
                 default:
                     ctx.fillStyle = '#ffffff';
