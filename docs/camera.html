@@ -914,231 +914,1002 @@
         function drawPhotoTemplateFrame(ctx, x, y, width, height, index) {
             switch(template) {
                 case 'newspaper':
-                    // Vintage newspaper with aged paper effect
+                    // Realistic newspaper with aged paper and typography
+                    // Background gradient (aged paper)
                     const newsGrad = ctx.createLinearGradient(x, y, x, y + height);
-                    newsGrad.addColorStop(0, '#FEF3C7');
-                    newsGrad.addColorStop(1, '#FDE68A');
+                    newsGrad.addColorStop(0, '#FFFBEB');
+                    newsGrad.addColorStop(0.3, '#FEF3C7');
+                    newsGrad.addColorStop(0.7, '#FDE68A');
+                    newsGrad.addColorStop(1, '#FCD34D');
                     ctx.fillStyle = newsGrad;
                     ctx.fillRect(x, y, width, height);
-                    // Double border for classic newspaper look
+                    
+                    // Add subtle texture/noise effect
+                    ctx.fillStyle = 'rgba(139, 92, 46, 0.02)';
+                    for (let i = 0; i < 100; i++) {
+                        ctx.fillRect(
+                            x + Math.random() * width,
+                            y + Math.random() * height,
+                            2, 2
+                        );
+                    }
+                    
+                    // Double border (classic newspaper)
                     ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 6;
+                    ctx.lineWidth = 8;
                     ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 3;
                     ctx.strokeRect(x + 18, y + 18, width - 36, height - 36);
+                    
+                    // Header section (THE DAILY SNAP)
+                    const headerHeight = Math.max(60, height * 0.12);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(x + 24, y + 24, width - 48, headerHeight);
+                    
+                    // Newspaper name
+                    ctx.fillStyle = '#FCD34D';
+                    ctx.font = `bold ${Math.round(headerHeight * 0.35)}px "Times New Roman", Georgia, serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('THE DAILY SNAP', x + width / 2, y + 24 + headerHeight / 2 - 8);
+                    
+                    // Date line
+                    ctx.font = `${Math.round(headerHeight * 0.15)}px "Times New Roman", Georgia, serif`;
+                    ctx.fillText(customization.date || new Date().toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }), x + width / 2, y + 24 + headerHeight - 10);
+                    
+                    // Decorative line under header
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x + 28, y + 28 + headerHeight);
+                    ctx.lineTo(x + width - 28, y + 28 + headerHeight);
+                    ctx.stroke();
+                    
+                    // Column lines (newspaper style)
+                    const contentStartY = y + 32 + headerHeight;
+                    const contentHeight = height - (32 + headerHeight + 20);
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                    ctx.lineWidth = 1;
+                    
+                    // Divide into 3 columns
+                    const colWidth = (width - 56) / 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x + 28 + colWidth, contentStartY);
+                    ctx.lineTo(x + 28 + colWidth, contentStartY + contentHeight);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x + 28 + colWidth * 2, contentStartY);
+                    ctx.lineTo(x + 28 + colWidth * 2, contentStartY + contentHeight);
+                    ctx.stroke();
+                    
                     break;
                     
                 case 'magazine':
-                    // Glamorous magazine with gradient background
+                    // Glamorous fashion magazine cover style
+                    // Background gradient (premium magazine)
                     const magGrad = ctx.createLinearGradient(x, y, x + width, y + height);
                     magGrad.addColorStop(0, '#FDF2F8');
-                    magGrad.addColorStop(0.5, '#FCE7F3');
+                    magGrad.addColorStop(0.3, '#FCE7F3');
+                    magGrad.addColorStop(0.6, '#FBCFE8');
                     magGrad.addColorStop(1, '#FAE8FF');
                     ctx.fillStyle = magGrad;
                     ctx.fillRect(x, y, width, height);
-                    // Elegant pink border with shadow
-                    ctx.shadowColor = 'rgba(236, 72, 153, 0.3)';
-                    ctx.shadowBlur = 12;
+                    
+                    // Elegant border with shadow
+                    ctx.shadowColor = 'rgba(236, 72, 153, 0.4)';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 4;
                     ctx.strokeStyle = '#EC4899';
-                    ctx.lineWidth = 4;
+                    ctx.lineWidth = 6;
                     ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
                     ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
+                    
+                    // Magazine logo area (top)
+                    const logoHeight = Math.max(45, height * 0.09);
+                    
+                    // VOGUE-style logo
+                    ctx.font = `bold ${Math.round(logoHeight * 0.7)}px "Didot", "Bodoni MT", Georgia, serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // Text with outline for premium look
+                    ctx.strokeStyle = '#A855F7';
+                    ctx.lineWidth = 2;
+                    ctx.strokeText(customization.headline || 'VOGUE', x + width / 2, y + logoHeight / 2 + 14);
+                    
+                    ctx.fillStyle = '#EC4899';
+                    ctx.fillText(customization.headline || 'VOGUE', x + width / 2, y + logoHeight / 2 + 14);
+                    
+                    // Date/Issue info
+                    ctx.font = `${Math.round(logoHeight * 0.18)}px "Helvetica Neue", Arial, sans-serif`;
+                    ctx.fillStyle = '#A855F7';
+                    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+                    ctx.fillText(dateStr, x + width / 2, y + logoHeight + 4);
+                    
+                    // Barcode at bottom (realistic magazine element)
+                    const barcodeWidth = width * 0.3;
+                    const barcodeHeight = 30;
+                    const barcodeX = x + width - barcodeWidth - 20;
+                    const barcodeY = y + height - barcodeHeight - 15;
+                    
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(barcodeX, barcodeY, barcodeWidth, barcodeHeight);
+                    
+                    // Barcode lines
+                    ctx.fillStyle = '#FFF';
+                    const barWidth = barcodeWidth / 20;
+                    for (let i = 0; i < 20; i++) {
+                        if (i % 3 !== 0) { // Make pattern more realistic
+                            ctx.fillRect(
+                                barcodeX + i * barWidth + barWidth * 0.3,
+                                barcodeY + 3,
+                                barWidth * (i % 2 === 0 ? 0.2 : 0.15),
+                                barcodeHeight - 10
+                            );
+                        }
+                    }
+                    
+                    // Magazine price/issue number
+                    ctx.fillStyle = '#A855F7';
+                    ctx.font = 'bold 10px Arial, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('$9.99', x + 20, y + height - 12);
+                    ctx.textAlign = 'right';
+                    ctx.fillText('VOL. 2025', x + barcodeX - 10, y + height - 12);
+                    
                     break;
                     
                 case 'comic':
-                    // Bold comic book style with halftone pattern
-                    const comicGrad = ctx.createRadialGradient(x + width/2, y + height/2, 0, x + width/2, y + height/2, Math.max(width, height));
+                    // Bold comic book style with halftone pattern and action effects
+                    // Radial gradient background (pop art style)
+                    const comicGrad = ctx.createRadialGradient(x + width/2, y + height/2, 0, x + width/2, y + height/2, Math.max(width, height) * 0.6);
                     comicGrad.addColorStop(0, '#FEF08A');
+                    comicGrad.addColorStop(0.5, '#FBBF24');
                     comicGrad.addColorStop(1, '#FCA5A5');
                     ctx.fillStyle = comicGrad;
                     ctx.fillRect(x, y, width, height);
-                    // Thick black border with inner accent
+                    
+                    // Halftone dots pattern (Ben-Day dots comic effect)
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+                    const dotSpacing = 8;
+                    for (let dx = 0; dx < width; dx += dotSpacing) {
+                        for (let dy = 0; dy < height; dy += dotSpacing) {
+                            ctx.beginPath();
+                            ctx.arc(x + dx, y + dy, 1.5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    
+                    // Thick black border (comic panel style)
                     ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 8;
-                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    ctx.lineWidth = 10;
+                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
+                    
+                    // Inner white accent border
                     ctx.strokeStyle = '#FFF';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 16, y + 16, width - 32, height - 32);
+                    
+                    // Another black line
+                    ctx.strokeStyle = '#000';
                     ctx.lineWidth = 2;
-                    ctx.strokeRect(x + 14, y + 14, width - 28, height - 28);
+                    ctx.strokeRect(x + 22, y + 22, width - 44, height - 44);
+                    
+                    // Action word bubbles (POW, BAM, KAPOW!)
+                    const words = ['POW!', 'BAM!', 'KAPOW!'];
+                    const wordIndex = index % words.length;
+                    const word = words[wordIndex];
+                    
+                    // Speech bubble at top
+                    const bubbleWidth = Math.min(width * 0.4, 100);
+                    const bubbleHeight = 30;
+                    const bubbleX = x + width - bubbleWidth - 25;
+                    const bubbleY = y + 25;
+                    
+                    // Bubble background (yellow with black border)
+                    ctx.fillStyle = '#FEF08A';
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 5);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Bubble text
+                    ctx.fillStyle = '#000';
+                    ctx.font = `bold ${Math.round(bubbleHeight * 0.55)}px "Comic Sans MS", "Comic Neue", cursive`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(word, bubbleX + bubbleWidth / 2, bubbleY + bubbleHeight / 2);
+                    
+                    // Star burst effects at corners
+                    ctx.fillStyle = '#FACC15';
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    
+                    // Draw small star bursts
+                    function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+                        let rot = Math.PI / 2 * 3;
+                        let step = Math.PI / spikes;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy - outerRadius);
+                        
+                        for (let i = 0; i < spikes; i++) {
+                            ctx.lineTo(cx + Math.cos(rot) * outerRadius, cy + Math.sin(rot) * outerRadius);
+                            rot += step;
+                            ctx.lineTo(cx + Math.cos(rot) * innerRadius, cy + Math.sin(rot) * innerRadius);
+                            rot += step;
+                        }
+                        ctx.lineTo(cx, cy - outerRadius);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    
+                    drawStar(x + 35, y + 35, 8, 12, 6);
+                    drawStar(x + width - 35, y + height - 35, 8, 12, 6);
+                    
                     break;
                     
                 case 'polaroid':
-                    // Classic polaroid with thick white border and shadow
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
-                    ctx.shadowOffsetX = 4;
-                    ctx.shadowOffsetY = 4;
-                    ctx.shadowBlur = 15;
+                    // Classic polaroid with realistic thick white border and shadow
+                    // Background (table/surface)
+                    ctx.fillStyle = '#F3F4F6';
                     ctx.fillRect(x, y, width, height);
+                    
+                    // Polaroid frame with shadow
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                    ctx.shadowOffsetX = 6;
+                    ctx.shadowOffsetY = 8;
+                    ctx.shadowBlur = 20;
+                    
+                    // White Polaroid border (thicker at bottom for writing space)
+                    const polWidth = width * 0.88;
+                    const polHeight = height * 0.82;
+                    const polX = x + (width - polWidth) / 2;
+                    const polY = y + (height - polHeight) / 2 - height * 0.03; // Slightly higher
+                    
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(polX, polY, polWidth, polHeight);
+                    
+                    // Reset shadow
                     ctx.shadowColor = 'transparent';
                     ctx.shadowOffsetX = 0;
                     ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = 0;
+                    
+                    // Photo area (slightly darker to show distinction)
+                    const photoMargin = polWidth * 0.045;
+                    const bottomSpace = polHeight * 0.18; // Space for writing
+                    const photoWidth = polWidth - photoMargin * 2;
+                    const photoHeight = polHeight - photoMargin - bottomSpace;
+                    
+                    ctx.fillStyle = '#E5E7EB';
+                    ctx.fillRect(
+                        polX + photoMargin,
+                        polY + photoMargin,
+                        photoWidth,
+                        photoHeight
+                    );
+                    
+                    // Handwritten text area (bottom white space)
+                    ctx.fillStyle = '#9CA3AF';
+                    ctx.font = 'italic 11px "Brush Script MT", cursive, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(
+                        customization.message || 'memories...',
+                        polX + polWidth / 2,
+                        polY + polHeight - bottomSpace / 2 + 3
+                    );
+                    
+                    // Slight rotation effect for realism
+                    ctx.save();
+                    ctx.translate(polX + polWidth / 2, polY + polHeight / 2);
+                    ctx.rotate((index % 2 === 0 ? 1 : -1) * 0.02); // Slight tilt
+                    ctx.translate(-(polX + polWidth / 2), -(polY + polHeight / 2));
+                    ctx.restore();
+                    
                     break;
                     
                 case 'passport':
-                    // Official passport style with gradient and gold trim
+                    // Official passport/ID card style with realistic government document look
+                    // Patriotic gradient background
                     const passGrad = ctx.createLinearGradient(x, y, x + width, y);
-                    passGrad.addColorStop(0, '#1E3A8A');
-                    passGrad.addColorStop(0.5, '#7C2D12');
-                    passGrad.addColorStop(1, '#991B1B');
+                    passGrad.addColorStop(0, '#1E40AF'); // Blue
+                    passGrad.addColorStop(0.2, '#1E3A8A');
+                    passGrad.addColorStop(0.5, '#7C2D12'); // Red-brown
+                    passGrad.addColorStop(0.8, '#991B1B'); // Dark red
+                    passGrad.addColorStop(1, '#7F1D1D');
                     ctx.fillStyle = passGrad;
                     ctx.fillRect(x, y, width, height);
-                    // Gold double border
+                    
+                    // Gold official border (double frame)
                     ctx.strokeStyle = '#FCD34D';
-                    ctx.lineWidth = 6;
-                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
-                    ctx.strokeStyle = '#92400E';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x + 16, y + 16, width - 32, height - 32);
+                    ctx.lineWidth = 8;
+                    ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
+                    
+                    ctx.strokeStyle = '#B45309';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x + 18, y + 18, width - 36, height - 36);
+                    
+                    // Header section (PASSPORT)
+                    const passHeaderHeight = Math.max(50, height * 0.11);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctx.fillRect(x + 24, y + 24, width - 48, passHeaderHeight);
+                    
+                    // Flag emoji or emblem
+                    ctx.font = `${Math.round(passHeaderHeight * 0.5)}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#FCD34D';
+                    ctx.fillText('🦅', x + width / 2, y + 24 + passHeaderHeight / 2 - 8);
+                    
+                    // PASSPORT text
+                    ctx.font = `bold ${Math.round(passHeaderHeight * 0.25)}px "Arial", sans-serif`;
+                    ctx.fillStyle = '#FCD34D';
+                    ctx.fillText('PASSPORT', x + width / 2, y + 24 + passHeaderHeight - 8);
+                    
+                    // White content area (photo and info section)
+                    const contentY = y + 28 + passHeaderHeight;
+                    const passContentHeight = height - (32 + passHeaderHeight + 50);
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(x + 28, contentY, width - 56, passContentHeight);
+                    
+                    // Info fields grid (realistic passport data fields)
+                    ctx.strokeStyle = '#D1D5DB';
+                    ctx.lineWidth = 1;
+                    const fieldHeight = passContentHeight / 4;
+                    
+                    for (let i = 1; i < 4; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(x + 28, contentY + i * fieldHeight);
+                        ctx.lineTo(x + width - 28, contentY + i * fieldHeight);
+                        ctx.stroke();
+                    }
+                    
+                    // Vertical divider
+                    ctx.beginPath();
+                    ctx.moveTo(x + width / 2, contentY);
+                    ctx.lineTo(x + width / 2, contentY + passContentHeight);
+                    ctx.stroke();
+                    
+                    // Label text
+                    ctx.fillStyle = '#6B7280';
+                    ctx.font = 'bold 9px Arial, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('NAME:', x + 32, contentY + 12);
+                    ctx.fillText('DOB:', x + 32, contentY + fieldHeight + 12);
+                    ctx.fillText('ISSUED:', x + 32, contentY + fieldHeight * 2 + 12);
+                    ctx.fillText('EXPIRES:', x + 32, contentY + fieldHeight * 3 + 12);
+                    
+                    // Serial number at bottom
+                    ctx.fillStyle = '#374151';
+                    ctx.font = 'bold 11px "Courier New", monospace';
+                    ctx.textAlign = 'center';
+                    const serialNum = 'P<' + Math.random().toString(36).substring(2, 12).toUpperCase();
+                    ctx.fillText(serialNum, x + width / 2, y + height - 18);
+                    
                     break;
                     
                 case 'movie':
-                    // Cinematic film strip with perforations
-                    ctx.fillStyle = '#000';
+                    // Cinematic movie poster with film strip and professional design
+                    // Dark cinematic background
+                    const movieGrad = ctx.createRadialGradient(
+                        x + width / 2, y + height / 2, 0,
+                        x + width / 2, y + height / 2, Math.max(width, height) * 0.7
+                    );
+                    movieGrad.addColorStop(0, '#1F1B24');
+                    movieGrad.addColorStop(0.4, '#0F0A14');
+                    movieGrad.addColorStop(1, '#000000');
+                    ctx.fillStyle = movieGrad;
                     ctx.fillRect(x, y, width, height);
-                    // Gold border
-                    ctx.strokeStyle = '#FCD34D';
-                    ctx.lineWidth = 4;
-                    ctx.strokeRect(x + 15, y + 15, width - 30, height - 30);
-                    // Film perforations on sides
-                    ctx.fillStyle = '#FCD34D';
-                    for (let i = 0; i < 8; i++) {
-                        const perfY = y + 25 + (i * ((height - 50) / 7));
-                        ctx.fillRect(x + 5, perfY, 8, 12);
-                        ctx.fillRect(x + width - 13, perfY, 8, 12);
+                    
+                    // Film perforations on both sides (authentic film strip)
+                    ctx.fillStyle = '#000';
+                    const perfWidth = 12;
+                    const perfHeight = 8;
+                    const perfSpacing = 15;
+                    const perfCount = Math.floor(height / perfSpacing);
+                    
+                    for (let i = 0; i < perfCount; i++) {
+                        const perfY = y + 10 + i * perfSpacing;
+                        // Left side perforations
+                        ctx.fillRect(x + 4, perfY, perfWidth, perfHeight);
+                        // Right side perforations
+                        ctx.fillRect(x + width - perfWidth - 4, perfY, perfWidth, perfHeight);
                     }
+                    
+                    // Golden border (premium poster frame)
+                    const borderGrad = ctx.createLinearGradient(x, y, x, y + height);
+                    borderGrad.addColorStop(0, '#FFD700');
+                    borderGrad.addColorStop(0.5, '#FCD34D');
+                    borderGrad.addColorStop(1, '#B8860B');
+                    
+                    ctx.strokeStyle = borderGrad;
+                    ctx.lineWidth = 4;
+                    ctx.shadowColor = 'rgba(252, 211, 77, 0.6)';
+                    ctx.shadowBlur = 15;
+                    ctx.strokeRect(x + 18, y + 18, width - 36, height - 36);
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    
+                    // Inner black border
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 24, y + 24, width - 48, height - 48);
+                    
+                    // "COMING SOON" banner at bottom
+                    const bannerHeight = Math.max(35, height * 0.08);
+                    const bannerY = y + height - bannerHeight - 30;
+                    
+                    ctx.fillStyle = borderGrad;
+                    ctx.fillRect(x + 24, bannerY, width - 48, bannerHeight);
+                    
+                    // Banner text
+                    ctx.fillStyle = '#000';
+                    ctx.font = `bold ${Math.round(bannerHeight * 0.5)}px "Impact", "Arial Black", sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('COMING SOON', x + width / 2, bannerY + bannerHeight / 2);
+                    
+                    // Star rating
+                    const starY = y + height - 50;
+                    ctx.font = '16px Arial';
+                    ctx.fillStyle = '#FFD700';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('★★★★★', x + width / 2, starY);
+                    
+                    // Movie title area at top
+                    ctx.font = `bold ${Math.round(height * 0.06)}px "Impact", sans-serif`;
+                    ctx.fillStyle = borderGrad;
+                    ctx.textAlign = 'center';
+                    ctx.shadowColor = 'rgba(252, 211, 77, 0.8)';
+                    ctx.shadowBlur = 20;
+                    ctx.fillText((customization.headline || 'THE MOVIE').toUpperCase(), x + width / 2, y + 45);
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
+                    
                     break;
                     
                 case 'vintage':
-                    // Aged vintage photo with ornate border
-                    const vintGrad = ctx.createLinearGradient(x, y, x, y + height);
-                    vintGrad.addColorStop(0, '#FEF3C7');
+                    // Aged vintage photo with ornate decorative border
+                    // Sepia-toned aged paper background
+                    const vintGrad = ctx.createRadialGradient(
+                        x + width / 2, y + height / 2, 0,
+                        x + width / 2, y + height / 2, Math.max(width, height) * 0.6
+                    );
+                    vintGrad.addColorStop(0, '#FFFBEB');
+                    vintGrad.addColorStop(0.4, '#FEF3C7');
+                    vintGrad.addColorStop(0.7, '#FCD34D');
                     vintGrad.addColorStop(1, '#F59E0B');
                     ctx.fillStyle = vintGrad;
                     ctx.fillRect(x, y, width, height);
-                    // Ornate double border
+                    
+                    // Add aging spots/texture
+                    ctx.fillStyle = 'rgba(120, 53, 15, 0.08)';
+                    for (let i = 0; i < 80; i++) {
+                        const spotX = x + Math.random() * width;
+                        const spotY = y + Math.random() * height;
+                        const spotSize = Math.random() * 4 + 1;
+                        ctx.beginPath();
+                        ctx.arc(spotX, spotY, spotSize, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    // Ornate double border (vintage frame)
                     ctx.strokeStyle = '#92400E';
-                    ctx.lineWidth = 10;
-                    ctx.strokeRect(x + 15, y + 15, width - 30, height - 30);
-                    ctx.strokeStyle = '#FEF3C7';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x + 22, y + 22, width - 44, height - 44);
+                    ctx.lineWidth = 14;
+                    ctx.strokeRect(x + 18, y + 18, width - 36, height - 36);
+                    
+                    // Inner decorative border
+                    ctx.strokeStyle = '#78350F';
+                    ctx.lineWidth = 6;
+                    ctx.strokeRect(x + 26, y + 26, width - 52, height - 52);
+                    
+                    // Gold accent line
+                    ctx.strokeStyle = '#FCD34D';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 30, y + 30, width - 60, height - 60);
+                    
+                    // Corner decorations (ornate vintage style)
+                    ctx.fillStyle = '#92400E';
+                    const cornerSize = 20;
+                    
+                    // Top-left corner decoration
+                    ctx.save();
+                    ctx.translate(x + 18, y + 18);
+                    ctx.fillRect(0, 0, cornerSize, 3);
+                    ctx.fillRect(0, 0, 3, cornerSize);
+                    ctx.restore();
+                    
+                    // Top-right corner decoration
+                    ctx.save();
+                    ctx.translate(x + width - 18, y + 18);
+                    ctx.fillRect(-cornerSize, 0, cornerSize, 3);
+                    ctx.fillRect(-3, 0, 3, cornerSize);
+                    ctx.restore();
+                    
+                    // Bottom-left corner decoration
+                    ctx.save();
+                    ctx.translate(x + 18, y + height - 18);
+                    ctx.fillRect(0, -3, cornerSize, 3);
+                    ctx.fillRect(0, -cornerSize, 3, cornerSize);
+                    ctx.restore();
+                    
+                    // Bottom-right corner decoration
+                    ctx.save();
+                    ctx.translate(x + width - 18, y + height - 18);
+                    ctx.fillRect(-cornerSize, -3, cornerSize, 3);
+                    ctx.fillRect(-3, -cornerSize, 3, cornerSize);
+                    ctx.restore();
+                    
+                    // Date banner at bottom
+                    ctx.fillStyle = 'rgba(146, 64, 14, 0.7)';
+                    ctx.fillRect(x + 34, y + height - 50, width - 68, 24);
+                    
+                    ctx.fillStyle = '#FFFBEB';
+                    ctx.font = 'italic bold 12px "Times New Roman", Georgia, serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('~ ' + (customization.date || 'Memories') + ' ~', x + width / 2, y + height - 35);
+                    
                     break;
                     
                 case 'neon':
-                    // Cyberpunk neon glow effect
+                    // Cyberpunk neon glow effect with dark background
+                    // Dark background
                     ctx.fillStyle = '#000';
                     ctx.fillRect(x, y, width, height);
-                    const neonColors = ['#EC4899', '#06B6D4', '#A855F7', '#FACC15'];
+                    
+                    // Grid pattern (cyberpunk aesthetic)
+                    ctx.strokeStyle = 'rgba(139, 92, 246, 0.1)';
+                    ctx.lineWidth = 1;
+                    const gridSize = 20;
+                    
+                    for (let gx = x; gx < x + width; gx += gridSize) {
+                        ctx.beginPath();
+                        ctx.moveTo(gx, y);
+                        ctx.lineTo(gx, y + height);
+                        ctx.stroke();
+                    }
+                    
+                    for (let gy = y; gy < y + height; gy += gridSize) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, gy);
+                        ctx.lineTo(x + width, gy);
+                        ctx.stroke();
+                    }
+                    
+                    // Multi-color neon frames (cycling colors)
+                    const neonColors = [
+                        { main: '#EC4899', glow: 'rgba(236, 72, 153, 0.6)' },  // Pink
+                        { main: '#06B6D4', glow: 'rgba(6, 182, 212, 0.6)' },   // Cyan
+                        { main: '#A855F7', glow: 'rgba(168, 85, 247, 0.6)' },  // Purple
+                        { main: '#FACC15', glow: 'rgba(250, 204, 21, 0.6)' }   // Yellow
+                    ];
                     const neonColor = neonColors[index % neonColors.length];
-                    ctx.shadowColor = neonColor;
-                    ctx.shadowBlur = 20;
-                    ctx.strokeStyle = neonColor;
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
-                    // Inner glow
+                    
+                    // Outer neon glow
+                    ctx.shadowColor = neonColor.glow;
                     ctx.shadowBlur = 30;
+                    ctx.strokeStyle = neonColor.main;
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 15, y + 15, width - 30, height - 30);
+                    
+                    // Middle glow layer
+                    ctx.shadowBlur = 20;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 18, y + 18, width - 36, height - 36);
+                    
+                    // Inner bright line
+                    ctx.shadowBlur = 40;
                     ctx.strokeStyle = '#FFF';
                     ctx.lineWidth = 1;
-                    ctx.strokeRect(x + 14, y + 14, width - 28, height - 28);
+                    ctx.strokeRect(x + 20, y + 20, width - 40, height - 40);
+                    
+                    // Reset shadow
                     ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    
+                    // Corner accent lights
+                    ctx.fillStyle = neonColor.main;
+                    ctx.shadowColor = neonColor.glow;
+                    ctx.shadowBlur = 15;
+                    
+                    const cornerRadius = 6;
+                    // Top-left
+                    ctx.beginPath();
+                    ctx.arc(x + 15, y + 15, cornerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Top-right
+                    ctx.beginPath();
+                    ctx.arc(x + width - 15, y + 15, cornerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Bottom-left
+                    ctx.beginPath();
+                    ctx.arc(x + 15, y + height - 15, cornerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Bottom-right
+                    ctx.beginPath();
+                    ctx.arc(x + width - 15, y + height - 15, cornerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
+                    
                     break;
                     
                 case 'scrapbook':
-                    // Handmade scrapbook with pattern
+                    // Handmade scrapbook with craft paper and decorative elements
+                    // Colorful craft paper background
                     const scrapGrad = ctx.createLinearGradient(x, y, x + width, y + height);
                     scrapGrad.addColorStop(0, '#FEF3F2');
-                    scrapGrad.addColorStop(0.33, '#DBEAFE');
-                    scrapGrad.addColorStop(0.66, '#FEF3C7');
-                    scrapGrad.addColorStop(1, '#FCE7F3');
+                    scrapGrad.addColorStop(0.25, '#DBEAFE');
+                    scrapGrad.addColorStop(0.5, '#FEF3C7');
+                    scrapGrad.addColorStop(0.75, '#FCE7F3');
+                    scrapGrad.addColorStop(1, '#F3E8FF');
                     ctx.fillStyle = scrapGrad;
                     ctx.fillRect(x, y, width, height);
-                    // Decorative dashed border
+                    
+                    // Decorative paper texture (dots/patterns)
+                    const scrapColors = ['#EC4899', '#06B6D4', '#FACC15', '#A855F7', '#10B981'];
+                    ctx.fillStyle = scrapColors[index % scrapColors.length] + '15';
+                    for (let i = 0; i < 50; i++) {
+                        const px = x + Math.random() * width;
+                        const py = y + Math.random() * height;
+                        ctx.fillRect(px, py, 3, 3);
+                    }
+                    
+                    // Washi tape effect (colorful decorative tape strips)
                     ctx.save();
-                    ctx.setLineDash([10, 5]);
-                    const scrapColors = ['#EC4899', '#06B6D4', '#FACC15', '#A855F7'];
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillStyle = scrapColors[index % scrapColors.length];
+                    
+                    // Top tape strip
+                    ctx.fillRect(x + width * 0.2, y + 10, width * 0.6, 12);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x + width * 0.2, y + 10, width * 0.6, 12);
+                    
+                    // Bottom tape strip
+                    ctx.fillStyle = scrapColors[(index + 2) % scrapColors.length];
+                    ctx.fillRect(x + width * 0.15, y + height - 22, width * 0.7, 12);
+                    ctx.strokeRect(x + width * 0.15, y + height - 22, width * 0.7, 12);
+                    
+                    ctx.restore();
+                    
+                    // Dashed border (stitching effect)
+                    ctx.save();
+                    ctx.setLineDash([8, 6]);
                     ctx.strokeStyle = scrapColors[index % scrapColors.length];
-                    ctx.lineWidth = 4;
-                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
                     ctx.setLineDash([]);
                     ctx.restore();
+                    
+                    // Corner stickers/decorations
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    
+                    // Hearts, stars, etc. at corners
+                    const stickers = ['💕', '⭐', '🌈', '✨', '🎨', '🦋'];
+                    const stickerIndex = index % stickers.length;
+                    
+                    // Top-right sticker
+                    ctx.fillText(stickers[stickerIndex], x + width - 25, y + 25);
+                    
+                    // Bottom-left sticker
+                    ctx.fillText(stickers[(stickerIndex + 1) % stickers.length], x + 25, y + height - 25);
+                    
+                    // Pushpin effect (top center)
+                    ctx.fillStyle = scrapColors[(index + 3) % scrapColors.length];
+                    ctx.beginPath();
+                    ctx.arc(x + width / 2, y + 20, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Pin shadow
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                    ctx.beginPath();
+                    ctx.arc(x + width / 2 + 2, y + 22, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
                     break;
                     
                 case 'minimalist':
-                    // Clean minimal design with subtle shadow
-                    ctx.fillStyle = '#FFFFFF';
+                    // Clean minimal design with subtle shadows and monochrome palette
+                    // Off-white background
+                    ctx.fillStyle = '#FAFAFA';
                     ctx.fillRect(x, y, width, height);
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
-                    ctx.shadowBlur = 8;
+                    
+                    // Subtle outer shadow
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.04)';
+                    ctx.shadowBlur = 12;
+                    ctx.shadowOffsetY = 2;
+                    
+                    // Main white card
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(x + 20, y + 20, width - 40, height - 40);
+                    
+                    // Reset shadow
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
+                    
+                    // Minimalist thin border
                     ctx.strokeStyle = '#E5E7EB';
                     ctx.lineWidth = 1;
                     ctx.strokeRect(x + 20, y + 20, width - 40, height - 40);
-                    ctx.shadowColor = 'transparent';
+                    
+                    // Inner photo area with subtle border
+                    ctx.strokeStyle = '#F3F4F6';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x + 28, y + 28, width - 56, height - 56);
+                    
+                    // Minimalist accent line (thin colored line at top or side)
+                    const accentColors = ['#6366F1', '#8B5CF6', '#EC4899', '#06B6D4'];
+                    ctx.strokeStyle = accentColors[index % accentColors.length];
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x + 20, y + 20);
+                    ctx.lineTo(x + 20, y + 70);
+                    ctx.stroke();
+                    
+                    // Subtle geometric corner marks
+                    ctx.strokeStyle = '#D1D5DB';
+                    ctx.lineWidth = 1;
+                    
+                    const markSize = 8;
+                    
+                    // Top-left corner marks
+                    ctx.beginPath();
+                    ctx.moveTo(x + 28, y + 28 + markSize);
+                    ctx.lineTo(x + 28, y + 28);
+                    ctx.lineTo(x + 28 + markSize, y + 28);
+                    ctx.stroke();
+                    
+                    // Top-right corner marks
+                    ctx.beginPath();
+                    ctx.moveTo(x + width - 28 - markSize, y + 28);
+                    ctx.lineTo(x + width - 28, y + 28);
+                    ctx.lineTo(x + width - 28, y + 28 + markSize);
+                    ctx.stroke();
+                    
+                    // Bottom-left corner marks
+                    ctx.beginPath();
+                    ctx.moveTo(x + 28, y + height - 28 - markSize);
+                    ctx.lineTo(x + 28, y + height - 28);
+                    ctx.lineTo(x + 28 + markSize, y + height - 28);
+                    ctx.stroke();
+                    
+                    // Bottom-right corner marks
+                    ctx.beginPath();
+                    ctx.moveTo(x + width - 28 - markSize, y + height - 28);
+                    ctx.lineTo(x + width - 28, y + height - 28);
+                    ctx.lineTo(x + width - 28, y + height - 28 - markSize);
+                    ctx.stroke();
+                    
                     break;
                     
                 case 'instagram':
-                    // Instagram-style gradient frame
-                    const instaGrad = ctx.createLinearGradient(x, y, x + width, y + height);
+                    // Instagram-style realistic UI design
+                    ctx.fillStyle = '#FAFAFA';
+                    ctx.fillRect(x, y, width, height);
+                    
+                    // Top bar with gradient (Instagram story-like)
+                    const instaGrad = ctx.createLinearGradient(x, y, x + width, y);
                     instaGrad.addColorStop(0, '#833AB4');
                     instaGrad.addColorStop(0.3, '#C13584');
                     instaGrad.addColorStop(0.6, '#E1306C');
                     instaGrad.addColorStop(0.8, '#FD1D1D');
                     instaGrad.addColorStop(1, '#FCAF45');
                     ctx.fillStyle = instaGrad;
-                    ctx.fillRect(x, y, width, height);
-                    // White inner frame (leave space for username at top and icons at bottom)
+                    ctx.fillRect(x + 8, y + 8, width - 16, 44);
+                    
+                    // Profile section background (white)
                     ctx.fillStyle = '#FFF';
-                    ctx.fillRect(x + 8, y + 48, width - 16, height - 96);
+                    ctx.fillRect(x + 8, y + 56, width - 16, 46);
+                    
+                    // Profile avatar (gradient ring)
+                    ctx.save();
+                    const avatarX = x + 28;
+                    const avatarY = y + 76;
+                    const avatarRadius = 16;
+                    
+                    // Gradient ring (story-like)
+                    ctx.beginPath();
+                    ctx.arc(avatarX, avatarY, avatarRadius + 2, 0, Math.PI * 2);
+                    ctx.fillStyle = instaGrad;
+                    ctx.fill();
+                    
+                    // Inner white circle
+                    ctx.beginPath();
+                    ctx.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#E1E8ED';
+                    ctx.fill();
+                    
+                    // Avatar icon
+                    ctx.fillStyle = '#AAB8C2';
+                    ctx.font = `${Math.round(avatarRadius * 1.2)}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('👤', avatarX, avatarY);
+                    ctx.restore();
+                    
+                    // Username text
+                    ctx.fillStyle = '#262626';
+                    ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(customization.username || '@username', x + 52, y + 76);
+                    
+                    // White content area
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(x + 8, y + 106, width - 16, height - 164);
+                    
+                    // Bottom interaction bar (white)
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(x + 8, y + height - 54, width - 16, 46);
+                    
+                    // Action icons (heart, comment, share)
+                    ctx.font = '20px Arial';
+                    ctx.fillText('❤️', x + 16, y + height - 26);
+                    ctx.fillText('💬', x + 48, y + height - 26);
+                    ctx.fillText('📤', x + 80, y + height - 26);
+                    
+                    // Bookmark icon (right side)
+                    ctx.fillText('🔖', x + width - 32, y + height - 26);
                     break;
                     
                 case 'macbook':
-                    // MacBook Selfie trending style with screen reflection effect
-                    const macGrad = ctx.createLinearGradient(x, y, x, y + height);
+                    // MacBook Selfie realistic design with better details
+                    // Background gradient (desk/table surface)
+                    const bgGrad = ctx.createLinearGradient(x, y, x, y + height);
+                    bgGrad.addColorStop(0, '#E5E7EB');
+                    bgGrad.addColorStop(1, '#D1D5DB');
+                    ctx.fillStyle = bgGrad;
+                    ctx.fillRect(x, y, width, height);
+                    
+                    // MacBook screen (darker background)
+                    const macGrad = ctx.createLinearGradient(x, y, x, y + height * 0.75);
                     macGrad.addColorStop(0, '#1F2937');
                     macGrad.addColorStop(1, '#000000');
                     ctx.fillStyle = macGrad;
-                    ctx.fillRect(x, y, width, height);
                     
-                    // MacBook screen bezel
-                    const bezelPadding = Math.min(width, height) * 0.08;
+                    const screenWidth = width * 0.92;
+                    const screenHeight = height * 0.70;
+                    const screenX = x + (width - screenWidth) / 2;
+                    const screenY = y + height * 0.08;
+                    
+                    // Screen bezel (outer border)
                     ctx.fillStyle = '#374151';
                     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-                    ctx.shadowBlur = 20;
-                    ctx.fillRect(x + bezelPadding, y + bezelPadding, width - (bezelPadding * 2), height - (bezelPadding * 1.5));
+                    ctx.shadowBlur = 15;
+                    ctx.shadowOffsetY = 5;
+                    ctx.fillRect(screenX, screenY, screenWidth, screenHeight);
                     ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
+                    
+                    // Active screen area (black)
+                    const innerPadding = Math.min(width, height) * 0.025;
+                    ctx.fillStyle = macGrad;
+                    ctx.fillRect(
+                        screenX + innerPadding, 
+                        screenY + innerPadding, 
+                        screenWidth - innerPadding * 2, 
+                        screenHeight - innerPadding * 2
+                    );
+                    
+                    // macOS menu bar
+                    const menuBarHeight = Math.max(20, Math.round(screenHeight * 0.04));
+                    const menuGrad = ctx.createLinearGradient(0, screenY + innerPadding, 0, screenY + innerPadding + menuBarHeight);
+                    menuGrad.addColorStop(0, 'rgba(60, 60, 60, 0.95)');
+                    menuGrad.addColorStop(1, 'rgba(40, 40, 40, 0.95)');
+                    ctx.fillStyle = menuGrad;
+                    ctx.fillRect(
+                        screenX + innerPadding,
+                        screenY + innerPadding,
+                        screenWidth - innerPadding * 2,
+                        menuBarHeight
+                    );
+                    
+                    // Traffic light buttons (close, minimize, maximize)
+                    const dotSize = Math.max(4, Math.round(menuBarHeight * 0.25));
+                    const dotY = screenY + innerPadding + menuBarHeight / 2;
+                    const dotStartX = screenX + innerPadding + 12;
+                    
+                    // Red (close)
+                    ctx.fillStyle = '#FF5F56';
+                    ctx.beginPath();
+                    ctx.arc(dotStartX, dotY, dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Yellow (minimize)
+                    ctx.fillStyle = '#FFBD2E';
+                    ctx.beginPath();
+                    ctx.arc(dotStartX + dotSize * 3, dotY, dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Green (maximize)
+                    ctx.fillStyle = '#27C93F';
+                    ctx.beginPath();
+                    ctx.arc(dotStartX + dotSize * 6, dotY, dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Camera indicator (green dot)
+                    const cameraX = screenX + screenWidth / 2;
+                    const cameraY = screenY + innerPadding + menuBarHeight / 2;
+                    ctx.fillStyle = '#27C93F';
+                    ctx.beginPath();
+                    ctx.arc(cameraX, cameraY, Math.max(2, dotSize * 0.6), 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Camera icon glow
+                    ctx.shadowColor = '#27C93F';
+                    ctx.shadowBlur = 6;
+                    ctx.fill();
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
                     
                     // Screen glow effect
-                    const screenGrad = ctx.createRadialGradient(
-                        x + width/2, y + height/2, 0,
-                        x + width/2, y + height/2, Math.min(width, height) * 0.4
+                    const screenGlowGrad = ctx.createRadialGradient(
+                        screenX + screenWidth / 2,
+                        screenY + screenHeight / 2,
+                        0,
+                        screenX + screenWidth / 2,
+                        screenY + screenHeight / 2,
+                        Math.min(screenWidth, screenHeight) * 0.4
                     );
-                    screenGrad.addColorStop(0, 'rgba(96, 165, 250, 0.1)');
-                    screenGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                    ctx.fillStyle = screenGrad;
-                    ctx.fillRect(x + bezelPadding, y + bezelPadding, width - (bezelPadding * 2), height - (bezelPadding * 1.5));
+                    screenGlowGrad.addColorStop(0, 'rgba(96, 165, 250, 0.08)');
+                    screenGlowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = screenGlowGrad;
+                    ctx.fillRect(
+                        screenX + innerPadding,
+                        screenY + innerPadding + menuBarHeight,
+                        screenWidth - innerPadding * 2,
+                        screenHeight - innerPadding * 2 - menuBarHeight
+                    );
                     
-                    // Top menu bar dots (macOS style)
-                    const dotY = y + bezelPadding + 12;
-                    const dotSize = 6;
-                    ctx.fillStyle = '#EF4444';
-                    ctx.beginPath();
-                    ctx.arc(x + bezelPadding + 15, dotY, dotSize, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#FBBF24';
-                    ctx.beginPath();
-                    ctx.arc(x + bezelPadding + 35, dotY, dotSize, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#10B981';
-                    ctx.beginPath();
-                    ctx.arc(x + bezelPadding + 55, dotY, dotSize, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Bottom keyboard area
-                    const keyboardHeight = bezelPadding * 0.6;
-                    const keyboardGrad = ctx.createLinearGradient(x, y + height - keyboardHeight, x, y + height);
-                    keyboardGrad.addColorStop(0, '#4B5563');
+                    // Keyboard area (bottom part of MacBook)
+                    const keyboardHeight = height - (screenY + screenHeight);
+                    const keyboardGrad = ctx.createLinearGradient(
+                        x, 
+                        screenY + screenHeight,
+                        x,
+                        y + height
+                    );
+                    keyboardGrad.addColorStop(0, '#6B7280');
+                    keyboardGrad.addColorStop(0.3, '#4B5563');
                     keyboardGrad.addColorStop(1, '#1F2937');
                     ctx.fillStyle = keyboardGrad;
-                    ctx.fillRect(x, y + height - keyboardHeight, width, keyboardHeight);
+                    ctx.fillRect(x, screenY + screenHeight, width, keyboardHeight);
+                    
+                    // Trackpad
+                    const trackpadWidth = width * 0.3;
+                    const trackpadHeight = keyboardHeight * 0.5;
+                    const trackpadX = x + (width - trackpadWidth) / 2;
+                    const trackpadY = screenY + screenHeight + (keyboardHeight - trackpadHeight) / 2;
+                    
+                    ctx.fillStyle = '#374151';
+                    ctx.fillRect(trackpadX, trackpadY, trackpadWidth, trackpadHeight);
+                    ctx.strokeStyle = '#1F2937';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(trackpadX, trackpadY, trackpadWidth, trackpadHeight);
                     
                     break;
                     

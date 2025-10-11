@@ -212,10 +212,14 @@
                     <!-- Live Preview -->
                     <div>
                         <div class="bg-gray-100 rounded-xl p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">Preview</h3>
+                            <h3 class="text-lg font-bold text-gray-800 mb-2 text-center">Live Preview</h3>
+                            <p class="text-xs text-gray-500 mb-4 text-center italic">Preview shows how your text will appear on photos</p>
                             <div id="preview-area" class="bg-white rounded-lg shadow-lg p-4 min-h-[400px] flex items-center justify-center">
                                 <canvas id="preview-canvas" class="max-w-full h-auto"></canvas>
                             </div>
+                            <p class="text-xs text-gray-400 mt-3 text-center">
+                                ✨ Actual template will have richer details and higher resolution
+                            </p>
                         </div>
                     </div>
                     
@@ -290,9 +294,9 @@
         // Helper function for text with shadow/outline
         function drawTextWithShadow(text, x, y, fillColor = '#FFF', shadowColor = '#000') {
             ctx.shadowColor = shadowColor;
-            ctx.shadowBlur = 3;
-            ctx.shadowOffsetX = 1.5;
-            ctx.shadowOffsetY = 1.5;
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
             ctx.fillStyle = fillColor;
             ctx.fillText(text, x, y);
             ctx.shadowBlur = 0;
@@ -318,159 +322,423 @@
             // Draw template-specific preview
             switch(template) {
                 case 'instagram':
-                    // Instagram gradient background
-                    const instaGrad = ctx.createLinearGradient(0, 0, 300, 400);
-                    instaGrad.addColorStop(0, '#833AB4');
-                    instaGrad.addColorStop(0.5, '#E1306C');
-                    instaGrad.addColorStop(1, '#FCAF45');
-                    ctx.fillStyle = instaGrad;
+                    // Instagram realistic UI design (matching camera.html)
+                    ctx.fillStyle = '#FAFAFA';
                     ctx.fillRect(0, 0, 300, 400);
                     
-                    // White header card for username
+                    // Top gradient bar (Instagram story-like)
+                    const instaGrad = ctx.createLinearGradient(0, 0, 300, 0);
+                    instaGrad.addColorStop(0, '#833AB4');
+                    instaGrad.addColorStop(0.3, '#C13584');
+                    instaGrad.addColorStop(0.6, '#E1306C');
+                    instaGrad.addColorStop(0.8, '#FD1D1D');
+                    instaGrad.addColorStop(1, '#FCAF45');
+                    ctx.fillStyle = instaGrad;
+                    ctx.fillRect(8, 8, 284, 44);
+                    
+                    // Profile section background (white)
                     ctx.fillStyle = '#FFF';
-                    ctx.fillRect(8, 8, 284, 40);
+                    ctx.fillRect(8, 56, 284, 46);
                     
-                    // Username with larger font
-                    ctx.fillStyle = '#000';
-                    ctx.font = `bold ${Math.round(20 * textScale)}px Arial, sans-serif`;
-                    ctx.textAlign = 'left';
-                    ctx.fillText(username, 20, 32);
+                    // Profile avatar with gradient ring
+                    const avatarX = 28;
+                    const avatarY = 76;
+                    const avatarRadius = 16;
                     
-                    // Profile pic circle
+                    // Gradient ring
                     ctx.beginPath();
-                    ctx.arc(26, 24, 12, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#E91E63';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                    ctx.arc(avatarX, avatarY, avatarRadius + 2, 0, Math.PI * 2);
+                    ctx.fillStyle = instaGrad;
+                    ctx.fill();
                     
-                    // Photo placeholder area
+                    // Inner circle
+                    ctx.beginPath();
+                    ctx.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#E1E8ED';
+                    ctx.fill();
+                    
+                    // Avatar icon
+                    ctx.fillStyle = '#AAB8C2';
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('👤', avatarX, avatarY);
+                    
+                    // Username text
+                    ctx.fillStyle = '#262626';
+                    ctx.font = `bold ${Math.round(14 * textScale)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto`;
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(username, 52, 76);
+                    
+                    // White content area (photo placeholder)
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(8, 106, 284, 240);
+                    
+                    // Photo placeholder
                     ctx.fillStyle = '#E5E7EB';
-                    ctx.fillRect(8, 56, 284, 296);
+                    ctx.fillRect(12, 110, 276, 232);
                     ctx.fillStyle = '#9CA3AF';
                     ctx.font = '14px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText('Your photos here', 150, 200);
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('Your photos here', 150, 226);
                     
-                    // White footer card for icons
+                    // Bottom interaction bar
                     ctx.fillStyle = '#FFF';
-                    ctx.fillRect(8, 360, 284, 32);
+                    ctx.fillRect(8, 350, 284, 42);
                     
-                    // Icons larger
-                    ctx.font = `${Math.round(24 * textScale)}px Arial`;
-                    ctx.fillText('❤️ 💬 📤', 150, 383);
+                    // Action icons
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('❤️', 16, 375);
+                    ctx.fillText('💬', 48, 375);
+                    ctx.fillText('📤', 80, 375);
+                    
+                    // Bookmark icon
+                    ctx.fillText('🔖', 268, 375);
                     break;
                     
                 case 'newspaper':
-                    // Newspaper background
-                    ctx.fillStyle = '#FEF3C7';
+                    // Realistic newspaper (matching camera.html)
+                    // Aged paper background
+                    const newsGrad = ctx.createLinearGradient(0, 0, 0, 400);
+                    newsGrad.addColorStop(0, '#FFFBEB');
+                    newsGrad.addColorStop(0.3, '#FEF3C7');
+                    newsGrad.addColorStop(0.7, '#FDE68A');
+                    newsGrad.addColorStop(1, '#FCD34D');
+                    ctx.fillStyle = newsGrad;
                     ctx.fillRect(0, 0, 300, 400);
                     
-                    // Border
+                    // Texture/noise effect
+                    ctx.fillStyle = 'rgba(139, 92, 46, 0.02)';
+                    for (let i = 0; i < 50; i++) {
+                        ctx.fillRect(Math.random() * 300, Math.random() * 400, 2, 2);
+                    }
+                    
+                    // Double border
                     ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 4;
+                    ctx.lineWidth = 6;
                     ctx.strokeRect(10, 10, 280, 380);
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(16, 16, 268, 368);
+                    
+                    // Header section
+                    const headerHeight = 50;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(20, 20, 260, headerHeight);
+                    
+                    // THE DAILY SNAP
+                    ctx.fillStyle = '#FCD34D';
+                    ctx.font = scaledFont(18, '"Times New Roman", Georgia, serif');
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('THE DAILY SNAP', 150, 35);
+                    
+                    // Date line
+                    ctx.font = scaledFont(8, '"Times New Roman", Georgia, serif');
+                    ctx.fillText(new Date().toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                    }), 150, 55);
+                    
+                    // Decorative line
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(24, 74);
+                    ctx.lineTo(276, 74);
+                    ctx.stroke();
                     
                     // Headline with shadow
-                    ctx.font = scaledFont(28, '"Times New Roman", Georgia, serif');
+                    ctx.font = scaledFont(20, '"Times New Roman", Georgia, serif');
                     ctx.textAlign = 'center';
-                    drawTextWithShadow(headline, 150, 50, '#000', '#FFF');
+                    ctx.textBaseline = 'top';
+                    drawTextWithShadow(headline, 150, 85, '#000', '#FFF');
                     
-                    // Subtitle with shadow
-                    ctx.font = scaledFont(16, '"Times New Roman", Georgia, serif', 'normal');
-                    drawTextWithShadow(subtitle, 150, 75, '#333', '#FFF');
+                    // Subtitle
+                    ctx.font = scaledFont(12, '"Times New Roman", Georgia, serif', 'normal');
+                    drawTextWithShadow(subtitle, 150, 108, '#333', '#FFF');
+                    
+                    // Column lines
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                    ctx.lineWidth = 1;
+                    const colWidth = 260 / 3;
+                    ctx.beginPath();
+                    ctx.moveTo(20 + colWidth, 130);
+                    ctx.lineTo(20 + colWidth, 370);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(20 + colWidth * 2, 130);
+                    ctx.lineTo(20 + colWidth * 2, 370);
+                    ctx.stroke();
                     
                     // Photo placeholder
                     ctx.fillStyle = '#D1D5DB';
-                    ctx.fillRect(30, 100, 240, 180);
+                    ctx.fillRect(40, 140, 220, 140);
                     break;
                     
                 case 'macbook':
-                    // MacBook background
-                    ctx.fillStyle = '#1F2937';
+                    // MacBook realistic design (matching camera.html)
+                    // Background (desk surface)
+                    const bgGrad = ctx.createLinearGradient(0, 0, 0, 400);
+                    bgGrad.addColorStop(0, '#E5E7EB');
+                    bgGrad.addColorStop(1, '#D1D5DB');
+                    ctx.fillStyle = bgGrad;
                     ctx.fillRect(0, 0, 300, 400);
                     
-                    // Screen
+                    // MacBook screen
+                    const macGrad = ctx.createLinearGradient(0, 0, 0, 280);
+                    macGrad.addColorStop(0, '#1F2937');
+                    macGrad.addColorStop(1, '#000000');
+                    
+                    const screenWidth = 275;
+                    const screenHeight = 210;
+                    const screenX = 12.5;
+                    const screenY = 30;
+                    
+                    // Screen bezel
                     ctx.fillStyle = '#374151';
-                    ctx.fillRect(20, 20, 260, 300);
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowOffsetY = 5;
+                    ctx.fillRect(screenX, screenY, screenWidth, screenHeight);
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
                     
-                    // macOS dots
-                    ctx.fillStyle = '#EF4444';
+                    // Active screen area
+                    const innerPadding = 8;
+                    ctx.fillStyle = macGrad;
+                    ctx.fillRect(screenX + innerPadding, screenY + innerPadding, screenWidth - innerPadding * 2, screenHeight - innerPadding * 2);
+                    
+                    // macOS menu bar
+                    const menuBarHeight = 18;
+                    const menuGrad = ctx.createLinearGradient(0, screenY + innerPadding, 0, screenY + innerPadding + menuBarHeight);
+                    menuGrad.addColorStop(0, 'rgba(60, 60, 60, 0.95)');
+                    menuGrad.addColorStop(1, 'rgba(40, 40, 40, 0.95)');
+                    ctx.fillStyle = menuGrad;
+                    ctx.fillRect(screenX + innerPadding, screenY + innerPadding, screenWidth - innerPadding * 2, menuBarHeight);
+                    
+                    // Traffic light buttons
+                    const dotSize = 4;
+                    const dotY = screenY + innerPadding + menuBarHeight / 2;
+                    const dotStartX = screenX + innerPadding + 12;
+                    
+                    ctx.fillStyle = '#FF5F56';
                     ctx.beginPath();
-                    ctx.arc(35, 35, 5, 0, Math.PI * 2);
+                    ctx.arc(dotStartX, dotY, dotSize, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    ctx.fillStyle = '#FBBF24';
+                    ctx.fillStyle = '#FFBD2E';
                     ctx.beginPath();
-                    ctx.arc(55, 35, 5, 0, Math.PI * 2);
+                    ctx.arc(dotStartX + dotSize * 3, dotY, dotSize, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    ctx.fillStyle = '#10B981';
+                    ctx.fillStyle = '#27C93F';
                     ctx.beginPath();
-                    ctx.arc(75, 35, 5, 0, Math.PI * 2);
+                    ctx.arc(dotStartX + dotSize * 6, dotY, dotSize, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Username with shadow
+                    // Camera indicator (green dot)
+                    const cameraX = screenX + screenWidth / 2;
+                    const cameraY = screenY + innerPadding + menuBarHeight / 2;
+                    ctx.fillStyle = '#27C93F';
+                    ctx.shadowColor = '#27C93F';
+                    ctx.shadowBlur = 6;
+                    ctx.beginPath();
+                    ctx.arc(cameraX, cameraY, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
+                    
+                    // Username text
                     ctx.font = scaledFont(22, '-apple-system, BlinkMacSystemFont, sans-serif');
                     ctx.textAlign = 'center';
-                    drawTextWithShadow(username, 150, 180, '#FFF', '#000');
+                    drawTextWithShadow(username, 150, 160, '#FFF', '#000');
                     
-                    // Keyboard
-                    const keyGrad = ctx.createLinearGradient(0, 320, 0, 400);
-                    keyGrad.addColorStop(0, '#4B5563');
-                    keyGrad.addColorStop(1, '#1F2937');
-                    ctx.fillStyle = keyGrad;
-                    ctx.fillRect(0, 320, 300, 80);
+                    // Keyboard area
+                    const keyboardHeight = 400 - (screenY + screenHeight);
+                    const keyboardGrad = ctx.createLinearGradient(0, screenY + screenHeight, 0, 400);
+                    keyboardGrad.addColorStop(0, '#6B7280');
+                    keyboardGrad.addColorStop(0.3, '#4B5563');
+                    keyboardGrad.addColorStop(1, '#1F2937');
+                    ctx.fillStyle = keyboardGrad;
+                    ctx.fillRect(0, screenY + screenHeight, 300, keyboardHeight);
+                    
+                    // Trackpad
+                    const trackpadWidth = 90;
+                    const trackpadHeight = 50;
+                    const trackpadX = 150 - trackpadWidth / 2;
+                    const trackpadY = screenY + screenHeight + (keyboardHeight - trackpadHeight) / 2;
+                    
+                    ctx.fillStyle = '#374151';
+                    ctx.fillRect(trackpadX, trackpadY, trackpadWidth, trackpadHeight);
+                    ctx.strokeStyle = '#1F2937';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(trackpadX, trackpadY, trackpadWidth, trackpadHeight);
                     break;
                     
                 case 'magazine':
-                    // Magazine background
+                    // Glamorous magazine (matching camera.html)
+                    // Background gradient
                     const magGrad = ctx.createLinearGradient(0, 0, 300, 400);
-                    magGrad.addColorStop(0, '#FCE7F3');
-                    magGrad.addColorStop(1, '#E9D5FF');
+                    magGrad.addColorStop(0, '#FDF2F8');
+                    magGrad.addColorStop(0.3, '#FCE7F3');
+                    magGrad.addColorStop(0.6, '#FBCFE8');
+                    magGrad.addColorStop(1, '#FAE8FF');
                     ctx.fillStyle = magGrad;
                     ctx.fillRect(0, 0, 300, 400);
                     
-                    // Border
+                    // Border with shadow
+                    ctx.shadowColor = 'rgba(236, 72, 153, 0.4)';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowOffsetY = 3;
                     ctx.strokeStyle = '#EC4899';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(15, 15, 270, 370);
+                    ctx.lineWidth = 5;
+                    ctx.strokeRect(12, 12, 276, 376);
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
                     
-                    // Title with shadow
-                    ctx.font = scaledFont(32, 'Impact, Arial, sans-serif');
+                    // VOGUE-style logo
+                    ctx.font = scaledFont(28, '"Didot", "Bodoni MT", Georgia, serif');
                     ctx.textAlign = 'center';
-                    drawTextWithShadow(headline, 150, 60, '#EC4899', '#FFF');
+                    ctx.textBaseline = 'middle';
                     
-                    // Subtitle with shadow
-                    ctx.font = scaledFont(16, 'Arial, sans-serif');
-                    drawTextWithShadow(subtitle, 150, 85, '#A855F7', '#FFF');
+                    // Text with outline
+                    ctx.strokeStyle = '#A855F7';
+                    ctx.lineWidth = 2;
+                    ctx.strokeText(headline || 'VOGUE', 150, 35);
+                    
+                    ctx.fillStyle = '#EC4899';
+                    ctx.fillText(headline || 'VOGUE', 150, 35);
+                    
+                    // Date/Issue
+                    ctx.font = scaledFont(8, '"Helvetica Neue", Arial, sans-serif');
+                    ctx.fillStyle = '#A855F7';
+                    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+                    ctx.fillText(dateStr, 150, 52);
+                    
+                    // Subtitle
+                    ctx.font = scaledFont(13, 'Arial, sans-serif');
+                    drawTextWithShadow(subtitle, 150, 70, '#A855F7', '#FFF');
                     
                     // Photo placeholder
                     ctx.fillStyle = '#F3E8FF';
-                    ctx.fillRect(30, 110, 240, 200);
+                    ctx.fillRect(40, 90, 220, 220);
+                    
+                    // Barcode at bottom
+                    const barcodeWidth = 90;
+                    const barcodeHeight = 25;
+                    const barcodeX = 300 - barcodeWidth - 20;
+                    const barcodeY = 400 - barcodeHeight - 15;
+                    
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(barcodeX, barcodeY, barcodeWidth, barcodeHeight);
+                    
+                    // Barcode lines
+                    ctx.fillStyle = '#FFF';
+                    const barWidth = barcodeWidth / 20;
+                    for (let i = 0; i < 20; i++) {
+                        if (i % 3 !== 0) {
+                            ctx.fillRect(
+                                barcodeX + i * barWidth + barWidth * 0.3,
+                                barcodeY + 2,
+                                barWidth * (i % 2 === 0 ? 0.2 : 0.15),
+                                barcodeHeight - 8
+                            );
+                        }
+                    }
+                    
+                    // Price/Issue
+                    ctx.fillStyle = '#A855F7';
+                    ctx.font = 'bold 8px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('$9.99', 20, 400 - 12);
+                    ctx.textAlign = 'right';
+                    ctx.fillText('VOL. 2025', barcodeX - 10, 400 - 12);
                     break;
                     
                 case 'movie':
-                    // Movie poster background
-                    ctx.fillStyle = '#000';
+                    // Cinematic movie poster (matching camera.html)
+                    // Dark background
+                    const movieGrad = ctx.createRadialGradient(150, 200, 0, 150, 200, 250);
+                    movieGrad.addColorStop(0, '#1F1B24');
+                    movieGrad.addColorStop(0.4, '#0F0A14');
+                    movieGrad.addColorStop(1, '#000000');
+                    ctx.fillStyle = movieGrad;
                     ctx.fillRect(0, 0, 300, 400);
                     
-                    // Gold border
-                    ctx.strokeStyle = '#FCD34D';
-                    ctx.lineWidth = 4;
-                    ctx.strokeRect(10, 10, 280, 380);
+                    // Film perforations
+                    ctx.fillStyle = '#000';
+                    const perfWidth = 10;
+                    const perfHeight = 6;
+                    const perfSpacing = 12;
+                    const perfCount = Math.floor(400 / perfSpacing);
                     
-                    // Title with cinematic styling
-                    ctx.font = scaledFont(26, '"Bebas Neue", Impact, Arial, sans-serif');
+                    for (let i = 0; i < perfCount; i++) {
+                        const perfY = 8 + i * perfSpacing;
+                        ctx.fillRect(3, perfY, perfWidth, perfHeight);
+                        ctx.fillRect(287, perfY, perfWidth, perfHeight);
+                    }
+                    
+                    // Golden border
+                    const borderGrad = ctx.createLinearGradient(0, 0, 0, 400);
+                    borderGrad.addColorStop(0, '#FFD700');
+                    borderGrad.addColorStop(0.5, '#FCD34D');
+                    borderGrad.addColorStop(1, '#B8860B');
+                    
+                    ctx.strokeStyle = borderGrad;
+                    ctx.lineWidth = 3;
+                    ctx.shadowColor = 'rgba(252, 211, 77, 0.6)';
+                    ctx.shadowBlur = 12;
+                    ctx.strokeRect(18, 18, 264, 364);
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
+                    
+                    // Inner black border
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(22, 22, 256, 356);
+                    
+                    // Movie title at top
+                    ctx.font = scaledFont(22, '"Impact", "Arial Black", sans-serif');
                     ctx.textAlign = 'center';
-                    drawTextWithShadow(headline, 150, 50, '#FCD34D', '#000');
+                    ctx.fillStyle = borderGrad;
+                    ctx.shadowColor = 'rgba(252, 211, 77, 0.8)';
+                    ctx.shadowBlur = 15;
+                    ctx.fillText((headline || 'THE MOVIE').toUpperCase(), 150, 45);
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
                     
                     // Subtitle
-                    ctx.font = scaledFont(14, 'Arial, sans-serif', 'normal');
-                    drawTextWithShadow(subtitle, 150, 75, '#FFF', '#000');
+                    ctx.font = scaledFont(12, 'Arial, sans-serif', 'normal');
+                    drawTextWithShadow(subtitle, 150, 65, '#FFF', '#000');
                     
                     // Photo placeholder
                     ctx.fillStyle = '#1F2937';
-                    ctx.fillRect(30, 100, 240, 220);
+                    ctx.fillRect(40, 85, 220, 220);
+                    
+                    // COMING SOON banner
+                    const bannerHeight = 28;
+                    const bannerY = 400 - bannerHeight - 35;
+                    
+                    ctx.fillStyle = borderGrad;
+                    ctx.fillRect(22, bannerY, 256, bannerHeight);
+                    
+                    ctx.fillStyle = '#000';
+                    ctx.font = scaledFont(14, '"Impact", "Arial Black", sans-serif');
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('COMING SOON', 150, bannerY + bannerHeight / 2);
+                    
+                    // Star rating
+                    ctx.font = '14px Arial';
+                    ctx.fillStyle = '#FFD700';
+                    ctx.textBaseline = 'alphabetic';
+                    ctx.fillText('★★★★★', 150, 400 - 42);
                     break;
                     
                 case 'passport':
