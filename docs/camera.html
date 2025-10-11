@@ -220,6 +220,10 @@
         const poses = parseInt(urlParams.get('poses')) || 4;
         const template = urlParams.get('template') || 'classic';
         
+        // Debug: Log template selection
+        console.log('📸 Camera Page Loaded');
+        console.log('Layout:', layout, '| Poses:', poses, '| Template:', template);
+        
         // Update layout info
         document.getElementById('layout-info').textContent = `Layout ${layout} - ${poses} Poses - ${template.charAt(0).toUpperCase() + template.slice(1)}`;
         
@@ -463,8 +467,23 @@
             // Apply filter to canvas
             applyFilterToCanvas(currentFilter);
             
-            // Get image data
-            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            // Create a new canvas with template effects
+            const templateCanvas = document.createElement('canvas');
+            const templateCtx = templateCanvas.getContext('2d');
+            
+            // Set canvas size with padding for template effects
+            const padding = 20;
+            templateCanvas.width = canvas.width + (padding * 2);
+            templateCanvas.height = canvas.height + (padding * 2);
+            
+            // Draw template background/border
+            drawPhotoTemplateFrame(templateCtx, 0, 0, templateCanvas.width, templateCanvas.height, capturedPhotos.length);
+            
+            // Draw the photo in the center
+            templateCtx.drawImage(canvas, padding, padding, canvas.width, canvas.height);
+            
+            // Get image data with template
+            const imageData = templateCanvas.toDataURL('image/jpeg', 0.9);
             capturedPhotos.push(imageData);
             
             // Update UI
@@ -557,6 +576,110 @@
         }
         
         // Template rendering functions
+        // Draw template frame for individual photo (used in preview)
+        function drawPhotoTemplateFrame(ctx, x, y, width, height, index) {
+            switch(template) {
+                case 'newspaper':
+                    ctx.fillStyle = '#FEF3C7';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 5, y + 5, width - 10, height - 10);
+                    break;
+                case 'magazine':
+                    ctx.fillStyle = '#FDF2F8';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#EC4899';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    break;
+                case 'comic':
+                    ctx.fillStyle = '#FEF08A';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 5;
+                    ctx.strokeRect(x + 6, y + 6, width - 12, height - 12);
+                    break;
+                case 'polaroid':
+                    ctx.fillStyle = '#FFF';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                    ctx.shadowBlur = 8;
+                    ctx.fillRect(x, y, width, height);
+                    ctx.shadowColor = 'transparent';
+                    break;
+                case 'passport':
+                    const passGrad = ctx.createLinearGradient(x, y, x + width, y);
+                    passGrad.addColorStop(0, '#1E3A8A');
+                    passGrad.addColorStop(1, '#991B1B');
+                    ctx.fillStyle = passGrad;
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#FCD34D';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 6, y + 6, width - 12, height - 12);
+                    break;
+                case 'movie':
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#FCD34D';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    break;
+                case 'vintage':
+                    ctx.fillStyle = '#FEF3C7';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#92400E';
+                    ctx.lineWidth = 8;
+                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    break;
+                case 'neon':
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.shadowColor = index % 2 === 0 ? '#EC4899' : '#06B6D4';
+                    ctx.shadowBlur = 15;
+                    ctx.strokeStyle = ctx.shadowColor;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 10, y + 10, width - 20, height - 20);
+                    ctx.shadowColor = 'transparent';
+                    break;
+                case 'scrapbook':
+                    const scrapGrad = ctx.createLinearGradient(x, y, x + width, y + height);
+                    scrapGrad.addColorStop(0, '#FEF3F2');
+                    scrapGrad.addColorStop(1, '#EFF6FF');
+                    ctx.fillStyle = scrapGrad;
+                    ctx.fillRect(x, y, width, height);
+                    ctx.save();
+                    ctx.setLineDash([8, 4]);
+                    ctx.strokeStyle = ['#EC4899', '#06B6D4', '#FACC15'][index % 3];
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x + 8, y + 8, width - 16, height - 16);
+                    ctx.setLineDash([]);
+                    ctx.restore();
+                    break;
+                case 'minimalist':
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#D1D5DB';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
+                    break;
+                case 'instagram':
+                    const instaGrad = ctx.createLinearGradient(x, y, x + width, y + height);
+                    instaGrad.addColorStop(0, '#A855F7');
+                    instaGrad.addColorStop(0.5, '#EC4899');
+                    instaGrad.addColorStop(1, '#FACC15');
+                    ctx.fillStyle = instaGrad;
+                    ctx.fillRect(x, y, width, height);
+                    break;
+                case 'classic':
+                default:
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(x, y, width, height);
+                    ctx.strokeStyle = '#E5E7EB';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 5, y + 5, width - 10, height - 10);
+            }
+        }
+        
         function drawTemplateBackground(ctx, width, height) {
             switch(template) {
                 case 'newspaper':
