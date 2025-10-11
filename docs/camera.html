@@ -606,37 +606,41 @@
         function downloadPhotoStrip() {
             const stripElement = document.getElementById('photo-strip');
             
-            // Use html2canvas if available, otherwise create a simple canvas
+            // Create canvas for final photo strip
             const stripCanvas = document.createElement('canvas');
             const stripCtx = stripCanvas.getContext('2d');
             
-            // Calculate dimensions
-            const photoWidth = 400;
-            const photoHeight = 400;
-            const padding = 40;
-            const brandingHeight = 80;
-            
-            stripCanvas.width = photoWidth + (padding * 2);
-            stripCanvas.height = (photoHeight * poses) + (padding * 2) + brandingHeight;
-            
-            // Draw template background first
-            drawTemplateBackground(stripCtx, stripCanvas.width, stripCanvas.height);
-            
-            // Draw photos with template styling
-            const promises = capturedPhotos.map((photoData, index) => {
+            // Load all photos first to get actual dimensions
+            const promises = capturedPhotos.map((photoData) => {
                 return new Promise((resolve) => {
                     const img = new Image();
-                    img.onload = () => {
-                        const y = padding + (index * photoHeight);
-                        drawPhotoWithTemplate(stripCtx, img, padding, y, photoWidth, photoHeight, index);
-                        resolve();
-                    };
+                    img.onload = () => resolve(img);
                     img.src = photoData;
                 });
             });
             
-            Promise.all(promises).then(() => {
-                // Add template-specific branding
+            Promise.all(promises).then((images) => {
+                // Use actual image dimensions (all should be same size)
+                const firstImg = images[0];
+                const photoWidth = firstImg.width;
+                const photoHeight = firstImg.height;
+                const padding = 40;
+                const brandingHeight = 100;
+                
+                // Set canvas size based on actual photo dimensions
+                stripCanvas.width = photoWidth;
+                stripCanvas.height = (photoHeight * poses) + brandingHeight;
+                
+                // Draw template background
+                drawTemplateBackground(stripCtx, stripCanvas.width, stripCanvas.height);
+                
+                // Draw each photo at actual size
+                images.forEach((img, index) => {
+                    const y = index * photoHeight;
+                    stripCtx.drawImage(img, 0, y, photoWidth, photoHeight);
+                });
+                
+                // Add branding
                 drawTemplateBranding(stripCtx, stripCanvas.width, stripCanvas.height, brandingHeight);
                 
                 // Download
