@@ -756,6 +756,7 @@
                 
             } else {
                 // Manual mode - show manual capture button
+                manualPhotoIndex = 0; // Reset manual photo index
                 manualCaptureBtn.classList.remove('hidden');
                 currentPhotoNum.textContent = '1';
             }
@@ -773,7 +774,6 @@
             capturePhoto();
             
             manualPhotoIndex++;
-            currentPhotoNum.textContent = manualPhotoIndex + 1;
             
             manualCaptureBtn.disabled = false;
             manualCaptureBtn.classList.remove('opacity-50');
@@ -784,6 +784,9 @@
                 isCapturing = false;
                 continueBtn.classList.remove('hidden');
                 retakeBtn.classList.remove('hidden');
+            } else {
+                // Update for next photo
+                currentPhotoNum.textContent = manualPhotoIndex + 1;
             }
         });
         

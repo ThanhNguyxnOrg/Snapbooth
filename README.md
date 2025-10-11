@@ -40,7 +40,9 @@ A free online photo booth with 12 creative templates, smart sticker system, and 
 - 🌐 **Branded Links** - thanhnguyxn.github.io/Photo-Booth watermark
 
 ### 🎯 Technical Features
-- 📱 **Fully Responsive** - Works on desktop, tablet, and mobile
+- 📱 **Fully Responsive** - Optimized for mobile with minimal scrolling
+- 📐 **Compact Mobile UI** - Icon-based layouts, collapsible template previews
+- 🎨 **Touch-Friendly** - Large tap targets, smooth interactions on mobile
 - 🔒 **Privacy First** - All processing in browser, no server uploads
 - 🆓 **100% Free** - No watermarks, no limits, open source
 - ⚡ **Fast & Lightweight** - Pure vanilla JavaScript, no heavy frameworks
@@ -50,11 +52,11 @@ A free online photo booth with 12 creative templates, smart sticker system, and 
 ## 🎭 Templates & Layouts
 
 ### 📐 Layout Options
-- **Layout S** - Single large photo (perfect for portraits)
-- **Layout A** - 4 photos in 2×2 grid (classic photo booth)
-- **Layout B** - 3 photos vertical (magazine style)
-- **Layout C** - 2 photos vertical (minimalist)
-- **Layout D** - 6 photos in 2×3 grid (maximum memories)
+- **Layout S** 🖼️ - Single large photo (perfect for portraits)
+- **Layout A** 🎞️ - 4 photos in 2×2 grid (classic photo booth)
+- **Layout B** 📷 - 3 photos vertical (magazine style)
+- **Layout C** 📸 - 2 photos vertical (minimalist)
+- **Layout D** 🎬 - 6 photos in 2×3 grid (maximum memories)
 
 ### 🎨 Template Styles
 
@@ -109,7 +111,29 @@ Perfect for:
 
 ---
 
-## 🚀 Quick Start
+## � Mobile Optimization
+
+### Responsive Design
+- 📐 **Adaptive Layouts** - Grid adjusts from 2 columns (mobile) to 5 columns (desktop)
+- 📏 **Minimal Scrolling** - Compact padding and spacing optimized for small screens
+- 🎯 **Touch Targets** - Large buttons and tap areas (44px minimum)
+- 🖼️ **Responsive Canvas** - Photo preview scales to fit mobile screens (max 90vw)
+
+### Mobile-First Features
+- 🎨 **Icon-Based Selection** - Layout cards use emojis for quick recognition
+- 📋 **Collapsible Previews** - Template details expand only when tapped
+- 🎛️ **Compact Controls** - Streamlined UI elements hide secondary text on small screens
+- ⚡ **Fast Performance** - Optimized for mobile browsers, smooth interactions
+
+### Mobile Tips
+- 📱 Use landscape mode for best camera experience
+- 🔄 Tap templates to preview before selecting
+- 👆 Drag stickers with single touch
+- 📥 QR codes work great for sharing to other devices
+
+---
+
+## �🚀 Quick Start
 
 Just visit: **[https://thanhnguyxn.github.io/Photo-Booth/](https://thanhnguyxn.github.io/Photo-Booth/)**
 
