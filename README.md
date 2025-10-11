@@ -81,7 +81,7 @@ Just visit: **[https://thanhnguyxn.github.io/Photo-Booth/](https://thanhnguyxn.g
 ## 👨‍💻 Author
 
 **Thanh Nguyen**  
-📧 thanhnguyentuan2007@gmail.com  
+📧 thanhnguyxntester@gmail.com  
 🐙 [@ThanhNguyxn](https://github.com/ThanhNguyxn)
 
 ---
