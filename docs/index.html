@@ -4,7 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>SnapStrip Studio | Free Online Photo Booth</title>
-    <meta name="description" content="Welcome to SnapStrip Studio, your personal photo booth at home. Create stunning photo strips with fun filters and frames.">
+    <meta name="description" content="Welcome to SnapStrip Studio, your personal photo booth at home. Create stunning photo strips with            // Escape to close dropdowns
+            if (e.key === 'Escape') {
+                const languageDropdown = document.getElementById('language-dropdown');
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (languageDropdown && !languageDropdown.classList.contains('hidden')) {
+                    languageDropdown.classList.add('hidden');
+                }
+                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            }
+        });
+        
+        }); // End of DOMContentLoaded
+        
+        // ============================================
+        // PWA - Service Worker Registration
+        // ============================================nd frames.">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -330,29 +347,33 @@
     
     <!-- Mobile Menu Script -->
     <script>
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // Language selector
-        const languageButton = document.getElementById('language-button');
-        const languageDropdown = document.getElementById('language-dropdown');
-        
-        if (languageButton) {
-            languageButton.addEventListener('click', () => {
-                languageDropdown.classList.toggle('hidden');
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
             
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!languageButton.contains(e.target) && !languageDropdown.contains(e.target)) {
-                    languageDropdown.classList.add('hidden');
-                }
-            });
-        }
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+            
+            // Language selector
+            const languageButton = document.getElementById('language-button');
+            const languageDropdown = document.getElementById('language-dropdown');
+            
+            if (languageButton) {
+                languageButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    languageDropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!languageButton.contains(e.target) && !languageDropdown.contains(e.target)) {
+                        languageDropdown.classList.add('hidden');
+                    }
+                });
+            }
         
         // ============================================
         // PWA - Service Worker Registration
