@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preview & Decorate - SnapStrip Studio</title>
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="alternate icon" href="favicon.ico">
     
@@ -112,6 +110,9 @@
                         <button id="undo-sticker" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded text-sm transition">
                             ↩️ Undo
                         </button>
+                    </div>
+                    <div class="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                        <p class="text-xs text-blue-700 text-center font-medium">💡 Tip: Drag & drop stickers to customize position!</p>
                     </div>
                 </div>
 
@@ -220,13 +221,93 @@
             return distance < minDistance;
         }
         
-        // Generate random position avoiding overlaps and photo center
+        // Calculate photo areas to avoid based on layout
+        function getPhotoAreas() {
+            const areas = [];
+            const padding = 60; // Extra padding around photos
+            
+            if (layout === 'S') {
+                // Single photo - centered
+                const photoWidth = canvas.width * 0.6;
+                const photoHeight = canvas.height * 0.6;
+                const x = (canvas.width - photoWidth) / 2;
+                const y = (canvas.height - photoHeight) / 2;
+                areas.push({ x: x - padding, y: y - padding, width: photoWidth + padding * 2, height: photoHeight + padding * 2 });
+            } else if (layout === 'A') {
+                // 4 photos in 2x2 grid
+                const cols = 2, rows = 2;
+                const photoWidth = canvas.width / cols;
+                const photoHeight = canvas.height / rows;
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        areas.push({
+                            x: col * photoWidth - padding,
+                            y: row * photoHeight - padding,
+                            width: photoWidth + padding * 2,
+                            height: photoHeight + padding * 2
+                        });
+                    }
+                }
+            } else if (layout === 'B') {
+                // 3 photos in column
+                const rows = 3;
+                const photoHeight = canvas.height / rows;
+                for (let row = 0; row < rows; row++) {
+                    areas.push({
+                        x: -padding,
+                        y: row * photoHeight - padding,
+                        width: canvas.width + padding * 2,
+                        height: photoHeight + padding * 2
+                    });
+                }
+            } else if (layout === 'C') {
+                // 2 photos in column
+                const rows = 2;
+                const photoHeight = canvas.height / rows;
+                for (let row = 0; row < rows; row++) {
+                    areas.push({
+                        x: -padding,
+                        y: row * photoHeight - padding,
+                        width: canvas.width + padding * 2,
+                        height: photoHeight + padding * 2
+                    });
+                }
+            } else if (layout === 'D') {
+                // 6 photos in 2x3 grid
+                const cols = 2, rows = 3;
+                const photoWidth = canvas.width / cols;
+                const photoHeight = canvas.height / rows;
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        areas.push({
+                            x: col * photoWidth - padding,
+                            y: row * photoHeight - padding,
+                            width: photoWidth + padding * 2,
+                            height: photoHeight + padding * 2
+                        });
+                    }
+                }
+            }
+            
+            return areas;
+        }
+        
+        // Check if point is inside any photo area
+        function isInPhotoArea(x, y) {
+            const photoAreas = getPhotoAreas();
+            for (const area of photoAreas) {
+                if (x >= area.x && x <= area.x + area.width &&
+                    y >= area.y && y <= area.y + area.height) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Generate random position avoiding overlaps and photo areas
         // Prioritize corners and edges over center area
         function getRandomPosition(size) {
             const margin = 80; // Margin from edges
-            const centerAvoidRadius = Math.min(canvas.width, canvas.height) / 2.5; // Larger avoid area
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
             
             let attempts = 0;
             const maxAttempts = 50;
@@ -254,9 +335,8 @@
                     y = margin + Math.random() * (canvas.height - margin * 2);
                 }
                 
-                // Check if too close to center (avoid covering main photo)
-                const distanceFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-                if (distanceFromCenter < centerAvoidRadius) {
+                // Check if position is in photo area (avoid covering photos)
+                if (isInPhotoArea(x, y)) {
                     attempts++;
                     continue;
                 }
@@ -363,16 +443,78 @@
                 const sizeVariation = 20;
                 const size = baseSize + Math.random() * sizeVariation - sizeVariation / 2;
                 
-                // Get random position avoiding overlaps
-                const position = getRandomPosition(size);
+                // Get all photo areas
+                const photoAreas = getPhotoAreas();
+                
+                // Try to find non-overlapping position
+                let attempts = 0;
+                const maxAttempts = 30;
+                let clampedX, clampedY;
+                let foundGoodPosition = false;
+                
+                while (attempts < maxAttempts && !foundGoodPosition) {
+                    // Pick a random photo to decorate around
+                    const randomPhotoIndex = Math.floor(Math.random() * photoAreas.length);
+                    const photoArea = photoAreas[randomPhotoIndex];
+                    
+                    // Calculate center of this specific photo
+                    const photoCenterX = photoArea.x + photoArea.width / 2;
+                    const photoCenterY = photoArea.y + photoArea.height / 2;
+                    
+                    // Random angle around this photo (full 360°)
+                    const angle = Math.random() * Math.PI * 2;
+                    
+                    // Calculate distance from photo edge (wider spread)
+                    const photoSize = Math.min(photoArea.width, photoArea.height);
+                    const minRadius = photoSize * 0.55; // Slightly outside photo
+                    const maxRadius = photoSize * 1.0; // Can go further out
+                    const radius = minRadius + Math.random() * (maxRadius - minRadius);
+                    
+                    // Calculate position around this specific photo
+                    const x = photoCenterX + Math.cos(angle) * radius;
+                    const y = photoCenterY + Math.sin(angle) * radius;
+                    
+                    // Clamp to canvas bounds with margin
+                    const margin = 40;
+                    clampedX = Math.max(margin, Math.min(canvas.width - margin, x));
+                    clampedY = Math.max(margin, Math.min(canvas.height - margin, y));
+                    
+                    // Check for overlap with existing stickers
+                    let hasOverlap = false;
+                    const minDistance = size * 1.5; // Minimum distance = 1.5x sticker size
+                    
+                    for (const sticker of stickers) {
+                        const distance = Math.sqrt(
+                            Math.pow(clampedX - sticker.x, 2) + 
+                            Math.pow(clampedY - sticker.y, 2)
+                        );
+                        const requiredDistance = (size + sticker.size) / 2 + minDistance;
+                        
+                        if (distance < requiredDistance) {
+                            hasOverlap = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!hasOverlap) {
+                        foundGoodPosition = true;
+                    }
+                    
+                    attempts++;
+                }
+                
+                // If couldn't find good position after attempts, still add but log warning
+                if (!foundGoodPosition) {
+                    console.log('⚠️ Could not find non-overlapping position, placing anyway');
+                }
                 
                 // Random rotation for variety
                 const rotation = Math.random() * 30 - 15; // -15 to +15 degrees
                 
                 const newSticker = {
                     emoji: emoji,
-                    x: position.x,
-                    y: position.y,
+                    x: clampedX,
+                    y: clampedY,
                     size: size,
                     rotation: rotation
                 };
@@ -384,7 +526,7 @@
                 }
                 
                 stickers.push(newSticker);
-                console.log('Total stickers:', stickers.length, 'Position:', position.x.toFixed(0), position.y.toFixed(0));
+                console.log('✅ Sticker placed after', attempts, 'attempts - Total:', stickers.length);
                 redraw();
             });
         });
@@ -422,7 +564,7 @@
             });
         });
 
-        // Canvas drag for stickers
+        // Canvas drag for stickers (improved hit detection)
         canvas.addEventListener('mousedown', (e) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -433,19 +575,29 @@
             // Find clicked sticker (reverse order for top-most)
             for (let i = stickers.length - 1; i >= 0; i--) {
                 const s = stickers[i];
-                ctx.font = `${s.size}px Arial`;
-                const metrics = ctx.measureText(s.emoji);
-                const width = metrics.width;
+                // Use larger bounding box for easier grabbing (centered around sticker position)
+                const hitBoxSize = s.size * 1.2; // 20% larger hit area
+                const halfBox = hitBoxSize / 2;
                 
-                if (x >= s.x && x <= s.x + width && y >= s.y - s.size && y <= s.y) {
+                // Check if click is within bounding box (centered on sticker)
+                if (x >= s.x - halfBox && x <= s.x + halfBox && 
+                    y >= s.y - halfBox && y <= s.y + halfBox) {
                     dragging = true;
                     activeSticker = i;
                     dragOffset = { x: x - s.x, y: y - s.y };
+                    canvas.style.cursor = 'grabbing';
                     return;
                 }
             }
         });
 
+        canvas.addEventListener('mouseup', () => {
+            dragging = false;
+            activeSticker = null;
+            canvas.style.cursor = 'default';
+        });
+        
+        // Show grab cursor when hovering over stickers
         canvas.addEventListener('mousemove', (e) => {
             if (dragging && activeSticker !== null) {
                 const rect = canvas.getBoundingClientRect();
@@ -457,12 +609,28 @@
                 stickers[activeSticker].x = x - dragOffset.x;
                 stickers[activeSticker].y = y - dragOffset.y;
                 redraw();
+            } else {
+                // Check if hovering over sticker to show grab cursor
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+                
+                let overSticker = false;
+                for (let i = stickers.length - 1; i >= 0; i--) {
+                    const s = stickers[i];
+                    const hitBoxSize = s.size * 1.2;
+                    const halfBox = hitBoxSize / 2;
+                    
+                    if (x >= s.x - halfBox && x <= s.x + halfBox && 
+                        y >= s.y - halfBox && y <= s.y + halfBox) {
+                        overSticker = true;
+                        break;
+                    }
+                }
+                canvas.style.cursor = overSticker ? 'grab' : 'default';
             }
-        });
-
-        canvas.addEventListener('mouseup', () => {
-            dragging = false;
-            activeSticker = null;
         });
 
         // Touch support
@@ -630,8 +798,18 @@
                     const infoDiv = document.createElement('div');
                     infoDiv.className = 'mt-4 space-y-2';
                     infoDiv.innerHTML = `
+                        <div class="p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                            <div class="text-xs text-gray-500 mb-2">🌐 Created with:</div>
+                            <a href="https://thanhnguyxn.github.io/Photo-Booth/" target="_blank" class="text-purple-600 hover:text-purple-800 font-bold text-base hover:underline block mb-1">
+                                SnapStrip Studio
+                            </a>
+                            <button onclick="navigator.clipboard.writeText('https://thanhnguyxn.github.io/Photo-Booth/').then(() => { this.innerHTML = '✅ Copied!'; setTimeout(() => this.innerHTML = '📋 thanhnguyxn.github.io/Photo-Booth', 1500); })" 
+                                class="w-full bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs py-1 px-2 rounded transition mt-1">
+                                📋 thanhnguyxn.github.io/Photo-Booth
+                            </button>
+                        </div>
                         <div class="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                            <div class="text-xs text-gray-500 mb-2">📥 Download Link:</div>
+                            <div class="text-xs text-gray-500 mb-2">📥 Download Your Photo:</div>
                             <a href="${imageUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium text-sm hover:underline block break-all mb-2">
                                 ${shortUrl}
                             </a>
