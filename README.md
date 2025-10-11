@@ -1,6 +1,6 @@
 # SnapStrip Studio 📸
 
-## 🎉 [**TRY IT LIVE**](https://thanhnguyn.github.io/Photo-Booth/)
+## 🎉 [**TRY IT LIVE**](https://thanhnguyxn.github.io/Photo-Booth/)
 
 A free online photo booth with 12 creative templates. Create stunning photo strips in seconds!
 
@@ -62,7 +62,7 @@ Perfect for:
 
 ## 🚀 Quick Start
 
-Just visit: **[https://thanhnguyn.github.io/Photo-Booth/](https://thanhnguyn.github.io/Photo-Booth/)**
+Just visit: **[https://thanhnguyxn.github.io/Photo-Booth/](https://thanhnguyxn.github.io/Photo-Booth/)**
 
 1. Click **START**
 2. Choose **Layout** (2-6 poses)
@@ -94,7 +94,7 @@ Just visit: **[https://thanhnguyn.github.io/Photo-Booth/](https://thanhnguyn.git
 
 <div align="center">
 
-### 👉 [**START CREATING**](https://thanhnguyn.github.io/Photo-Booth/) 👈
+### 👉 [**START CREATING**](https://thanhnguyxn.github.io/Photo-Booth/) 👈
 
 ⭐ Star this repo if you like it!
 
