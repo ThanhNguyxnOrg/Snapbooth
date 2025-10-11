@@ -437,8 +437,20 @@
         // Continue button action
         continueBtn.addEventListener('click', () => {
             if (selectedTemplate) {
-                // Navigate to customize page with all parameters
-                window.location.href = `customize.html?layout=${layout}&poses=${poses}&template=${selectedTemplate}`;
+                // Templates that need customization
+                const templatesNeedingCustomization = [
+                    'instagram', 'macbook', 'newspaper', 'magazine', 
+                    'movie', 'passport', 'vintage', 'comic', 'scrapbook'
+                ];
+                
+                // Skip customize page for templates that don't need customization
+                if (templatesNeedingCustomization.includes(selectedTemplate)) {
+                    // Navigate to customize page
+                    window.location.href = `customize.html?layout=${layout}&poses=${poses}&template=${selectedTemplate}`;
+                } else {
+                    // Skip directly to camera for classic, polaroid, neon, minimalist
+                    window.location.href = `camera.html?layout=${layout}&poses=${poses}&template=${selectedTemplate}`;
+                }
             }
         });
     </script>

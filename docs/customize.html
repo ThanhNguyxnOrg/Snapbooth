@@ -354,6 +354,263 @@
                     ctx.fillRect(0, 320, 300, 80);
                     break;
                     
+                case 'magazine':
+                    // Magazine background
+                    const magGrad = ctx.createLinearGradient(0, 0, 300, 400);
+                    magGrad.addColorStop(0, '#FCE7F3');
+                    magGrad.addColorStop(1, '#E9D5FF');
+                    ctx.fillStyle = magGrad;
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Border
+                    ctx.strokeStyle = '#EC4899';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(15, 15, 270, 370);
+                    
+                    // Title
+                    ctx.fillStyle = '#EC4899';
+                    ctx.font = 'bold 32px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(headline, 150, 60);
+                    
+                    // Subtitle
+                    ctx.fillStyle = '#A855F7';
+                    ctx.font = '14px Arial';
+                    ctx.fillText(subtitle, 150, 85);
+                    
+                    // Photo placeholder
+                    ctx.fillStyle = '#F3E8FF';
+                    ctx.fillRect(30, 110, 240, 200);
+                    break;
+                    
+                case 'movie':
+                    // Movie poster background
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Gold border
+                    ctx.strokeStyle = '#FCD34D';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(10, 10, 280, 380);
+                    
+                    // Title
+                    ctx.fillStyle = '#FCD34D';
+                    ctx.font = 'bold 28px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(headline, 150, 50);
+                    
+                    // Subtitle
+                    ctx.font = '14px Arial';
+                    ctx.fillText(subtitle, 150, 75);
+                    
+                    // Photo placeholder
+                    ctx.fillStyle = '#1F2937';
+                    ctx.fillRect(30, 100, 240, 220);
+                    break;
+                    
+                case 'passport':
+                    // Passport background
+                    const passGrad = ctx.createLinearGradient(0, 0, 0, 400);
+                    passGrad.addColorStop(0, '#1E3A8A');
+                    passGrad.addColorStop(1, '#991B1B');
+                    ctx.fillStyle = passGrad;
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Gold border
+                    ctx.strokeStyle = '#FCD34D';
+                    ctx.lineWidth = 5;
+                    ctx.strokeRect(15, 15, 270, 370);
+                    
+                    // Title
+                    ctx.fillStyle = '#FCD34D';
+                    ctx.font = 'bold 18px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(headline, 150, 50);
+                    
+                    // Location and date
+                    ctx.font = '12px Arial';
+                    ctx.fillText(`${location} - ${new Date(document.getElementById('date').value || Date.now()).toLocaleDateString()}`, 150, 70);
+                    
+                    // Photo placeholder
+                    ctx.fillStyle = '#D1D5DB';
+                    ctx.fillRect(75, 100, 150, 200);
+                    break;
+                    
+                case 'vintage':
+                    // Vintage background
+                    const vintGrad = ctx.createLinearGradient(0, 0, 300, 400);
+                    vintGrad.addColorStop(0, '#FEF3C7');
+                    vintGrad.addColorStop(1, '#FED7AA');
+                    ctx.fillStyle = vintGrad;
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Double border
+                    ctx.strokeStyle = '#92400E';
+                    ctx.lineWidth = 8;
+                    ctx.strokeRect(15, 15, 270, 370);
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(25, 25, 250, 350);
+                    
+                    // Message
+                    ctx.fillStyle = '#92400E';
+                    ctx.font = 'bold 18px "Times New Roman"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(message, 150, 50);
+                    
+                    // Photo placeholder
+                    ctx.fillStyle = '#F3F4F6';
+                    ctx.fillRect(40, 80, 220, 240);
+                    break;
+                    
+                case 'comic':
+                    // Comic background
+                    const comicGrad = ctx.createRadialGradient(150, 200, 50, 150, 200, 250);
+                    comicGrad.addColorStop(0, '#FEF08A');
+                    comicGrad.addColorStop(1, '#FCA5A5');
+                    ctx.fillStyle = comicGrad;
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Thick black border
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 6;
+                    ctx.strokeRect(10, 10, 280, 380);
+                    
+                    // Message
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 28px "Comic Sans MS"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(message, 150, 50);
+                    
+                    // Photo placeholders (comic panels)
+                    ctx.lineWidth = 3;
+                    ctx.fillStyle = '#FBBF24';
+                    ctx.fillRect(30, 80, 110, 130);
+                    ctx.strokeRect(30, 80, 110, 130);
+                    ctx.fillStyle = '#EF4444';
+                    ctx.fillRect(160, 80, 110, 130);
+                    ctx.strokeRect(160, 80, 110, 130);
+                    break;
+                    
+                case 'scrapbook':
+                    // Scrapbook background
+                    const scrapGrad = ctx.createLinearGradient(0, 0, 300, 400);
+                    scrapGrad.addColorStop(0, '#FCE7F3');
+                    scrapGrad.addColorStop(0.33, '#DBEAFE');
+                    scrapGrad.addColorStop(0.66, '#FEF3C7');
+                    scrapGrad.addColorStop(1, '#FCE7F3');
+                    ctx.fillStyle = scrapGrad;
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Dashed border
+                    ctx.setLineDash([10, 5]);
+                    ctx.strokeStyle = '#EC4899';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(20, 20, 260, 360);
+                    ctx.setLineDash([]);
+                    
+                    // Message
+                    ctx.fillStyle = '#EC4899';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(message, 150, 50);
+                    
+                    // Photo placeholder
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(40, 80, 220, 240);
+                    break;
+                    
+                case 'classic':
+                    // Classic white background
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Simple border
+                    ctx.strokeStyle = '#E5E7EB';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(20, 20, 260, 360);
+                    
+                    // Photo placeholders
+                    ctx.fillStyle = '#F3F4F6';
+                    ctx.fillRect(40, 40, 220, 70);
+                    ctx.fillRect(40, 120, 220, 70);
+                    ctx.fillRect(40, 200, 220, 70);
+                    ctx.fillRect(40, 280, 220, 70);
+                    break;
+                    
+                case 'polaroid':
+                    // Polaroid background
+                    ctx.fillStyle = '#F3F4F6';
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Polaroid frames
+                    ctx.fillStyle = '#FFF';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowOffsetX = 5;
+                    ctx.shadowOffsetY = 5;
+                    
+                    ctx.save();
+                    ctx.translate(150, 120);
+                    ctx.rotate(-0.1);
+                    ctx.fillRect(-80, -90, 160, 180);
+                    ctx.restore();
+                    
+                    ctx.save();
+                    ctx.translate(150, 260);
+                    ctx.rotate(0.08);
+                    ctx.fillRect(-80, -90, 160, 180);
+                    ctx.restore();
+                    
+                    ctx.shadowColor = 'transparent';
+                    break;
+                    
+                case 'neon':
+                    // Neon background
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Neon glow effect
+                    ctx.shadowColor = '#EC4899';
+                    ctx.shadowBlur = 20;
+                    ctx.strokeStyle = '#EC4899';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(20, 20, 260, 360);
+                    
+                    // Neon text
+                    ctx.fillStyle = '#EC4899';
+                    ctx.font = 'bold 32px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('⚡ NEON ⚡', 150, 60);
+                    
+                    ctx.shadowColor = 'transparent';
+                    
+                    // Photo placeholder
+                    ctx.fillStyle = '#1F2937';
+                    ctx.fillRect(40, 100, 220, 220);
+                    break;
+                    
+                case 'minimalist':
+                    // Minimalist white background
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillRect(0, 0, 300, 400);
+                    
+                    // Thin border
+                    ctx.strokeStyle = '#D1D5DB';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(30, 30, 240, 340);
+                    
+                    // Title
+                    ctx.fillStyle = '#9CA3AF';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('MINIMALIST', 150, 50);
+                    
+                    // Photo placeholders
+                    ctx.fillStyle = '#F9FAFB';
+                    ctx.fillRect(50, 70, 200, 120);
+                    ctx.fillRect(50, 210, 200, 120);
+                    break;
+                    
                 default:
                     ctx.fillStyle = '#E5E7EB';
                     ctx.fillRect(0, 0, 300, 400);
