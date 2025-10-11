@@ -328,7 +328,7 @@
                 
                 // Update preview
                 const photoElement = document.getElementById(`photo-${i}`);
-                photoElement.innerHTML = `<img src="${photoData}" class="w-full h-full object-cover rounded-lg">`;
+                photoElement.innerHTML = `<img src="${photoData}" class="w-full h-full object-contain rounded-lg">`;
                 photoCount.textContent = `Photo ${i + 1}/${poses}`;
             }
             
@@ -361,7 +361,7 @@
             stripPhotos.innerHTML = '';
             for (let i = 0; i < poses; i++) {
                 const placeholder = document.createElement('div');
-                placeholder.className = 'photo-frame aspect-video bg-white rounded-lg overflow-hidden relative border-2 border-gray-200';
+                placeholder.className = 'photo-frame w-full bg-white rounded-lg overflow-hidden relative border-2 border-gray-200';
                 placeholder.id = `photo-${i}`;
                 
                 // Create canvas for template preview
@@ -385,7 +385,7 @@
                 // Convert canvas to image
                 const previewImg = document.createElement('img');
                 previewImg.src = previewCanvas.toDataURL();
-                previewImg.className = 'w-full h-full object-cover';
+                previewImg.className = 'w-full h-full object-contain';
                 placeholder.appendChild(previewImg);
                 
                 stripPhotos.appendChild(placeholder);
@@ -553,7 +553,7 @@
             const photoIndex = capturedPhotos.length - 1;
             const photoElement = document.getElementById(`photo-${photoIndex}`);
             if (photoElement) {
-                photoElement.innerHTML = `<img src="${finalImageData}" class="w-full h-full object-cover rounded-lg">`;
+                photoElement.innerHTML = `<img src="${finalImageData}" class="w-full h-full object-contain rounded-lg">`;
             }
             
             // Update counter
