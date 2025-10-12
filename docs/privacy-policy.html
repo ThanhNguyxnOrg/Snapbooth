@@ -32,9 +32,31 @@
     </script>
     
     <style>
+        /* Smooth page transitions */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        body.page-transition {
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease-in;
+        }
+        
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         .glass-effect {
@@ -79,7 +101,7 @@
                 
                 <div class="hidden md:flex space-x-8 items-center">
                     <a href="index.html" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition" data-i18n="nav.home">Home</a>
-                    <a href="faq.html" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition" data-i18n="faq.title">FAQ</a>
+                    <a href="faq.html" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition" data-i18n="nav.faq">FAQ</a>
                     <a href="privacy-policy.html" class="text-purple-600 border-b-2 border-purple-600 px-3 py-2 rounded-md text-sm font-medium" data-i18n="privacy.title">Privacy Policy</a>
                     <a href="contact.html" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition" data-i18n="contact.title">Contact</a>
                     
@@ -115,7 +137,7 @@
             
             <div id="mobile-menu" class="hidden md:hidden pb-4">
                 <a href="index.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="nav.home">Home</a>
-                <a href="faq.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="faq.title">FAQ</a>
+                <a href="faq.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="nav.faq">FAQ</a>
                 <a href="privacy-policy.html" class="block text-purple-600 font-medium px-3 py-2" data-i18n="privacy.title">Privacy Policy</a>
                 <a href="contact.html" class="block text-gray-700 hover:text-purple-600 px-3 py-2 transition" data-i18n="contact.title">Contact</a>
                 
@@ -320,6 +342,22 @@
     
     <!-- i18n Script -->
     <script src="i18n.js"></script>
+    
+    <!-- Smooth Page Transition -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a[href$=".html"]');
+            links.forEach(link => {
+                if (link.getAttribute('target') === '_blank') return;
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    document.body.classList.add('page-transition');
+                    setTimeout(() => window.location.href = href, 300);
+                });
+            });
+        });
+    </script>
     
     <script>
         // Mobile Menu Toggle
