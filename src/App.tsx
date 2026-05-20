@@ -108,7 +108,7 @@ interface CaptionPreset {
 
 type PhotoSlot = string | null;
 
-const REPO_URL = "https://github.com/ThanhNguyxnOrg/Photo-Booth";
+const REPO_URL = "https://github.com/ThanhNguyxnOrg/Snapbooth";
 const TMPFILES_API = "https://tmpfiles.org/api/v1/upload";
 
 const LAYOUTS: Record<LayoutId, LayoutSpec> = {

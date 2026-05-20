@@ -3,26 +3,26 @@
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=000)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=fff)](https://vite.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/)
-[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-live-222?logo=github)](https://thanhnguyxnorg.github.io/Photo-Booth/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-live-222?logo=github)](https://thanhnguyxnorg.github.io/Snapbooth/)
 
 Privacy-first browser photo booth with a clean studio UI, curated presets, and static Pages deployment.
 
-Live site: [https://thanhnguyxnorg.github.io/Photo-Booth/](https://thanhnguyxnorg.github.io/Photo-Booth/)
+Live site: [https://thanhnguyxnorg.github.io/Snapbooth/](https://thanhnguyxnorg.github.io/Snapbooth/)
 
 > Browser-only. Count-in shutter. Filters, frames, GIFs, QR share.
 
 ## Sticker Wall
 
-[![Browser only](https://img.shields.io/badge/Browser--only-yes-111111)](https://thanhnguyxnorg.github.io/Photo-Booth/)
-[![No backend](https://img.shields.io/badge/No_backend-required-222222)](https://github.com/ThanhNguyxnOrg/Photo-Booth)
-[![Count-in](https://img.shields.io/badge/Count--in-on-ffd166)](https://github.com/ThanhNguyxnOrg/Photo-Booth)
-[![Webcam](https://img.shields.io/badge/Webcam-ready-4cc9f0)](https://github.com/ThanhNguyxnOrg/Photo-Booth)
-[![Upload fallback](https://img.shields.io/badge/Upload_fallback-on-8ecae6)](https://github.com/ThanhNguyxnOrg/Photo-Booth)
-[![GIF export](https://img.shields.io/badge/GIF-export-ff6b6b)](https://github.com/ThanhNguyxnOrg/Photo-Booth)
-[![Boomerang](https://img.shields.io/badge/Boomerang-on-f72585)](https://github.com/ThanhNguyxnOrg/Photo-Booth)
-[![QR share](https://img.shields.io/badge/QR_share-ready-8338ec)](https://github.com/ThanhNguyxnOrg/Photo-Booth)
-[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-live-222)](https://thanhnguyxnorg.github.io/Photo-Booth/)
-[![Smoke tested](https://img.shields.io/badge/Smoke_test-pass-2a9d8f)](https://github.com/ThanhNguyxnOrg/Photo-Booth/actions)
+[![Browser only](https://img.shields.io/badge/Browser--only-yes-111111)](https://thanhnguyxnorg.github.io/Snapbooth/)
+[![No backend](https://img.shields.io/badge/No_backend-required-222222)](https://github.com/ThanhNguyxnOrg/Snapbooth)
+[![Count-in](https://img.shields.io/badge/Count--in-on-ffd166)](https://github.com/ThanhNguyxnOrg/Snapbooth)
+[![Webcam](https://img.shields.io/badge/Webcam-ready-4cc9f0)](https://github.com/ThanhNguyxnOrg/Snapbooth)
+[![Upload fallback](https://img.shields.io/badge/Upload_fallback-on-8ecae6)](https://github.com/ThanhNguyxnOrg/Snapbooth)
+[![GIF export](https://img.shields.io/badge/GIF-export-ff6b6b)](https://github.com/ThanhNguyxnOrg/Snapbooth)
+[![Boomerang](https://img.shields.io/badge/Boomerang-on-f72585)](https://github.com/ThanhNguyxnOrg/Snapbooth)
+[![QR share](https://img.shields.io/badge/QR_share-ready-8338ec)](https://github.com/ThanhNguyxnOrg/Snapbooth)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-live-222)](https://thanhnguyxnorg.github.io/Snapbooth/)
+[![Smoke tested](https://img.shields.io/badge/Smoke_test-pass-2a9d8f)](https://github.com/ThanhNguyxnOrg/Snapbooth/actions)
 
 ## What It Is
 
@@ -115,7 +115,7 @@ Ideas were selected from real photobooth projects instead of being invented blin
 
 - Default branch: `main`
 - Pages source: `main` + `docs/`
-- Live URL: [thanhnguyxnorg.github.io/Photo-Booth](https://thanhnguyxnorg.github.io/Photo-Booth/)
+- Live URL: [thanhnguyxnorg.github.io/Snapbooth](https://thanhnguyxnorg.github.io/Snapbooth/)
 
 ## GitHub Topics
 
