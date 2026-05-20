@@ -831,24 +831,47 @@ function Studio(props: StudioProps) {
           </div>
 
           <div
-            className={`viewfinder ${props.flash ? "is-flashing" : ""}`}
-            style={{
-              aspectRatio: getViewfinderAspect(layoutSpec).toString(),
-              maxWidth: `${getViewfinderMaxWidth(layoutSpec)}px`
-            }}
+            className="viewfinder-shell"
+            style={
+              {
+                "--frame-paper": frameSpec.paper,
+                "--frame-ink": frameSpec.ink,
+                "--frame-accent": frameSpec.accent
+              } as React.CSSProperties
+            }
           >
-            <ViewfinderGrid
-              layout={props.layout}
-              photos={props.photos}
-              activeIndex={props.activeIndex}
-              mirror={props.mirror}
-              videoRef={props.videoRef}
-              cameraState={props.cameraState}
-              cameraMessage={props.cameraMessage}
-              filterCss={filterSpec.css}
-            />
+            <div className="viewfinder-shell__bar">
+              <span>Live preview</span>
+              <span>
+                {frameSpec.label} / {filterSpec.label}
+              </span>
+            </div>
 
-            {props.countdown !== null && <div className="countdown">{props.countdown}</div>}
+            <div
+              className={`viewfinder ${props.flash ? "is-flashing" : ""}`}
+              style={{
+                aspectRatio: getViewfinderAspect(layoutSpec).toString(),
+                maxWidth: `${getViewfinderMaxWidth(layoutSpec)}px`
+              }}
+            >
+              <ViewfinderGrid
+                layout={props.layout}
+                photos={props.photos}
+                activeIndex={props.activeIndex}
+                mirror={props.mirror}
+                videoRef={props.videoRef}
+                cameraState={props.cameraState}
+                cameraMessage={props.cameraMessage}
+                filterCss={filterSpec.css}
+              />
+
+              {props.countdown !== null && <div className="countdown">{props.countdown}</div>}
+            </div>
+
+            <div className="viewfinder-shell__bar viewfinder-shell__bar--foot">
+              <span>{layoutSpec.code}</span>
+              <span>{props.caption}</span>
+            </div>
           </div>
 
           <div className="progress-row" aria-label="Capture progress">
@@ -876,27 +899,6 @@ function Studio(props: StudioProps) {
             </button>
           </div>
 
-          <RailSection title="04 Filter" className="filter-rail">
-            <div className="filter-groups">
-              {FILTER_GROUPS.map((group) => (
-                <div key={group} className="filter-group">
-                  <p>{group}</p>
-                  <div>
-                    {FILTERS.filter((item) => item.group === group).map((item) => (
-                      <button
-                        className={`filter-option ${props.filter === item.id ? "is-active" : ""}`}
-                        key={item.id}
-                        onClick={() => props.onFilter(item.id)}
-                      >
-                        <span className="filter-thumb" style={{ filter: item.css }} />
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </RailSection>
         </section>
 
         <aside className="rail rail-right" aria-label="Capture controls">
@@ -965,6 +967,29 @@ function Studio(props: StudioProps) {
                 event.currentTarget.value = "";
               }}
             />
+          </RailSection>
+
+          <RailSection title="04 Filter" className="filter-rail">
+            <div className="filter-groups">
+              {FILTER_GROUPS.map((group) => (
+                <div key={group} className="filter-group">
+                  <p>{group}</p>
+                  <div>
+                    {FILTERS.filter((item) => item.group === group).map((item) => (
+                      <button
+                        className={`filter-option ${props.filter === item.id ? "is-active" : ""}`}
+                        key={item.id}
+                        onClick={() => props.onFilter(item.id)}
+                        type="button"
+                      >
+                        <span className="filter-thumb" style={{ filter: item.css }} />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </RailSection>
 
           <RailSection title="Roll">

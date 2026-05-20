@@ -508,16 +508,16 @@ video {
 }
 
 .frame-list {
-  max-height: 310px;
-  overflow: auto;
-  padding-right: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .frame-option {
-  grid-template-columns: 36px 1fr;
-  gap: 10px;
-  min-height: 50px;
-  padding: 8px 10px;
+  grid-template-columns: 30px 1fr;
+  gap: 8px;
+  min-height: 56px;
+  padding: 8px 0;
 }
 
 .frame-option small {
@@ -687,6 +687,41 @@ video {
   color: var(--ink-secondary);
 }
 
+.viewfinder-shell {
+  display: grid;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--frame-ink) 34%, var(--rule));
+  background: var(--frame-paper);
+  color: var(--frame-ink);
+  box-shadow: var(--shadow-lifted);
+}
+
+.viewfinder-shell__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: color-mix(in srgb, var(--frame-ink) 72%, var(--frame-paper));
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.viewfinder-shell__bar span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viewfinder-shell__bar--foot {
+  color: color-mix(in srgb, var(--frame-ink) 62%, var(--frame-paper));
+}
+
 .viewfinder {
   position: relative;
   width: min(100%, 760px);
@@ -792,7 +827,7 @@ video {
 }
 
 .filter-rail {
-  margin-top: 28px;
+  margin-top: 0;
 }
 
 .filter-groups {
@@ -811,16 +846,17 @@ video {
 
 .filter-group > div {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .filter-option {
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
   align-items: center;
   width: 100%;
-  padding: 8px 0;
+  padding: 6px 0;
   border-left: 0;
   border-bottom: 1px solid var(--rule);
   text-align: left;
@@ -832,8 +868,8 @@ video {
 }
 
 .filter-thumb {
-  width: 62px;
-  height: 78px;
+  width: 44px;
+  height: 56px;
   margin: 0 auto 6px;
   border: 1px solid var(--rule);
   background:
@@ -1349,6 +1385,10 @@ video {
     position: static;
     grid-column: 1 / -1;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-rail {
+    grid-column: 1 / -1;
   }
 
   .develop-grid {
