@@ -21,11 +21,17 @@ import {
   Timer,
   Trash2,
   Upload,
-  X
+  Volume2,
+  VolumeX,
+  X,
+  History,
+  Menu
 } from "lucide-react";
+import { saveRoll, getAllRolls, deleteRoll } from "./galleryDb";
+import type { SavedRoll } from "./galleryDb";
 
 type Theme = "light" | "dark";
-type View = "intro" | "studio" | "develop" | "faq" | "privacy" | "contact";
+type View = "intro" | "studio" | "develop" | "faq" | "privacy" | "contact" | "gallery";
 type LayoutId = "S" | "A" | "B" | "C" | "D";
 type CameraFacing = "user" | "environment";
 type CaptionGroup = "EDITORIAL" | "ANALOG" | "PLAYFUL" | "MINIMAL";
@@ -107,6 +113,29 @@ interface CaptionPreset {
 }
 
 type PhotoSlot = string | null;
+
+interface StickerInstance {
+  id: string;
+  type: "svg" | "text";
+  value: string;
+  font?: string;
+  color?: string;
+  fontSize?: number;
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+}
+
+const STICKER_TEMPLATES = [
+  { id: "heart", label: "❤️ Heart", viewBox: "0 0 24 24", path: "M12,21.35 l-1.45,-1.32 C5.4,15.36 2,12.28 2,8.5 C2,5.42 4.42,3 7.5,3 c1.74,0 3.41,0.81 4.5,2.09 C13.09,3.81 14.76,3 16.5,3 C19.58,3 22,5.42 22,8.5 c0,3.78 -3.4,6.86 -8.55,11.54 L12,21.35 z" },
+  { id: "star", label: "⭐ Star", viewBox: "0 0 24 24", path: "M12,17.27 L18.18,21 L16.54,13.97 L22,9.24 L14.81,8.63 L12,2 L9.19,8.63 L2,9.24 L7.46,13.97 L5.82,21 L12,17.27 Z" },
+  { id: "crown", label: "👑 Crown", viewBox: "0 0 30 24", path: "M2,22 L5,8 L10,15 L15,5 L20,15 L25,8 L28,22 Z" },
+  { id: "mustache", label: "🥸 Mustache", viewBox: "0 0 24 24", path: "M16,19c-2.3,0-4.3-1-5.7-2.6C8.9,14.8,6.9,14,4.7,14H2v-1.5c2,0,4,.7,5.6,2c1.3,1,2.8,1.5,4.4,1.5s3.1-.5,4.4-1.5c1.6-1.3,3.6-2,5.6-2V14h-2.7c-2.2,0-4.2.8-5.6,2.4-1.4,1.6-3.4,2.6-5.7,2.6z" },
+  { id: "speech", label: "💬 Bubble", viewBox: "0 0 24 24", path: "M20,2 H4 C2.9,2 2,2.9 2,4 V14 C2,15.1 2.9,16 4,16 H16 L22,22 V4 C22,2.9 21.1,2 20,2 Z" },
+  { id: "arrow", label: "➡️ Arrow", viewBox: "0 0 24 24", path: "M12,2 L22,12 L17,12 L17,22 L7,22 L7,12 L2,12 Z" },
+  { id: "sparkles", label: "✨ Sparkles", viewBox: "0 0 30 30", path: "M10,3 L12,8 L17,10 L12,12 L10,17 L8,12 L3,10 L8,8 Z M22,12 L23,15 L26,16 L23,17 L22,20 L21,17 L18,16 L21,15 Z" }
+];
 
 const REPO_URL = "https://github.com/ThanhNguyxnOrg/Snapbooth";
 const TMPFILES_API = "https://tmpfiles.org/api/v1/upload";
@@ -263,30 +292,193 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+class SoundEffects {
+  private ctx: AudioContext | null = null;
+  public enabled: boolean = true;
+
+  private init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === "suspended") {
+      void this.ctx.resume();
+    }
+  }
+
+  playBeep() {
+    if (!this.enabled) return;
+    this.init();
+    const ctx = this.ctx;
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.12);
+  }
+
+  playShutter() {
+    if (!this.enabled) return;
+    this.init();
+    const ctx = this.ctx;
+    if (!ctx) return;
+
+    const duration = 0.12;
+    const bufferSize = ctx.sampleRate * duration;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 1200;
+    filter.Q.value = 3;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.24, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    noise.start();
+
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(2000, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.08);
+
+    oscGain.gain.setValueAtTime(0.16, ctx.currentTime);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.08);
+  }
+
+  playChime() {
+    if (!this.enabled) return;
+    this.init();
+    const ctx = this.ctx;
+    if (!ctx) return;
+
+    const playNote = (freq: number, delay: number, dur: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+      
+      gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+      gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + dur);
+    };
+
+    playNote(659.25, 0, 0.4);
+    playNote(830.61, 0.08, 0.4);
+    playNote(987.77, 0.16, 0.4);
+    playNote(1318.51, 0.24, 0.6);
+  }
+}
+
+const sounds = new SoundEffects();
+
 export default function App() {
-  const [view, setView] = useState<View>("intro");
+  const [view, setView] = useState<View>(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-view");
+    if (saved === "studio" || saved === "develop" || saved === "gallery") return saved as View;
+    return "intro";
+  });
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = window.localStorage.getItem("snapbooth-theme");
     if (saved === "light" || saved === "dark") return saved;
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
-  const [layout, setLayout] = useState<LayoutId>("B");
-  const [frame, setFrame] = useState<FrameId>("CLASSIC");
-  const [filter, setFilter] = useState<FilterId>("BARE");
-  const [photos, setPhotos] = useState<PhotoSlot[]>(() => emptyPhotos("B"));
-  const [mode, setMode] = useState<"MANUAL" | "AUTO">("MANUAL");
-  const [timerSec, setTimerSec] = useState(3);
-  const [mirror, setMirror] = useState(true);
+  const [layout, setLayout] = useState<LayoutId>(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-layout");
+    return (saved as LayoutId) || "B";
+  });
+  const [frame, setFrame] = useState<FrameId>(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-frame");
+    return (saved as FrameId) || "CLASSIC";
+  });
+  const [filter, setFilter] = useState<FilterId>(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-filter");
+    return (saved as FilterId) || "BARE";
+  });
+  const [photos, setPhotos] = useState<PhotoSlot[]>(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-photos");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    const currentLayout = (window.sessionStorage.getItem("snapbooth-layout") as LayoutId) || "B";
+    return emptyPhotos(currentLayout);
+  });
+  const [mode, setMode] = useState<"MANUAL" | "AUTO">(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-mode");
+    return saved === "AUTO" ? "AUTO" : "MANUAL";
+  });
+  const [timerSec, setTimerSec] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-timerSec");
+    return saved ? parseInt(saved, 10) : 3;
+  });
+  const [mirror, setMirror] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-mirror");
+    return saved !== "false";
+  });
   const [cameraFacing, setCameraFacing] = useState<CameraFacing>("user");
-  const [caption, setCaption] = useState("BROWSER DARKROOM");
-  const [note, setNote] = useState("SNAPBOOTH / ROLL 001");
-  const [textScale, setTextScale] = useState(1);
+  const [caption, setCaption] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-caption");
+    return saved !== null ? saved : "BROWSER DARKROOM";
+  });
+  const [note, setNote] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-note");
+    return saved !== null ? saved : "SNAPBOOTH / ROLL 001";
+  });
+  const [textScale, setTextScale] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-textScale");
+    return saved ? parseFloat(saved) : 1;
+  });
   const [cameraState, setCameraState] = useState<"idle" | "ready" | "error" | "unsupported">("idle");
   const [cameraMessage, setCameraMessage] = useState("Camera is warming up.");
   const [countdown, setCountdown] = useState<number | null>(null);
   const [flash, setFlash] = useState(false);
   const [notice, setNotice] = useState("Use webcam or upload images. Processing stays in this browser.");
   const [autoRunning, setAutoRunning] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    const saved = window.localStorage.getItem("snapbooth-sound");
+    return saved !== "false";
+  });
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -299,7 +491,7 @@ export default function App() {
   const filled = photos.filter(Boolean).length;
   const complete = filled === total;
   const nextIndex = photos.findIndex((photo) => !photo);
-  const activeIndex = nextIndex === -1 ? total - 1 : nextIndex;
+  const activeIndex = selectedSlot !== null ? selectedSlot : (nextIndex === -1 ? total - 1 : nextIndex);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -307,19 +499,74 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const next = emptyPhotos(layout);
-    photosRef.current = next;
-    setPhotos(next);
+    sounds.enabled = soundEnabled;
+    window.localStorage.setItem("snapbooth-sound", String(soundEnabled));
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-view", view);
+  }, [view]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-layout", layout);
+  }, [layout]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-frame", frame);
+  }, [frame]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-filter", filter);
+  }, [filter]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-photos", JSON.stringify(photos));
+  }, [photos]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-mode", mode);
+  }, [mode]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-timerSec", String(timerSec));
+  }, [timerSec]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-mirror", String(mirror));
+  }, [mirror]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-caption", caption);
+  }, [caption]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-note", note);
+  }, [note]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-textScale", String(textScale));
+  }, [textScale]);
+
+  useEffect(() => {
+    const expectedFrames = LAYOUTS[layout].frames;
+    if (photosRef.current.length !== expectedFrames) {
+      const next = emptyPhotos(layout);
+      photosRef.current = next;
+      setPhotos(next);
+    }
     autoRef.current = false;
     setAutoRunning(false);
     countdownRef.current += 1;
     setCountdown(null);
+    setSelectedSlot(null);
     setNotice(`Layout ${LAYOUTS[layout].code} armed.`);
   }, [layout]);
 
   useEffect(() => {
     photosRef.current = photos;
   }, [photos]);
+
+
 
   useEffect(() => {
     if (view !== "studio") return undefined;
@@ -376,10 +623,10 @@ export default function App() {
     }
   }, [activeIndex, layout, photos, view]);
 
-  const addPhoto = useCallback((dataUrl: string) => {
+  const addPhoto = useCallback((dataUrl: string, targetSlot: number | null = null) => {
     let inserted = false;
     setPhotos((current) => {
-      const index = current.findIndex((photo) => !photo);
+      const index = targetSlot !== null ? targetSlot : current.findIndex((photo) => !photo);
       if (index === -1) return current;
       const next = [...current];
       next[index] = dataUrl;
@@ -387,6 +634,7 @@ export default function App() {
       inserted = true;
       return next;
     });
+    setSelectedSlot(null);
     return inserted;
   }, []);
 
@@ -406,13 +654,14 @@ export default function App() {
       mirror
     });
 
-    const inserted = addPhoto(dataUrl);
+    const inserted = addPhoto(dataUrl, selectedSlot);
     if (!inserted) return false;
+    sounds.playShutter();
     setFlash(true);
     window.setTimeout(() => setFlash(false), 90);
     setNotice("Frame captured.");
     return true;
-  }, [addPhoto, filter, layout, mirror]);
+  }, [addPhoto, filter, layout, mirror, selectedSlot]);
 
   const cancelCountdown = useCallback(() => {
     countdownRef.current += 1;
@@ -427,6 +676,7 @@ export default function App() {
       for (let tick = timerSec; tick > 0; tick -= 1) {
         if (countdownRef.current !== token) return false;
         setCountdown(tick);
+        sounds.playBeep();
         await wait(1000);
       }
 
@@ -516,10 +766,9 @@ export default function App() {
     async (files: FileList | null) => {
       if (!files?.length) return;
       if (!autoRef.current) cancelCountdown();
-      const available = total - photosRef.current.filter(Boolean).length;
-      const selected = Array.from(files).slice(0, available);
 
-      for (const file of selected) {
+      if (selectedSlot !== null) {
+        const file = files[0];
         const dataUrl = await readFileAsDataUrl(file);
         const image = await loadImage(dataUrl);
         addPhoto(
@@ -530,13 +779,32 @@ export default function App() {
             aspect: LAYOUTS[layout].cellAspect,
             filterCss: getFilter(filter).css,
             mirror: false
-          })
+          }),
+          selectedSlot
         );
-      }
+        setNotice("Slot updated via upload.");
+      } else {
+        const available = total - photosRef.current.filter(Boolean).length;
+        const selected = Array.from(files).slice(0, available);
 
-      setNotice(`${selected.length} upload${selected.length === 1 ? "" : "s"} added.`);
+        for (const file of selected) {
+          const dataUrl = await readFileAsDataUrl(file);
+          const image = await loadImage(dataUrl);
+          addPhoto(
+            captureSourceToDataUrl({
+              source: image,
+              sourceWidth: image.naturalWidth,
+              sourceHeight: image.naturalHeight,
+              aspect: LAYOUTS[layout].cellAspect,
+              filterCss: getFilter(filter).css,
+              mirror: false
+            })
+          );
+        }
+        setNotice(`${selected.length} upload${selected.length === 1 ? "" : "s"} added.`);
+      }
     },
-    [addPhoto, cancelCountdown, filter, layout, total]
+    [addPhoto, cancelCountdown, filter, layout, total, selectedSlot]
   );
 
   const retakeLast = useCallback(() => {
@@ -564,6 +832,7 @@ export default function App() {
     autoRef.current = false;
     setAutoRunning(false);
     cancelCountdown();
+    sounds.playChime();
     setView("develop");
   }, [cancelCountdown, complete]);
 
@@ -575,16 +844,90 @@ export default function App() {
     [cancelCountdown]
   );
 
+  // Keyboard Shortcuts (Phase 5)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if the user is typing in an input/textarea
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const key = e.key;
+
+      // Global shortcuts
+      if (key === "d" || key === "D") {
+        setTheme((current) => (current === "light" ? "dark" : "light"));
+        e.preventDefault();
+        return;
+      }
+
+      if (key === "Escape") {
+        // Close modal dialogs / go back
+        if (view === "develop" || view === "gallery") {
+          setView("studio");
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Studio-only shortcuts
+      if (view === "studio") {
+        if (key === " ") {
+          // Space: Capture photo
+          if (autoRunning) {
+            stopAuto();
+          } else if (!complete) {
+            void handleShutter();
+          }
+          e.preventDefault();
+          return;
+        }
+
+        if (key === "Enter") {
+          // Enter: Develop strip (if complete)
+          if (complete) {
+            startDevelop();
+            e.preventDefault();
+          }
+          return;
+        }
+
+        // Layouts 1-5
+        if (key >= "1" && key <= "5") {
+          const layoutsMap: LayoutId[] = ["S", "A", "B", "C", "D"];
+          const selectedLayoutId = layoutsMap[parseInt(key, 10) - 1];
+          if (selectedLayoutId) {
+            setLayout(selectedLayoutId);
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [view, autoRunning, complete, handleShutter, stopAuto, startDevelop, setLayout, setTheme]);
+
   return (
     <div className="app-shell">
       <TopBar
         view={view}
         theme={theme}
+        soundEnabled={soundEnabled}
         onNavigate={setView}
         onToggleTheme={() => setTheme((current) => (current === "light" ? "dark" : "light"))}
+        onToggleSound={() => setSoundEnabled((current) => !current)}
       />
 
-      <main>
+      <main className="page-enter" key={view}>
         {view === "intro" && (
           <Intro
             onBegin={() => setView("studio")}
@@ -616,6 +959,7 @@ export default function App() {
             autoRunning={autoRunning}
             complete={complete}
             activeIndex={activeIndex}
+            selectedSlot={selectedSlot}
             videoRef={videoRef}
             fileRef={fileRef}
             onLayout={setLayout}
@@ -636,6 +980,7 @@ export default function App() {
             onRetakeLast={retakeLast}
             onRetakeAll={retakeAll}
             onDevelop={startDevelop}
+            onSelectSlot={(index) => setSelectedSlot((current) => (current === index ? null : index))}
           />
         )}
 
@@ -648,6 +993,16 @@ export default function App() {
             caption={caption}
             note={note}
             textScale={textScale}
+            onBack={() => setView("studio")}
+            onStartNew={() => {
+              retakeAll();
+              setView("intro");
+            }}
+          />
+        )}
+
+        {view === "gallery" && (
+          <GalleryView
             onBack={() => setView("studio")}
             onStartNew={() => {
               retakeAll();
@@ -686,6 +1041,7 @@ interface StudioProps {
   autoRunning: boolean;
   complete: boolean;
   activeIndex: number;
+  selectedSlot: number | null;
   videoRef: RefObject<HTMLVideoElement>;
   fileRef: React.RefObject<HTMLInputElement>;
   onLayout: (layout: LayoutId) => void;
@@ -706,6 +1062,7 @@ interface StudioProps {
   onRetakeLast: () => void;
   onRetakeAll: () => void;
   onDevelop: () => void;
+  onSelectSlot: (index: number) => void;
 }
 
 function Studio(props: StudioProps) {
@@ -728,7 +1085,7 @@ function Studio(props: StudioProps) {
 
       <div className="studio-grid">
         <aside className="rail rail-left" aria-label="Photo strip settings">
-          <RailSection title="01 Layout">
+          <RailSection title="01 Layout" defaultOpen={true}>
             <div className="layout-list">
               {LAYOUT_ORDER.map((id) => (
                 <button
@@ -744,7 +1101,7 @@ function Studio(props: StudioProps) {
             </div>
           </RailSection>
 
-          <RailSection title="02 Frame">
+          <RailSection title="02 Frame" defaultOpen={false}>
             <div className="frame-list">
               {FRAMES.map((item) => (
                 <button
@@ -769,7 +1126,7 @@ function Studio(props: StudioProps) {
             </div>
           </RailSection>
 
-          <RailSection title="03 Customize">
+          <RailSection title="03 Customize" defaultOpen={false}>
             <label className="field">
               <span>Roll title</span>
               <input value={props.caption} onChange={(event) => props.onCaption(event.target.value)} maxLength={56} />
@@ -858,14 +1215,16 @@ function Studio(props: StudioProps) {
                 layout={props.layout}
                 photos={props.photos}
                 activeIndex={props.activeIndex}
+                selectedSlot={props.selectedSlot}
                 mirror={props.mirror}
                 videoRef={props.videoRef}
                 cameraState={props.cameraState}
                 cameraMessage={props.cameraMessage}
                 filterCss={filterSpec.css}
+                onSelectSlot={props.onSelectSlot}
               />
 
-              {props.countdown !== null && <div className="countdown">{props.countdown}</div>}
+              {props.countdown !== null && <div className="countdown countdown-anim">{props.countdown}</div>}
             </div>
 
             <div className="viewfinder-shell__bar viewfinder-shell__bar--foot">
@@ -902,7 +1261,7 @@ function Studio(props: StudioProps) {
         </section>
 
         <aside className="rail rail-right" aria-label="Capture controls">
-          <RailSection title="Capture">
+          <RailSection title="Capture" defaultOpen={true}>
             <div className="shutter-block">
               <button
                 className="shutter"
@@ -912,7 +1271,10 @@ function Studio(props: StudioProps) {
               >
                 {props.autoRunning ? <Square size={22} /> : <Aperture size={28} />}
               </button>
-              <span>{props.autoRunning ? "Stop" : "Shutter"}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                {props.autoRunning ? "Stop" : "Shutter"}
+                <kbd style={{ fontSize: "10px", opacity: 0.5, border: "1px solid var(--rule)", padding: "2px 4px", borderRadius: "2px", textTransform: "none" }}>Space</kbd>
+              </span>
             </div>
 
             <div className="segmented" role="group" aria-label="Capture mode">
@@ -969,7 +1331,7 @@ function Studio(props: StudioProps) {
             />
           </RailSection>
 
-          <RailSection title="04 Filter" className="filter-rail">
+          <RailSection title="04 Filter" className="filter-rail" defaultOpen={false}>
             <div className="filter-groups">
               {FILTER_GROUPS.map((group) => (
                 <div key={group} className="filter-group">
@@ -992,7 +1354,7 @@ function Studio(props: StudioProps) {
             </div>
           </RailSection>
 
-          <RailSection title="Roll">
+          <RailSection title="Roll" defaultOpen={true}>
             <div className="button-stack">
               <Button variant="ghost" icon={<RotateCcw size={15} />} onClick={props.onRetakeLast}>
                 Retake last
@@ -1001,7 +1363,10 @@ function Studio(props: StudioProps) {
                 Retake all
               </Button>
               <Button icon={<Check size={15} />} onClick={props.onDevelop} disabled={!props.complete}>
-                Develop strip
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  Develop strip
+                  {props.complete && <kbd style={{ fontSize: "10px", opacity: 0.7, border: "1px solid currentColor", padding: "1px 4px", borderRadius: "2px", textTransform: "none" }}>Enter</kbd>}
+                </span>
               </Button>
             </div>
           </RailSection>
@@ -1139,20 +1504,24 @@ function ViewfinderGrid({
   layout,
   photos,
   activeIndex,
+  selectedSlot,
   mirror,
   videoRef,
   cameraState,
   cameraMessage,
-  filterCss
+  filterCss,
+  onSelectSlot
 }: {
   layout: LayoutId;
   photos: PhotoSlot[];
   activeIndex: number;
+  selectedSlot: number | null;
   mirror: boolean;
   videoRef: RefObject<HTMLVideoElement>;
   cameraState: "idle" | "ready" | "error" | "unsupported";
   cameraMessage: string;
   filterCss: string;
+  onSelectSlot: (index: number) => void;
 }) {
   const layoutSpec = LAYOUTS[layout];
   const [cols, rows] = layoutSpec.grid;
@@ -1167,10 +1536,17 @@ function ViewfinderGrid({
     >
       {Array.from({ length: layoutSpec.frames }, (_, index) => {
         const photo = photos[index];
-        const active = index === activeIndex && !photo;
+        const active = index === activeIndex;
+        const isSelected = index === selectedSlot;
+        const showPhoto = photo && !isSelected;
+
         return (
-          <div className={`view-cell ${active ? "is-active" : ""}`} key={index}>
-            {photo ? (
+          <div
+            className={`view-cell ${active ? "is-active" : ""} ${isSelected ? "is-selected" : ""}`}
+            key={index}
+            onClick={() => onSelectSlot(index)}
+          >
+            {showPhoto ? (
               <img src={photo} alt={`Captured frame ${index + 1}`} />
             ) : active ? (
               cameraState === "ready" || cameraState === "idle" ? (
@@ -1222,11 +1598,62 @@ function Develop({
   const [gifProgress, setGifProgress] = useState(0);
   const [share, setShare] = useState<{ qr?: string; link?: string; error?: string }>({});
   const [shareOpen, setShareOpen] = useState(false);
+
+  const [stickers, setStickers] = useState<StickerInstance[]>([]);
+  const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
+  const [customText, setCustomText] = useState("");
+  const [textColor, setTextColor] = useState("#e84a2a");
+  const [textFont, setTextFont] = useState("JetBrains Mono");
+
   const timestamp = useMemo(nowStamp, []);
   const filename = useMemo(
     () => `snapbooth_${layout.toLowerCase()}_${frame.toLowerCase()}_${Date.now().toString(36)}.png`,
     [frame, layout]
   );
+
+  const addSvgSticker = (typeId: string) => {
+    const newSticker: StickerInstance = {
+      id: Math.random().toString(36).substring(2, 9),
+      type: "svg",
+      value: typeId,
+      color: textColor,
+      x: 50,
+      y: 30 + Math.random() * 20,
+      scale: 1.2,
+      rotation: (Math.random() - 0.5) * 15
+    };
+    setStickers((prev) => [...prev, newSticker]);
+    setSelectedStickerId(newSticker.id);
+  };
+
+  const addTextSticker = () => {
+    if (!customText.trim()) return;
+    const newSticker: StickerInstance = {
+      id: Math.random().toString(36).substring(2, 9),
+      type: "text",
+      value: customText,
+      font: textFont === "JetBrains Mono" ? "var(--font-mono)" : textFont === "Fraunces" ? "var(--font-serif)" : "var(--font-sans)",
+      color: textColor,
+      x: 50,
+      y: 30 + Math.random() * 20,
+      scale: 1.2,
+      rotation: 0
+    };
+    setStickers((prev) => [...prev, newSticker]);
+    setSelectedStickerId(newSticker.id);
+    setCustomText("");
+  };
+
+  const handleUpdateSticker = (id: string, updates: Partial<StickerInstance>) => {
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
+  };
+
+  const handleDeleteSticker = (id: string) => {
+    setStickers((prev) => prev.filter((s) => s.id !== id));
+    if (selectedStickerId === id) {
+      setSelectedStickerId(null);
+    }
+  };
 
   const renderOptions = useMemo(
     () => ({
@@ -1237,10 +1664,43 @@ function Develop({
       caption,
       note,
       textScale,
-      timestamp
+      timestamp,
+      stickers
     }),
-    [caption, filter, frame, layout, note, photos, textScale, timestamp]
+    [caption, filter, frame, layout, note, photos, textScale, timestamp, stickers]
   );
+
+  useEffect(() => {
+    let active = true;
+    const saveTimer = setTimeout(async () => {
+      try {
+        const canvas = await renderStripCanvas(renderOptions);
+        const image = canvas.toDataURL("image/png");
+        if (!active) return;
+        await saveRoll({
+          id: timestamp,
+          layout,
+          frame,
+          filter,
+          photos,
+          caption,
+          note,
+          textScale,
+          timestamp,
+          stickers,
+          created: Date.now(),
+          image
+        });
+      } catch (err) {
+        console.error("Failed to auto-save to gallery:", err);
+      }
+    }, 1000);
+
+    return () => {
+      active = false;
+      clearTimeout(saveTimer);
+    };
+  }, [renderOptions, layout, frame, filter, photos, caption, note, textScale, timestamp, stickers]);
 
   async function exportPng() {
     setBusy("png");
@@ -1347,6 +1807,78 @@ function Develop({
     }
   }
 
+  async function exportSocial(ratio: "story" | "post") {
+    setBusy("png");
+    try {
+      const stripCanvas = await renderStripCanvas(renderOptions);
+      const targetWidth = 1080;
+      const targetHeight = ratio === "story" ? 1920 : 1350;
+      
+      const canvas = document.createElement("canvas");
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      
+      const frameSpec = getFrame(frame);
+      
+      const gradient = ctx.createLinearGradient(0, 0, targetWidth, targetHeight);
+      gradient.addColorStop(0, frameSpec.paper);
+      gradient.addColorStop(0.5, frameSpec.paper);
+      gradient.addColorStop(1, ratio === "story" ? frameSpec.accent : frameSpec.paper);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      
+      ctx.fillStyle = "rgba(20,20,20,0.03)";
+      for (let dot = 0; dot < 300; dot += 1) {
+        const x = (dot * 47) % targetWidth;
+        const y = (dot * 71) % targetHeight;
+        ctx.fillRect(x, y, 3, 3);
+      }
+      
+      const padY = ratio === "story" ? targetHeight * 0.12 : targetHeight * 0.1;
+      const maxStripHeight = targetHeight - padY * 2;
+      
+      const scale = maxStripHeight / stripCanvas.height;
+      const stripW = stripCanvas.width * scale;
+      const stripH = stripCanvas.height * scale;
+      
+      const stripX = (targetWidth - stripW) / 2;
+      const stripY = (targetHeight - stripH) / 2;
+      
+      ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 12;
+      
+      ctx.drawImage(stripCanvas, stripX, stripY, stripW, stripH);
+      
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      if (ratio === "story") {
+        ctx.fillStyle = frameSpec.ink;
+        ctx.textAlign = "center";
+        ctx.font = "bold 24px JetBrains Mono, monospace";
+        ctx.fillText("SNAPBOOTH / BROWSER DARKROOM", targetWidth / 2, targetHeight - 80);
+      } else {
+        ctx.fillStyle = frameSpec.ink;
+        ctx.textAlign = "center";
+        ctx.font = "bold 20px JetBrains Mono, monospace";
+        ctx.fillText("SNAPBOOTH", targetWidth / 2, targetHeight - 50);
+      }
+      
+      const blob = await canvasToBlob(canvas, "image/png");
+      downloadBlob(blob, filename.replace(".png", `_${ratio}.png`));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function createShareQr() {
     setShareOpen(true);
     setShare({});
@@ -1392,6 +1924,11 @@ function Develop({
             note={note}
             textScale={textScale}
             resolved
+            stickers={stickers}
+            selectedStickerId={selectedStickerId}
+            onSelectSticker={setSelectedStickerId}
+            onUpdateSticker={handleUpdateSticker}
+            onDeleteSticker={handleDeleteSticker}
           />
 
           <dl className="metadata">
@@ -1430,10 +1967,141 @@ function Develop({
               <Button variant="secondary" icon={<Download size={15} />} onClick={() => void exportBoomerangGif()} disabled={busy !== null}>
                 {busy === "boomerang" ? `Boomerang ${Math.round(gifProgress * 100)}%` : "Boomerang GIF"}
               </Button>
+              <Button variant="secondary" icon={<Download size={15} />} onClick={() => void exportSocial("story")} disabled={busy !== null}>
+                {busy === "png" ? "Rendering" : "Social Story (9:16)"}
+              </Button>
+              <Button variant="secondary" icon={<Download size={15} />} onClick={() => void exportSocial("post")} disabled={busy !== null}>
+                {busy === "png" ? "Rendering" : "Social Post (4:5)"}
+              </Button>
               <Button variant="secondary" icon={<QrCode size={15} />} onClick={() => void createShareQr()} disabled={busy !== null}>
                 {busy === "qr" ? "Uploading" : "Share QR"}
               </Button>
             </div>
+          </RailSection>
+
+          <RailSection title="Stickers" defaultOpen={true}>
+            <div className="field">
+              <span className="field-head">Select Sticker</span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "12px" }}>
+                {STICKER_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    onClick={() => addSvgSticker(tpl.id)}
+                    style={{
+                      height: "44px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "1px solid var(--rule)",
+                      borderRadius: "4px",
+                      background: "var(--bg-elevated)",
+                      fontSize: "20px"
+                    }}
+                    title={tpl.label}
+                  >
+                    <svg viewBox={tpl.viewBox} style={{ width: "24px", height: "24px", color: "var(--ink-primary)" }}>
+                      <path d={tpl.path} fill="currentColor" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="field">
+              <span className="field-head">Add Custom Text</span>
+              <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+                <input
+                  type="text"
+                  placeholder="Type text..."
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") addTextSticker();
+                  }}
+                  style={{ flex: 1, minWidth: 0 }}
+                />
+                <Button variant="secondary" onClick={addTextSticker}>Add</Button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                <select
+                  value={textFont}
+                  onChange={(e) => setTextFont(e.target.value)}
+                  style={{
+                    height: "40px",
+                    border: "0",
+                    borderBottom: "1px solid var(--rule)",
+                    background: "transparent",
+                    color: "var(--ink-primary)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px"
+                  }}
+                >
+                  <option value="JetBrains Mono">MONO</option>
+                  <option value="Inter">SANS</option>
+                  <option value="Fraunces">SERIF</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="field" style={{ borderTop: "1px solid var(--rule)", paddingTop: "14px", marginTop: "14px" }}>
+              <span className="field-head">Sticker Color</span>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
+                {["#141414", "#FFFFFF", "#e84a2a", "#2f6f4e", "#3b82f6", "#ec4899", "#eab308"].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => {
+                      setTextColor(c);
+                      if (selectedStickerId) {
+                        handleUpdateSticker(selectedStickerId, { color: c });
+                      }
+                    }}
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      background: c,
+                      border: textColor === c ? "2px solid var(--accent)" : "1px solid var(--rule)",
+                      cursor: "pointer",
+                      boxShadow: "inset 0 0 2px rgba(0,0,0,0.2)"
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {selectedStickerId && (
+              <div style={{ display: "grid", gap: "8px", borderTop: "1px solid var(--rule)", paddingTop: "14px", marginTop: "14px" }}>
+                <span className="field-head">Selected Controls</span>
+                
+                <label className="field" style={{ marginBottom: "8px" }}>
+                  <span className="field-head">Scale: {Math.round((stickers.find(s => s.id === selectedStickerId)?.scale || 1) * 10) / 10}x</span>
+                  <input
+                    type="range"
+                    min="0.2"
+                    max="4"
+                    step="0.1"
+                    value={stickers.find(s => s.id === selectedStickerId)?.scale || 1}
+                    onChange={(e) => handleUpdateSticker(selectedStickerId, { scale: parseFloat(e.target.value) })}
+                  />
+                </label>
+
+                <label className="field" style={{ marginBottom: "12px" }}>
+                  <span className="field-head">Rotate: {Math.round(stickers.find(s => s.id === selectedStickerId)?.rotation || 0)}°</span>
+                  <input
+                    type="range"
+                    min="-180"
+                    max="180"
+                    step="1"
+                    value={stickers.find(s => s.id === selectedStickerId)?.rotation || 0}
+                    onChange={(e) => handleUpdateSticker(selectedStickerId, { rotation: parseFloat(e.target.value) })}
+                  />
+                </label>
+
+                <Button variant="ghost" icon={<Trash2 size={15} />} onClick={() => handleDeleteSticker(selectedStickerId)}>
+                  Delete selected
+                </Button>
+              </div>
+            )}
           </RailSection>
 
           <RailSection title="Roll">
@@ -1462,7 +2130,12 @@ function StripPreview({
   caption,
   note,
   textScale,
-  resolved = false
+  resolved = false,
+  stickers = [],
+  selectedStickerId = null,
+  onSelectSticker,
+  onUpdateSticker,
+  onDeleteSticker
 }: {
   layout: LayoutId;
   frame: FrameId;
@@ -1471,6 +2144,11 @@ function StripPreview({
   note: string;
   textScale: number;
   resolved?: boolean;
+  stickers?: StickerInstance[];
+  selectedStickerId?: string | null;
+  onSelectSticker?: (id: string | null) => void;
+  onUpdateSticker?: (id: string, updates: Partial<StickerInstance>) => void;
+  onDeleteSticker?: (id: string) => void;
 }) {
   const layoutSpec = LAYOUTS[layout];
   const frameSpec = getFrame(frame);
@@ -1483,8 +2161,103 @@ function StripPreview({
     "--cell-aspect": layoutSpec.cellAspect.toString()
   } as CSSProperties;
 
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent, sticker: StickerInstance) => {
+    e.stopPropagation();
+    onSelectSticker?.(sticker.id);
+
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+
+    const startX = sticker.x;
+    const startY = sticker.y;
+
+    const rect = e.currentTarget.parentElement?.getBoundingClientRect();
+    if (!rect) return;
+
+    const handleMouseMove = (moveEvent: MouseEvent | TouchEvent) => {
+      const currentX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX;
+      const currentY = "touches" in moveEvent ? moveEvent.touches[0].clientY : moveEvent.clientY;
+
+      const deltaX = ((currentX - clientX) / rect.width) * 100;
+      const deltaY = ((currentY - clientY) / rect.height) * 100;
+
+      onUpdateSticker?.(sticker.id, {
+        x: Math.max(0, Math.min(100, startX + deltaX)),
+        y: Math.max(0, Math.min(100, startY + deltaY))
+      });
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleMouseMove);
+      window.removeEventListener("touchend", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchmove", handleMouseMove, { passive: false });
+    window.addEventListener("touchend", handleMouseUp);
+  };
+
+  const handleScaleRotateStart = (e: React.MouseEvent | React.TouchEvent, sticker: StickerInstance) => {
+    e.stopPropagation();
+
+    const rect = e.currentTarget.parentElement?.getBoundingClientRect();
+    if (!rect) return;
+
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+
+    const startDx = clientX - centerX;
+    const startDy = clientY - centerY;
+    const startDist = Math.sqrt(startDx * startDx + startDy * startDy);
+    const startAngle = Math.atan2(startDy, startDx);
+
+    const startScale = sticker.scale;
+    const startRotation = sticker.rotation;
+
+    const handleMouseMove = (moveEvent: MouseEvent | TouchEvent) => {
+      const currentX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX;
+      const currentY = "touches" in moveEvent ? moveEvent.touches[0].clientY : moveEvent.clientY;
+
+      const dx = currentX - centerX;
+      const dy = currentY - centerY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const angle = Math.atan2(dy, dx);
+
+      const newScale = Math.max(0.2, Math.min(4, startScale * (dist / startDist)));
+      const angleDiff = angle - startAngle;
+      const newRotation = startRotation + (angleDiff * 180) / Math.PI;
+
+      onUpdateSticker?.(sticker.id, {
+        scale: newScale,
+        rotation: newRotation
+      });
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleMouseMove);
+      window.removeEventListener("touchend", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchmove", handleMouseMove, { passive: false });
+    window.addEventListener("touchend", handleMouseUp);
+  };
+
   return (
-    <div className={`strip-preview ${resolved ? "is-resolved" : ""}`} style={scaleStyle}>
+    <div
+      className={`strip-preview ${resolved ? "is-resolved" : ""}`}
+      style={scaleStyle}
+      onClick={() => onSelectSticker?.(null)}
+    >
       <div
         className="strip-grid"
         style={{
@@ -1509,6 +2282,73 @@ function StripPreview({
       )}
       <div className="perf perf-left" />
       <div className="perf perf-right" />
+
+      {/* Render Stickers */}
+      {stickers.map((sticker) => {
+        const isSelected = sticker.id === selectedStickerId;
+        const template = STICKER_TEMPLATES.find((t) => t.id === sticker.value);
+
+        return (
+          <div
+            key={sticker.id}
+            className={`sticker-instance ${isSelected ? "is-selected" : ""}`}
+            style={{
+              left: `${sticker.x}%`,
+              top: `${sticker.y}%`,
+              transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
+              color: sticker.color || "var(--frame-ink)"
+            }}
+            onMouseDown={(e) => handleDragStart(e, sticker)}
+            onTouchStart={(e) => handleDragStart(e, sticker)}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {sticker.type === "svg" && template ? (
+              <svg
+                viewBox={template.viewBox}
+                className="sticker-svg"
+                style={{ width: "60px", height: "60px" }}
+              >
+                <path d={template.path} fill="currentColor" />
+              </svg>
+            ) : (
+              <span
+                className="sticker-text"
+                style={{
+                  fontFamily: sticker.font || "var(--font-mono)",
+                  fontSize: `${sticker.fontSize || 16}px`,
+                  fontWeight: "bold",
+                  color: sticker.color || "var(--frame-ink)"
+                }}
+              >
+                {sticker.value}
+              </span>
+            )}
+
+            {isSelected && (
+              <>
+                <button
+                  className="sticker-btn-delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteSticker?.(sticker.id);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  title="Delete sticker"
+                >
+                  ×
+                </button>
+                <div
+                  className="sticker-handle-rotate"
+                  onMouseDown={(e) => handleScaleRotateStart(e, sticker)}
+                  onTouchStart={(e) => handleScaleRotateStart(e, sticker)}
+                  title="Scale & Rotate"
+                />
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1523,12 +2363,30 @@ function ShareDialog({
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    setCanShare(!!navigator.share);
+  }, []);
 
   async function copyLink() {
     if (!share.link) return;
     await navigator.clipboard.writeText(share.link);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1600);
+  }
+
+  async function shareLink() {
+    if (!share.link) return;
+    try {
+      await navigator.share({
+        title: "Snapbooth Photo Strip",
+        text: "Check out my photo strip from Snapbooth!",
+        url: share.link
+      });
+    } catch (err) {
+      console.warn("Share failed:", err);
+    }
   }
 
   return (
@@ -1554,7 +2412,35 @@ function ShareDialog({
                 {copied ? <Check size={16} /> : <Copy size={16} />}
               </button>
             </div>
-            <p className="dialog-message">Link expires in about 60 minutes via tmpfiles.org.</p>
+            
+            <div style={{ display: "flex", gap: "8px", width: "100%", marginTop: "12px" }}>
+              <Button style={{ flex: 1 }} onClick={() => void copyLink()} icon={copied ? <Check size={15} /> : <Copy size={15} />}>
+                {copied ? "Copied!" : "Copy URL"}
+              </Button>
+              {canShare && (
+                <Button variant="secondary" style={{ flex: 1 }} onClick={() => void shareLink()} icon={<Upload size={15} />}>
+                  Share...
+                </Button>
+              )}
+            </div>
+
+            <div style={{
+              background: "rgba(232, 74, 42, 0.08)",
+              border: "1px solid rgba(232, 74, 42, 0.22)",
+              color: "#e84a2a",
+              padding: "10px 14px",
+              borderRadius: "4px",
+              fontSize: "11px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginTop: "16px",
+              width: "100%",
+              boxSizing: "border-box"
+            }}>
+              <Timer size={14} style={{ flexShrink: 0 }} />
+              <span>This link and QR code will expire in 60 minutes (hosted temporarily via tmpfiles.org).</span>
+            </div>
           </>
         )}
       </section>
@@ -1565,39 +2451,70 @@ function ShareDialog({
 function TopBar({
   view,
   theme,
+  soundEnabled,
   onNavigate,
-  onToggleTheme
+  onToggleTheme,
+  onToggleSound
 }: {
   view: View;
   theme: Theme;
+  soundEnabled: boolean;
   onNavigate: (view: View) => void;
   onToggleTheme: () => void;
+  onToggleSound: () => void;
 }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const links: { view: View; label: string }[] = [
     { view: "intro", label: "Home" },
     { view: "studio", label: "Studio" },
+    { view: "gallery", label: "Gallery" },
     { view: "faq", label: "FAQ" },
     { view: "privacy", label: "Privacy" },
     { view: "contact", label: "Contact" }
   ];
 
+  const handleNavigate = (targetView: View) => {
+    onNavigate(targetView);
+    setMobileOpen(false);
+  };
+
   return (
     <header className="topbar">
-      <button className="wordmark" onClick={() => onNavigate("intro")}>
+      <button className="wordmark" onClick={() => handleNavigate("intro")}>
         Snapbooth<span>.</span>
       </button>
-      <nav aria-label="Primary navigation">
+
+      <button
+        className="mobile-menu-toggle"
+        onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label="Toggle menu"
+        style={{
+          display: "none",
+          border: 0,
+          background: "transparent",
+          cursor: "pointer",
+          padding: "8px",
+          color: "var(--ink-primary)"
+        }}
+      >
+        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      <nav className={mobileOpen ? "mobile-open" : ""} aria-label="Primary navigation">
         {links.map((link) => (
           <button
             className={view === link.view ? "is-active" : ""}
             key={link.view}
-            onClick={() => onNavigate(link.view)}
+            onClick={() => handleNavigate(link.view)}
           >
             {link.label}
           </button>
         ))}
       </nav>
       <div className="topbar-actions">
+        <button onClick={onToggleSound} aria-label="Toggle sound" title={soundEnabled ? "Mute sounds" : "Unmute sounds"}>
+          {soundEnabled ? <Volume2 size={17} /> : <VolumeX size={17} />}
+        </button>
         <a href={REPO_URL} target="_blank" rel="noreferrer" aria-label="Open GitHub repository">
           <Github size={17} />
           <span>Repo</span>
@@ -1621,16 +2538,20 @@ function Footer() {
 function RailSection({
   title,
   children,
-  className = ""
+  className = "",
+  defaultOpen = true
 }: {
   title: string;
   children: ReactNode;
   className?: string;
+  defaultOpen?: boolean;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className={`rail-section ${className}`}>
-      <h2>{title}</h2>
-      <div className="hairline" />
+    <section className={`rail-section ${open ? "is-active" : ""} ${className}`}>
+      <h2 onClick={() => setOpen(!open)} style={{ cursor: "pointer", userSelect: "none" }}>
+        {title}
+      </h2>
       <div className="rail-content">{children}</div>
     </section>
   );
@@ -1641,16 +2562,18 @@ function Button({
   icon,
   variant = "primary",
   disabled = false,
+  style,
   onClick
 }: {
   children: ReactNode;
   icon?: ReactNode;
   variant?: "primary" | "secondary" | "ghost";
   disabled?: boolean;
+  style?: CSSProperties;
   onClick?: () => void;
 }) {
   return (
-    <button className={`btn btn-${variant}`} disabled={disabled} onClick={onClick}>
+    <button className={`btn btn-${variant}`} disabled={disabled} onClick={onClick} style={style}>
       {icon}
       <span>{children}</span>
     </button>
@@ -1891,6 +2814,7 @@ async function renderStripCanvas(options: {
   note: string;
   textScale: number;
   timestamp: string;
+  stickers?: StickerInstance[];
 }): Promise<HTMLCanvasElement> {
   const layout = LAYOUTS[options.layout];
   const frame = getFrame(options.frame);
@@ -1944,6 +2868,52 @@ async function renderStripCanvas(options: {
       textY + 40,
       width - pad * 2
     );
+  }
+
+  if (options.stickers && options.stickers.length > 0) {
+    const baseStickerWidth = width * 0.12;
+    options.stickers.forEach((sticker) => {
+      const canvasX = (sticker.x / 100) * width;
+      const canvasY = (sticker.y / 100) * height;
+
+      ctx.save();
+      ctx.translate(canvasX, canvasY);
+      ctx.rotate((sticker.rotation * Math.PI) / 180);
+
+      const stickerScale = sticker.scale;
+      const stickerColor = sticker.color || frame.ink;
+
+      if (sticker.type === "svg") {
+        const template = STICKER_TEMPLATES.find((t) => t.id === sticker.value);
+        if (template) {
+          ctx.fillStyle = stickerColor;
+          const path = new Path2D(template.path);
+          const [, , vbW, vbH] = template.viewBox.split(" ").map(Number);
+          const maxDim = Math.max(vbW, vbH);
+          const drawScale = (baseStickerWidth * stickerScale) / maxDim;
+
+          ctx.scale(drawScale, drawScale);
+          ctx.translate(-vbW / 2, -vbH / 2);
+          ctx.fill(path);
+        }
+      } else if (sticker.type === "text") {
+        ctx.fillStyle = stickerColor;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const fontSize = Math.round((sticker.fontSize || 22) * (width / 520) * stickerScale);
+        const fontName =
+          sticker.font === "var(--font-serif)"
+            ? "Fraunces, Georgia, serif"
+            : sticker.font === "var(--font-mono)"
+            ? "JetBrains Mono, monospace"
+            : "Inter, sans-serif";
+        ctx.font = `bold ${fontSize}px ${fontName}`;
+        ctx.fillText(sticker.value, 0, 0);
+      }
+
+      ctx.restore();
+    });
   }
 
   return canvas;
@@ -2060,4 +3030,294 @@ async function uploadTemporary(blob: Blob, filename: string): Promise<string> {
     throw new Error("Temporary upload did not return a link.");
   }
   return data.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+}
+
+function GalleryView({
+  onBack,
+  onStartNew
+}: {
+  onBack: () => void;
+  onStartNew: () => void;
+}) {
+  const [rolls, setRolls] = useState<SavedRoll[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedRoll, setSelectedRoll] = useState<SavedRoll | null>(null);
+
+  const loadGallery = useCallback(async () => {
+    try {
+      const data = await getAllRolls();
+      setRolls(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadGallery();
+  }, [loadGallery]);
+
+  const handleDelete = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this developed roll from your gallery?")) return;
+    try {
+      await deleteRoll(id);
+      if (selectedRoll?.id === id) {
+        setSelectedRoll(null);
+      }
+      void loadGallery();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDownload = (roll: SavedRoll, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const anchor = document.createElement("a");
+    anchor.href = roll.image;
+    anchor.download = `snapbooth_${roll.layout.toLowerCase()}_${roll.frame.toLowerCase()}_${roll.id.replace(/[: -]/g, "_")}.png`;
+    anchor.click();
+  };
+
+  return (
+    <section className="editorial-page" style={{ position: "relative" }}>
+      <div className="page-bar">
+        <Button variant="ghost" onClick={onBack}>
+          Back to studio
+        </Button>
+        <span>Your Developed Photo Gallery</span>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", flexWrap: "wrap", gap: "16px" }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: "48px" }}>Gallery</h1>
+          <p className="eyebrow" style={{ marginTop: "8px" }}>History of developed strips</p>
+        </div>
+        <Button variant="secondary" icon={<RotateCcw size={15} />} onClick={onStartNew}>
+          New Session
+        </Button>
+      </div>
+
+      {loading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "64px 0", fontFamily: "var(--font-mono)", fontSize: "14px" }}>
+          Loading your developed rolls...
+        </div>
+      ) : rolls.length === 0 ? (
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "96px 24px",
+          border: "2px dashed var(--rule)",
+          borderRadius: "8px",
+          textAlign: "center"
+        }}>
+          <History size={48} style={{ color: "var(--ink-secondary)", marginBottom: "20px" }} />
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "28px", margin: "0 0 10px", fontWeight: "500" }}>Your darkroom is empty</h2>
+          <p style={{ color: "var(--ink-secondary)", maxWidth: "420px", margin: "0 0 24px" }}>
+            Strips you develop and customize in the print room will be saved here automatically.
+          </p>
+          <Button onClick={onBack}>Capture some poses</Button>
+        </div>
+      ) : (
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gap: "32px"
+        }}>
+          {rolls.map((roll) => (
+            <div
+              key={roll.id}
+              onClick={() => setSelectedRoll(roll)}
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--rule)",
+                borderRadius: "6px",
+                overflow: "hidden",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                display: "flex",
+                flexDirection: "column"
+              }}
+              className="gallery-card"
+            >
+              <div style={{
+                position: "relative",
+                aspectRatio: "2 / 3",
+                background: "rgba(0,0,0,0.05)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                padding: "16px"
+              }}>
+                <img
+                  src={roll.image}
+                  alt={roll.caption}
+                  style={{
+                    maxHeight: "100%",
+                    maxWidth: "100%",
+                    objectFit: "contain",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.12)"
+                  }}
+                />
+              </div>
+              <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
+                <span style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10px",
+                  color: "var(--ink-secondary)",
+                  textTransform: "uppercase"
+                }}>{roll.timestamp}</span>
+                <strong style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: "16px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontWeight: "600"
+                }}>{roll.caption || "Untitled"}</strong>
+                
+                <div style={{ display: "flex", gap: "8px", marginTop: "auto", paddingTop: "8px", borderTop: "1px solid var(--rule)" }}>
+                  <button
+                    onClick={(e) => handleDownload(roll, e)}
+                    style={{
+                      flex: 1,
+                      height: "30px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      fontSize: "11px",
+                      fontFamily: "var(--font-mono)",
+                      textTransform: "uppercase",
+                      border: "1px solid var(--rule)",
+                      borderRadius: "4px",
+                      background: "transparent",
+                      color: "var(--ink-primary)"
+                    }}
+                  >
+                    <Download size={12} /> DL
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(roll.id, e)}
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "1px solid var(--rule)",
+                      borderRadius: "4px",
+                      background: "transparent",
+                      color: "#ff4d4d"
+                    }}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {selectedRoll && (
+        <div
+          className="modal-backdrop"
+          onClick={() => setSelectedRoll(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.65)",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px"
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--rule)",
+              borderRadius: "8px",
+              padding: "24px",
+              maxWidth: "600px",
+              width: "100%",
+              maxHeight: "90vh",
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) 240px",
+              gap: "24px",
+              overflow: "auto",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", background: "rgba(0,0,0,0.03)", padding: "16px", borderRadius: "6px" }}>
+              <img
+                src={selectedRoll.image}
+                alt={selectedRoll.caption}
+                style={{ maxHeight: "65vh", maxWidth: "100%", objectFit: "contain", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
+              />
+            </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                <div>
+                  <h3 style={{ margin: "0 0 4px 0", fontFamily: "var(--font-serif)", fontSize: "24px", fontWeight: "600" }}>
+                    {selectedRoll.caption || "Untitled"}
+                  </h3>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--ink-secondary)" }}>
+                    {selectedRoll.timestamp}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setSelectedRoll(null)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "4px",
+                    color: "var(--ink-secondary)"
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "16px", display: "grid", gap: "10px" }}>
+                <span className="eyebrow" style={{ fontSize: "10px" }}>Specifications</span>
+                <dl style={{ margin: 0, display: "grid", gap: "8px", fontSize: "12px", fontFamily: "var(--font-mono)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <dt style={{ color: "var(--ink-secondary)" }}>Layout</dt>
+                    <dd style={{ margin: 0, fontWeight: "bold" }}>{selectedRoll.layout}</dd>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <dt style={{ color: "var(--ink-secondary)" }}>Frame</dt>
+                    <dd style={{ margin: 0, fontWeight: "bold" }}>{selectedRoll.frame}</dd>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <dt style={{ color: "var(--ink-secondary)" }}>Filter</dt>
+                    <dd style={{ margin: 0, fontWeight: "bold" }}>{selectedRoll.filter}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div style={{ marginTop: "auto", display: "grid", gap: "8px" }}>
+                <Button icon={<Download size={15} />} onClick={() => handleDownload(selectedRoll)}>
+                  Download image
+                </Button>
+                <Button variant="secondary" icon={<Trash2 size={15} />} onClick={() => handleDelete(selectedRoll.id)}>
+                  Delete Roll
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
