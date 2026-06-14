@@ -1,0 +1,12 @@
+# Imported from .gitignore
+node_modules/
+dist/
+.vite/
+.idea/
+output/
+test-results/
+playwright-report/
+
+*.log
+*.local
+*.zip

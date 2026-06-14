@@ -1,13 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Snapbooth">
-  <rect width="64" height="64" fill="#F4F0E6"/>
-  <rect x="14" y="8" width="36" height="48" fill="#FFFFFF" stroke="#141414" stroke-width="3"/>
-  <rect x="20" y="16" width="24" height="16" fill="#141414"/>
-  <rect x="20" y="36" width="24" height="10" fill="#EBE6D8" stroke="#141414" stroke-width="2"/>
-  <rect x="8" y="14" width="4" height="6" fill="#141414"/>
-  <rect x="8" y="28" width="4" height="6" fill="#141414"/>
-  <rect x="8" y="42" width="4" height="6" fill="#141414"/>
-  <rect x="52" y="14" width="4" height="6" fill="#141414"/>
-  <rect x="52" y="28" width="4" height="6" fill="#141414"/>
-  <rect x="52" y="42" width="4" height="6" fill="#141414"/>
-  <rect x="38" y="50" width="8" height="4" fill="#E84A2A"/>
+  <style>
+    .ring {
+      stroke: #0a0b10;
+    }
+    @media (prefers-color-scheme: dark) {
+      .ring {
+        stroke: #ffffff;
+      }
+    }
+  </style>
+  <!-- Outer ring -->
+  <circle cx="32" cy="32" r="26" fill="none" class="ring" stroke-width="6"/>
+  <!-- Center glowing aperture dot -->
+  <circle cx="32" cy="32" r="10" fill="#FF4D29"/>
+  <!-- Tiny lens flare -->
+  <circle cx="37" cy="27" r="3.5" fill="#FFFFFF" opacity="0.9"/>
 </svg>

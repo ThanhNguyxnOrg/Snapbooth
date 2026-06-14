@@ -410,6 +410,23 @@ class SoundEffects {
 
 const sounds = new SoundEffects();
 
+const handleMouseMove3D = (e: React.MouseEvent<HTMLDivElement>) => {
+  const el = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+  const x = e.clientX - rect.left - rect.width / 2;
+  const y = e.clientY - rect.top - rect.height / 2;
+  const rotateX = -(y / (rect.height / 2)) * 8;
+  const rotateY = (x / (rect.width / 2)) * 8;
+  el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+  el.style.boxShadow = `${-rotateY * 1.5}px ${rotateX * 1.5}px 32px rgba(0, 0, 0, 0.25)`;
+};
+
+const handleMouseLeave3D = (e: React.MouseEvent<HTMLDivElement>) => {
+  const el = e.currentTarget;
+  el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)";
+  el.style.boxShadow = "";
+};
+
 export default function App() {
   const [view, setView] = useState<View>(() => {
     const saved = window.sessionStorage.getItem("snapbooth-view");
@@ -1196,6 +1213,8 @@ function Studio(props: StudioProps) {
                 "--frame-accent": frameSpec.accent
               } as React.CSSProperties
             }
+            onMouseMove={handleMouseMove3D}
+            onMouseLeave={handleMouseLeave3D}
           >
             <div className="viewfinder-shell__bar">
               <span>Live preview</span>
@@ -2257,6 +2276,8 @@ function StripPreview({
       className={`strip-preview ${resolved ? "is-resolved" : ""}`}
       style={scaleStyle}
       onClick={() => onSelectSticker?.(null)}
+      onMouseMove={handleMouseMove3D}
+      onMouseLeave={handleMouseLeave3D}
     >
       <div
         className="strip-grid"
@@ -2481,7 +2502,11 @@ function TopBar({
   return (
     <header className="topbar">
       <button className="wordmark" onClick={() => handleNavigate("intro")}>
-        Snapbooth<span>.</span>
+        <img
+          src={theme === "light" ? "./logo-light.svg" : "./logo-dark.svg"}
+          alt="Snapbooth Logo"
+        />
+        Snapbooth
       </button>
 
       <button
@@ -3134,7 +3159,7 @@ function GalleryView({
               style={{
                 background: "var(--bg-elevated)",
                 border: "1px solid var(--rule)",
-                borderRadius: "6px",
+                borderRadius: "16px",
                 overflow: "hidden",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
@@ -3142,6 +3167,8 @@ function GalleryView({
                 flexDirection: "column"
               }}
               className="gallery-card"
+              onMouseMove={handleMouseMove3D}
+              onMouseLeave={handleMouseLeave3D}
             >
               <div style={{
                 position: "relative",

@@ -1,0 +1,67 @@
+name: Bug Report
+description: File a bug report to help us improve Snapbooth
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill in the details below.
+  - type: textarea
+    id: describe-bug
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: Tell us what went wrong...
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: What did you expect to happen?
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      description: What browser did you experience this issue on?
+      options:
+        - Chrome
+        - Safari
+        - Firefox
+        - Edge
+        - Opera
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: OS
+    attributes:
+      label: Operating System
+      description: What operating system are you using? (e.g. Windows 11, iOS 16, macOS 13)
+      placeholder: e.g. Windows 11
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Any other context, error logs, or details.
+      placeholder: Browser logs, screen dimensions, etc.
+    validations:
+      required: false

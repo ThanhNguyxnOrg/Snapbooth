@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Camera lens circle -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#0A0A0A" stroke-width="32"/>
+  <!-- Inner lens aperture blades -->
+  <path d="M 256,56 L 256,120" stroke="#0A0A0A" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 396,172 L 341,204" stroke="#0A0A0A" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 396,340 L 341,308" stroke="#0A0A0A" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 256,456 L 256,392" stroke="#0A0A0A" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 116,340 L 171,308" stroke="#0A0A0A" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 116,172 L 171,204" stroke="#0A0A0A" stroke-width="20" stroke-linecap="round"/>
+  <!-- Center flash dot (neon orange) -->
+  <circle cx="256" cy="256" r="64" fill="#F23F1B"/>
+  <!-- Lens flare dot -->
+  <circle cx="288" cy="224" r="16" fill="#FFFFFF" opacity="0.8"/>
+</svg>
