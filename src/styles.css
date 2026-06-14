@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Bebas+Neue&family=Syne:wght@400..800&display=swap");
 
 :root {
   color-scheme: light;
@@ -1289,7 +1289,7 @@ video {
 }
 
 .strip-caption strong {
-  font-family: var(--font-serif);
+  font-family: var(--caption-font-family, var(--font-serif));
   font-size: calc(24px * var(--caption-scale));
   font-weight: 500;
   line-height: 1.1;
@@ -2133,5 +2133,91 @@ video {
 .develop-page .strip-preview {
   animation: printerSlideDown 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transform-origin: top center;
+}
+
+/* Fullscreen Flash */
+.fullscreen-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #ffffff;
+  pointer-events: none;
+  animation: flashFadeOut 250ms cubic-bezier(0.1, 0.8, 0.3, 1) both;
+}
+
+@keyframes flashFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Rule of Thirds Guides */
+.viewfinder-grid-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.grid-line-h1 { top: 33.33%; left: 0; right: 0; height: 1px; }
+.grid-line-h2 { top: 66.66%; left: 0; right: 0; height: 1px; }
+.grid-line-v1 { left: 33.33%; top: 0; bottom: 0; width: 1px; }
+.grid-line-v2 { left: 66.66%; top: 0; bottom: 0; width: 1px; }
+
+/* Vignette Overlay */
+.vignette-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+  mix-blend-mode: multiply;
+  transition: opacity 150ms ease;
+}
+
+/* Grain Overlay */
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23g)' opacity='0.45'/%3E%3C/svg%3E");
+  transition: opacity 150ms ease;
+}
+
+/* Custom Select Dropdowns in Rail */
+.field select {
+  height: 40px;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-primary);
+  width: 100%;
+  padding-left: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.field select:focus {
+  border-bottom-color: var(--ink-primary);
+  outline: 0;
+}
+
+.field select option {
+  background: var(--bg-paper);
+  color: var(--ink-primary);
 }
 

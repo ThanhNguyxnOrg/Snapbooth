@@ -11,6 +11,9 @@ export interface SavedRoll {
   stickers: any[];
   created: number;
   image: string; // rendered PNG dataUrl
+  captionFont?: string;
+  grain?: number;
+  vignette?: number;
 }
 
 const DB_NAME = "snapbooth-db";

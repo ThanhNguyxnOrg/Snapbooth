@@ -25,7 +25,8 @@ import {
   VolumeX,
   X,
   History,
-  Menu
+  Menu,
+  Grid
 } from "lucide-react";
 import { saveRoll, getAllRolls, deleteRoll } from "./galleryDb";
 import type { SavedRoll } from "./galleryDb";
@@ -496,6 +497,22 @@ export default function App() {
     const saved = window.localStorage.getItem("snapbooth-sound");
     return saved !== "false";
   });
+  const [showGrid, setShowGrid] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-showGrid");
+    return saved === "true";
+  });
+  const [captionFont, setCaptionFont] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-captionFont");
+    return saved || "Fraunces";
+  });
+  const [vignette, setVignette] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-vignette");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [grain, setGrain] = useState(() => {
+    const saved = window.sessionStorage.getItem("snapbooth-grain");
+    return saved ? parseInt(saved, 10) : 0;
+  });
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -563,6 +580,22 @@ export default function App() {
   useEffect(() => {
     window.sessionStorage.setItem("snapbooth-textScale", String(textScale));
   }, [textScale]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-showGrid", String(showGrid));
+  }, [showGrid]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-captionFont", captionFont);
+  }, [captionFont]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-vignette", String(vignette));
+  }, [vignette]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem("snapbooth-grain", String(grain));
+  }, [grain]);
 
   useEffect(() => {
     const expectedFrames = LAYOUTS[layout].frames;
@@ -675,7 +708,7 @@ export default function App() {
     if (!inserted) return false;
     sounds.playShutter();
     setFlash(true);
-    window.setTimeout(() => setFlash(false), 90);
+    window.setTimeout(() => setFlash(false), 250);
     setNotice("Frame captured.");
     return true;
   }, [addPhoto, filter, layout, mirror, selectedSlot]);
@@ -935,6 +968,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {flash && <div className="fullscreen-flash" />}
       <TopBar
         view={view}
         theme={theme}
@@ -998,6 +1032,14 @@ export default function App() {
             onRetakeAll={retakeAll}
             onDevelop={startDevelop}
             onSelectSlot={(index) => setSelectedSlot((current) => (current === index ? null : index))}
+            showGrid={showGrid}
+            captionFont={captionFont}
+            vignette={vignette}
+            grain={grain}
+            onShowGrid={setShowGrid}
+            onCaptionFont={setCaptionFont}
+            onVignette={setVignette}
+            onGrain={setGrain}
           />
         )}
 
@@ -1010,6 +1052,9 @@ export default function App() {
             caption={caption}
             note={note}
             textScale={textScale}
+            captionFont={captionFont}
+            vignette={vignette}
+            grain={grain}
             onBack={() => setView("studio")}
             onStartNew={() => {
               retakeAll();
@@ -1080,6 +1125,14 @@ interface StudioProps {
   onRetakeAll: () => void;
   onDevelop: () => void;
   onSelectSlot: (index: number) => void;
+  showGrid: boolean;
+  captionFont: string;
+  vignette: number;
+  grain: number;
+  onShowGrid: (value: boolean) => void;
+  onCaptionFont: (value: string) => void;
+  onVignette: (value: number) => void;
+  onGrain: (value: number) => void;
 }
 
 function Studio(props: StudioProps) {
@@ -1191,6 +1244,43 @@ function Studio(props: StudioProps) {
                 onChange={(event) => props.onTextScale(Number(event.target.value))}
               />
             </label>
+            <label className="field">
+              <span>Title Font</span>
+              <select
+                value={props.captionFont}
+                onChange={(event) => props.onCaptionFont(event.target.value)}
+              >
+                <option value="Fraunces">Fraunces (Default Serif)</option>
+                <option value="Playfair">Playfair Display (Classic Serif)</option>
+                <option value="Cormorant">Cormorant Garamond (Elegant Serif)</option>
+                <option value="Bebas">Bebas Neue (Condensed Impact)</option>
+                <option value="Outfit">Outfit (Modern Sans)</option>
+                <option value="Syne">Syne (Artistic Sans)</option>
+                <option value="Mono">JetBrains Mono (Technical Mono)</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Vignette {props.vignette}%</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={props.vignette}
+                onChange={(event) => props.onVignette(Number(event.target.value))}
+              />
+            </label>
+            <label className="field">
+              <span>Grain / Noise {props.grain}%</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={props.grain}
+                onChange={(event) => props.onGrain(Number(event.target.value))}
+              />
+            </label>
           </RailSection>
         </aside>
 
@@ -1241,6 +1331,9 @@ function Studio(props: StudioProps) {
                 cameraMessage={props.cameraMessage}
                 filterCss={filterSpec.css}
                 onSelectSlot={props.onSelectSlot}
+                showGrid={props.showGrid}
+                vignette={props.vignette}
+                grain={props.grain}
               />
 
               {props.countdown !== null && <div className="countdown countdown-anim">{props.countdown}</div>}
@@ -1332,7 +1425,10 @@ function Studio(props: StudioProps) {
               <Button variant="secondary" icon={<FlipHorizontal size={15} />} onClick={props.onMirror}>
                 {props.mirror ? "Mirror" : "Normal"}
               </Button>
-              <Button variant="secondary" icon={<Sparkles size={15} />} onClick={props.onDemoRoll}>
+              <Button variant={props.showGrid ? "primary" : "secondary"} icon={<Grid size={15} />} onClick={() => props.onShowGrid(!props.showGrid)}>
+                {props.showGrid ? "Grid On" : "Grid Off"}
+              </Button>
+              <Button variant="secondary" icon={<Sparkles size={15} />} onClick={props.onDemoRoll} style={{ gridColumn: "span 2" }}>
                 Demo roll
               </Button>
             </div>
@@ -1529,7 +1625,10 @@ function ViewfinderGrid({
   cameraState,
   cameraMessage,
   filterCss,
-  onSelectSlot
+  onSelectSlot,
+  showGrid = false,
+  vignette = 0,
+  grain = 0
 }: {
   layout: LayoutId;
   photos: PhotoSlot[];
@@ -1541,6 +1640,9 @@ function ViewfinderGrid({
   cameraMessage: string;
   filterCss: string;
   onSelectSlot: (index: number) => void;
+  showGrid?: boolean;
+  vignette?: number;
+  grain?: number;
 }) {
   const layoutSpec = LAYOUTS[layout];
   const [cols, rows] = layoutSpec.grid;
@@ -1577,6 +1679,15 @@ function ViewfinderGrid({
                     playsInline
                     style={{ filter: filterCss, transform: mirror ? "scaleX(-1)" : "none" }}
                   />
+                  {/* Rule of Thirds Guides */}
+                  {showGrid && (
+                    <div className="viewfinder-grid-lines">
+                      <div className="grid-line grid-line-h1" />
+                      <div className="grid-line grid-line-h2" />
+                      <div className="grid-line grid-line-v1" />
+                      <div className="grid-line grid-line-v2" />
+                    </div>
+                  )}
                   {cameraState === "idle" && <div className="camera-message">{cameraMessage}</div>}
                 </>
               ) : (
@@ -1585,6 +1696,11 @@ function ViewfinderGrid({
             ) : (
               <span>{String(index + 1).padStart(2, "0")}</span>
             )}
+
+            {/* Vignette Overlay */}
+            {vignette > 0 && <div className="vignette-overlay" style={{ opacity: vignette / 100 }} />}
+            {/* Grain Overlay */}
+            {grain > 0 && <div className="grain-overlay" style={{ opacity: grain / 100 }} />}
           </div>
         );
       })}
@@ -1601,7 +1717,10 @@ function Develop({
   note,
   textScale,
   onBack,
-  onStartNew
+  onStartNew,
+  captionFont,
+  vignette,
+  grain
 }: {
   layout: LayoutId;
   frame: FrameId;
@@ -1612,6 +1731,9 @@ function Develop({
   textScale: number;
   onBack: () => void;
   onStartNew: () => void;
+  captionFont: string;
+  vignette: number;
+  grain: number;
 }) {
   const [busy, setBusy] = useState<null | "png" | "gif" | "boomerang" | "qr">(null);
   const [gifProgress, setGifProgress] = useState(0);
@@ -1684,9 +1806,12 @@ function Develop({
       note,
       textScale,
       timestamp,
-      stickers
+      stickers,
+      captionFont,
+      vignette,
+      grain
     }),
-    [caption, filter, frame, layout, note, photos, textScale, timestamp, stickers]
+    [caption, filter, frame, layout, note, photos, textScale, timestamp, stickers, captionFont, vignette, grain]
   );
 
   useEffect(() => {
@@ -1708,7 +1833,10 @@ function Develop({
           timestamp,
           stickers,
           created: Date.now(),
-          image
+          image,
+          captionFont,
+          vignette,
+          grain
         });
       } catch (err) {
         console.error("Failed to auto-save to gallery:", err);
@@ -1787,7 +1915,10 @@ function Develop({
         textScale,
         timestamp,
         index: sequence[0].index + 1,
-        total: images.length
+        total: images.length,
+        captionFont,
+        vignette,
+        grain
       });
       const gif = new GIF({
         workers: 2,
@@ -1807,7 +1938,10 @@ function Develop({
           textScale,
           timestamp,
           index: index + 1,
-          total: images.length
+          total: images.length,
+          captionFont,
+          vignette,
+          grain
         });
         gif.addFrame(canvas, { delay: index === 0 ? 320 : 170, copy: true });
       });
@@ -1948,6 +2082,9 @@ function Develop({
             onSelectSticker={setSelectedStickerId}
             onUpdateSticker={handleUpdateSticker}
             onDeleteSticker={handleDeleteSticker}
+            captionFont={captionFont}
+            vignette={vignette}
+            grain={grain}
           />
 
           <dl className="metadata">
@@ -2142,6 +2279,18 @@ function Develop({
   );
 }
 
+function getFontFamilyCSS(fontKey: string): string {
+  switch (fontKey) {
+    case "Playfair": return "'Playfair Display', Georgia, serif";
+    case "Cormorant": return "'Cormorant Garamond', Georgia, serif";
+    case "Bebas": return "'Bebas Neue', sans-serif";
+    case "Outfit": return "'Outfit', sans-serif";
+    case "Syne": return "'Syne', sans-serif";
+    case "Mono": return "'JetBrains Mono', monospace";
+    default: return "Fraunces, Georgia, serif";
+  }
+}
+
 function StripPreview({
   layout,
   frame,
@@ -2154,7 +2303,10 @@ function StripPreview({
   selectedStickerId = null,
   onSelectSticker,
   onUpdateSticker,
-  onDeleteSticker
+  onDeleteSticker,
+  captionFont = "Fraunces",
+  vignette = 0,
+  grain = 0
 }: {
   layout: LayoutId;
   frame: FrameId;
@@ -2168,6 +2320,9 @@ function StripPreview({
   onSelectSticker?: (id: string | null) => void;
   onUpdateSticker?: (id: string, updates: Partial<StickerInstance>) => void;
   onDeleteSticker?: (id: string) => void;
+  captionFont?: string;
+  vignette?: number;
+  grain?: number;
 }) {
   const layoutSpec = LAYOUTS[layout];
   const frameSpec = getFrame(frame);
@@ -2177,7 +2332,8 @@ function StripPreview({
     "--frame-ink": frameSpec.ink,
     "--frame-accent": frameSpec.accent,
     "--caption-scale": textScale.toString(),
-    "--cell-aspect": layoutSpec.cellAspect.toString()
+    "--cell-aspect": layoutSpec.cellAspect.toString(),
+    "--caption-font-family": getFontFamilyCSS(captionFont)
   } as CSSProperties;
 
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent, sticker: StickerInstance) => {
@@ -2291,6 +2447,8 @@ function StripPreview({
           return (
             <div className="strip-cell" key={index}>
               {photo ? <img src={photo} alt={`Frame ${index + 1}`} /> : <span>{String(index + 1).padStart(2, "0")}</span>}
+              {vignette > 0 && <div className="vignette-overlay" style={{ opacity: vignette / 100 }} />}
+              {grain > 0 && <div className="grain-overlay" style={{ opacity: grain / 100 }} />}
             </div>
           );
         })}
@@ -2830,6 +2988,32 @@ async function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+let cachedNoisePattern: CanvasPattern | null = null;
+function getNoisePattern(ctx: CanvasRenderingContext2D): CanvasPattern | null {
+  if (cachedNoisePattern) return cachedNoisePattern;
+  
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const nCtx = canvas.getContext("2d");
+  if (!nCtx) return null;
+  
+  const imgData = nCtx.createImageData(size, size);
+  const data = imgData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const val = Math.floor(Math.random() * 255);
+    data[i] = val;
+    data[i + 1] = val;
+    data[i + 2] = val;
+    data[i + 3] = 45;
+  }
+  nCtx.putImageData(imgData, 0, 0);
+  
+  cachedNoisePattern = ctx.createPattern(canvas, "repeat");
+  return cachedNoisePattern;
+}
+
 async function renderStripCanvas(options: {
   layout: LayoutId;
   frame: FrameId;
@@ -2840,6 +3024,9 @@ async function renderStripCanvas(options: {
   textScale: number;
   timestamp: string;
   stickers?: StickerInstance[];
+  captionFont?: string;
+  vignette?: number;
+  grain?: number;
 }): Promise<HTMLCanvasElement> {
   const layout = LAYOUTS[options.layout];
   const frame = getFrame(options.frame);
@@ -2875,6 +3062,46 @@ async function renderStripCanvas(options: {
     const x = pad + col * (cellWidth + gap);
     const y = pad + row * (cellHeight + gap);
     ctx.drawImage(image, x, y, cellWidth, cellHeight);
+
+    // Vignette Effect
+    if (options.vignette && options.vignette > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, y, cellWidth, cellHeight);
+      ctx.clip();
+      
+      const cx = x + cellWidth / 2;
+      const cy = y + cellHeight / 2;
+      const rOuter = Math.sqrt((cellWidth / 2) ** 2 + (cellHeight / 2) ** 2);
+      const rInner = cellWidth * 0.25;
+      
+      const grad = ctx.createRadialGradient(cx, cy, rInner, cx, cy, rOuter);
+      grad.addColorStop(0, "rgba(0,0,0,0)");
+      grad.addColorStop(1, `rgba(0,0,0,${0.85 * (options.vignette / 100)})`);
+      
+      ctx.fillStyle = grad;
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillRect(x, y, cellWidth, cellHeight);
+      ctx.restore();
+    }
+    
+    // Grain Effect
+    if (options.grain && options.grain > 0) {
+      const pattern = getNoisePattern(ctx);
+      if (pattern) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, cellWidth, cellHeight);
+        ctx.clip();
+        
+        ctx.fillStyle = pattern;
+        ctx.globalAlpha = options.grain / 100;
+        ctx.globalCompositeOperation = "overlay";
+        ctx.fillRect(x, y, cellWidth, cellHeight);
+        ctx.restore();
+      }
+    }
+
     ctx.strokeStyle = "rgba(20,20,20,0.22)";
     ctx.lineWidth = 2;
     ctx.strokeRect(x, y, cellWidth, cellHeight);
@@ -2884,7 +3111,7 @@ async function renderStripCanvas(options: {
     const textY = height - captionHeight + 50;
     ctx.fillStyle = frame.ink;
     ctx.textAlign = "center";
-    ctx.font = `${Math.round(34 * options.textScale)}px Fraunces, Georgia, serif`;
+    ctx.font = `${Math.round(34 * options.textScale)}px ${getFontFamilyCSS(options.captionFont || "Fraunces")}`;
     ctx.fillText(options.caption.toUpperCase(), width / 2, textY, width - pad * 2);
     ctx.font = `${Math.round(18 * options.textScale)}px JetBrains Mono, monospace`;
     ctx.fillText(
@@ -2954,6 +3181,9 @@ function renderPoseFrameCanvas(options: {
   timestamp: string;
   index: number;
   total: number;
+  captionFont?: string;
+  vignette?: number;
+  grain?: number;
 }): HTMLCanvasElement {
   const layout = LAYOUTS[options.layout];
   const frame = getFrame(options.frame);
@@ -2980,6 +3210,46 @@ function renderPoseFrameCanvas(options: {
   const x = pad;
   const y = pad;
   ctx.drawImage(options.image, x, y, imageWidth, imageHeight);
+
+  // Vignette Effect
+  if (options.vignette && options.vignette > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, imageWidth, imageHeight);
+    ctx.clip();
+    
+    const cx = x + imageWidth / 2;
+    const cy = y + imageHeight / 2;
+    const rOuter = Math.sqrt((imageWidth / 2) ** 2 + (imageHeight / 2) ** 2);
+    const rInner = imageWidth * 0.25;
+    
+    const grad = ctx.createRadialGradient(cx, cy, rInner, cx, cy, rOuter);
+    grad.addColorStop(0, "rgba(0,0,0,0)");
+    grad.addColorStop(1, `rgba(0,0,0,${0.85 * (options.vignette / 100)})`);
+    
+    ctx.fillStyle = grad;
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillRect(x, y, imageWidth, imageHeight);
+    ctx.restore();
+  }
+  
+  // Grain Effect
+  if (options.grain && options.grain > 0) {
+    const pattern = getNoisePattern(ctx);
+    if (pattern) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, y, imageWidth, imageHeight);
+      ctx.clip();
+      
+      ctx.fillStyle = pattern;
+      ctx.globalAlpha = options.grain / 100;
+      ctx.globalCompositeOperation = "overlay";
+      ctx.fillRect(x, y, imageWidth, imageHeight);
+      ctx.restore();
+    }
+  }
+
   ctx.strokeStyle = "rgba(20,20,20,0.22)";
   ctx.lineWidth = 2;
   ctx.strokeRect(x, y, imageWidth, imageHeight);
@@ -2988,7 +3258,7 @@ function renderPoseFrameCanvas(options: {
     const textY = y + imageHeight + 48;
     ctx.fillStyle = frame.ink;
     ctx.textAlign = "center";
-    ctx.font = `${Math.round(28 * options.textScale)}px Fraunces, Georgia, serif`;
+    ctx.font = `${Math.round(28 * options.textScale)}px ${getFontFamilyCSS(options.captionFont || "Fraunces")}`;
     ctx.fillText(options.caption.toUpperCase(), width / 2, textY, width - pad * 2);
     ctx.font = `${Math.round(14 * options.textScale)}px JetBrains Mono, monospace`;
     ctx.fillText(
