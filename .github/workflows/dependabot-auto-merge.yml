@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -42,4 +42,6 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: gh pr merge --auto --merge "$PR_URL"
+        run: |
+          BODY=$(printf "🤖 Verified and auto-merged by ThanhNguyxnAgent\n\nCo-authored-by: ThanhNguyxnAgent[bot] <4125740+thanhnguyxnagent[bot]@users.noreply.github.com>\nSigned-off-by: ThanhNguyxnAgent[bot] <4125740+thanhnguyxnagent[bot]@users.noreply.github.com>")
+          gh pr merge "$PR_URL" --auto --squash --body "$BODY"
