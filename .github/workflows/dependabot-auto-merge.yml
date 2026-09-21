@@ -25,7 +25,7 @@ jobs:
       - name: Generate GitHub App Token
         if: contains(fromJson('["version-update:semver-patch","version-update:semver-minor"]'), steps.metadata.outputs.update-type)
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
