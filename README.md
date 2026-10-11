@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark.svg" />
+    <img src="public/logo-light.svg" alt="Snapbooth logo" width="120" />
+  </picture>
+</p>
+
 # Snapbooth
 
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=000)](https://react.dev/)
