@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import QRCode from "qrcode";
-import GIF from "gif.js";
 import gifWorkerUrl from "gif.js/dist/gif.worker.js?url";
 import {
   Aperture,
@@ -30,395 +28,16 @@ import {
 } from "lucide-react";
 import { saveRoll, getAllRolls, deleteRoll, pruneRolls } from "./galleryDb";
 import type { SavedRoll } from "./galleryDb";
+import { CAPTION_GROUPS, CAPTION_PRESETS, FILTERS, FILTER_GROUPS, FRAMES, LAYOUTS, LAYOUT_ORDER, REPO_URL, STICKER_TEMPLATES, emptyPhotos, getFilter, getFrame } from "./presets";
+import type { CameraFacing, FilterId, FilterSpec, FrameId, LayoutId, PhotoSlot, StickerInstance } from "./presets";
+import { captureSourceToDataUrl, createDemoPhoto, downscaleForGif, canvasToBlob, getFontFamilyCSS, getViewfinderAspect, getViewfinderMaxWidth, loadImage, readFileAsDataUrl, renderPoseFrameCanvas, renderStripCanvas } from "./render";
+import { downloadBlob, nowStamp, persistSession, uploadTemporary, wait } from "./utils";
+import { sounds } from "./sound";
 
 type Theme = "light" | "dark";
 type View = "intro" | "studio" | "develop" | "faq" | "privacy" | "contact" | "gallery";
-type LayoutId = "S" | "A" | "B" | "C" | "D";
-type CameraFacing = "user" | "environment";
-type CaptionGroup = "EDITORIAL" | "ANALOG" | "PLAYFUL" | "MINIMAL";
-type FilterId =
-  | "BARE"
-  | "BRIGHT"
-  | "BLOOM"
-  | "COOL"
-  | "VIVID"
-  | "WARM"
-  | "INK"
-  | "SILVER"
-  | "CHARCOAL"
-  | "KODAK"
-  | "PORTRA"
-  | "CINESTILL"
-  | "FADE"
-  | "VELVET"
-  | "DUSK"
-  | "EXPIRED"
-  | "RISO"
-  | "NOIR"
-  | "NEON"
-  | "TUNGSTEN"
-  | "FLASH"
-  | "CHROME"
-  | "HALATION"
-  | "SOLAR";
-type FrameId =
-  | "CLASSIC"
-  | "POST"
-  | "DESKTOP"
-  | "BROADSHEET"
-  | "COVER"
-  | "MARQUEE"
-  | "DOCUMENT"
-  | "KEEPSAKE"
-  | "PANEL"
-  | "BULLETIN"
-  | "EXPOSURE"
-  | "POLAROID"
-  | "TICKET"
-  | "ALBUM"
-  | "INDEX"
-  | "ZINE"
-  | "ARCHIVE"
-  | "MIDNIGHT"
-  | "BLANK";
 
-interface LayoutSpec {
-  id: LayoutId;
-  code: string;
-  label: string;
-  frames: number;
-  grid: [number, number];
-  cellAspect: number;
-  stripWidth: number;
-}
 
-interface FrameSpec {
-  id: FrameId;
-  label: string;
-  tone: string;
-  paper: string;
-  ink: string;
-  accent: string;
-}
-
-interface FilterSpec {
-  id: FilterId;
-  label: string;
-  group: "DAYLIGHT" | "MONO" | "FILM" | "MOOD" | "LAB";
-  css: string;
-}
-
-interface CaptionPreset {
-  value: string;
-  group: CaptionGroup;
-}
-
-type PhotoSlot = string | null;
-
-interface StickerInstance {
-  id: string;
-  type: "svg" | "text";
-  value: string;
-  font?: string;
-  color?: string;
-  fontSize?: number;
-  x: number;
-  y: number;
-  scale: number;
-  rotation: number;
-}
-
-const STICKER_TEMPLATES = [
-  { id: "heart", label: "❤️ Heart", viewBox: "0 0 24 24", path: "M12,21.35 l-1.45,-1.32 C5.4,15.36 2,12.28 2,8.5 C2,5.42 4.42,3 7.5,3 c1.74,0 3.41,0.81 4.5,2.09 C13.09,3.81 14.76,3 16.5,3 C19.58,3 22,5.42 22,8.5 c0,3.78 -3.4,6.86 -8.55,11.54 L12,21.35 z" },
-  { id: "star", label: "⭐ Star", viewBox: "0 0 24 24", path: "M12,17.27 L18.18,21 L16.54,13.97 L22,9.24 L14.81,8.63 L12,2 L9.19,8.63 L2,9.24 L7.46,13.97 L5.82,21 L12,17.27 Z" },
-  { id: "crown", label: "👑 Crown", viewBox: "0 0 30 24", path: "M2,22 L5,8 L10,15 L15,5 L20,15 L25,8 L28,22 Z" },
-  { id: "mustache", label: "🥸 Mustache", viewBox: "0 0 24 24", path: "M16,19c-2.3,0-4.3-1-5.7-2.6C8.9,14.8,6.9,14,4.7,14H2v-1.5c2,0,4,.7,5.6,2c1.3,1,2.8,1.5,4.4,1.5s3.1-.5,4.4-1.5c1.6-1.3,3.6-2,5.6-2V14h-2.7c-2.2,0-4.2.8-5.6,2.4-1.4,1.6-3.4,2.6-5.7,2.6z" },
-  { id: "speech", label: "💬 Bubble", viewBox: "0 0 24 24", path: "M20,2 H4 C2.9,2 2,2.9 2,4 V14 C2,15.1 2.9,16 4,16 H16 L22,22 V4 C22,2.9 21.1,2 20,2 Z" },
-  { id: "arrow", label: "➡️ Arrow", viewBox: "0 0 24 24", path: "M12,2 L22,12 L17,12 L17,22 L7,22 L7,12 L2,12 Z" },
-  { id: "sparkles", label: "✨ Sparkles", viewBox: "0 0 30 30", path: "M10,3 L12,8 L17,10 L12,12 L10,17 L8,12 L3,10 L8,8 Z M22,12 L23,15 L26,16 L23,17 L22,20 L21,17 L18,16 L21,15 Z" }
-];
-
-const REPO_URL = "https://github.com/ThanhNguyxnOrg/Snapbooth";
-const TMPFILES_API = "https://tmpfiles.org/api/v1/upload";
-
-const LAYOUTS: Record<LayoutId, LayoutSpec> = {
-  S: {
-    id: "S",
-    code: "S / 1",
-    label: "Single",
-    frames: 1,
-    grid: [1, 1],
-    cellAspect: 4 / 5,
-    stripWidth: 920
-  },
-  A: {
-    id: "A",
-    code: "A / 4",
-    label: "Quad",
-    frames: 4,
-    grid: [2, 2],
-    cellAspect: 1,
-    stripWidth: 1040
-  },
-  B: {
-    id: "B",
-    code: "B / 3",
-    label: "Strip",
-    frames: 3,
-    grid: [1, 3],
-    cellAspect: 4 / 5,
-    stripWidth: 760
-  },
-  C: {
-    id: "C",
-    code: "C / 2",
-    label: "Pair",
-    frames: 2,
-    grid: [1, 2],
-    cellAspect: 4 / 5,
-    stripWidth: 760
-  },
-  D: {
-    id: "D",
-    code: "D / 6",
-    label: "Contact",
-    frames: 6,
-    grid: [2, 3],
-    cellAspect: 1,
-    stripWidth: 1040
-  }
-};
-
-const LAYOUT_ORDER: LayoutId[] = ["S", "A", "B", "C", "D"];
-
-const FRAMES: FrameSpec[] = [
-  { id: "CLASSIC", label: "Classic", tone: "Paper booth", paper: "#FFFFFF", ink: "#141414", accent: "#141414" },
-  { id: "POST", label: "Post", tone: "Air mail edge", paper: "#FCF7EA", ink: "#141414", accent: "#B5302A" },
-  { id: "DESKTOP", label: "Desktop", tone: "Machine label", paper: "#F8F8F4", ink: "#111111", accent: "#2F6F4E" },
-  { id: "BROADSHEET", label: "Broadsheet", tone: "Newspaper rule", paper: "#F7F1DF", ink: "#111111", accent: "#141414" },
-  { id: "COVER", label: "Cover", tone: "Editorial cover", paper: "#FFFFFF", ink: "#141414", accent: "#E84A2A" },
-  { id: "MARQUEE", label: "Marquee", tone: "Cinema print", paper: "#161513", ink: "#F1ECDF", accent: "#FF6B49" },
-  { id: "DOCUMENT", label: "Document", tone: "Archive sheet", paper: "#F5F1E7", ink: "#141414", accent: "#5C5A52" },
-  { id: "KEEPSAKE", label: "Keepsake", tone: "Warm matte", paper: "#F9E8DA", ink: "#271B13", accent: "#B76B47" },
-  { id: "PANEL", label: "Panel", tone: "Gallery edge", paper: "#FDFDF9", ink: "#141414", accent: "#29384A" },
-  { id: "BULLETIN", label: "Bulletin", tone: "Pinned note", paper: "#FFF9D9", ink: "#17130A", accent: "#D39A13" },
-  { id: "EXPOSURE", label: "Exposure", tone: "Contact proof", paper: "#E9E9E1", ink: "#0D0D0C", accent: "#76766C" },
-  { id: "POLAROID", label: "Polaroid", tone: "Instant border", paper: "#F8F2E6", ink: "#1C1A17", accent: "#C96B42" },
-  { id: "TICKET", label: "Ticket", tone: "Stub print", paper: "#F4E9C5", ink: "#211B16", accent: "#D28B2A" },
-  { id: "ALBUM", label: "Album", tone: "Memory page", paper: "#FDF7F0", ink: "#1A1512", accent: "#7A5A46" },
-  { id: "INDEX", label: "Index", tone: "Contact index", paper: "#F1EEE7", ink: "#171717", accent: "#4D5B6B" },
-  { id: "ZINE", label: "Zine", tone: "Soft print", paper: "#F5E8F1", ink: "#231A27", accent: "#7F4D78" },
-  { id: "ARCHIVE", label: "Archive", tone: "Filed proof", paper: "#EDE8DF", ink: "#20201F", accent: "#8A6B3C" },
-  { id: "MIDNIGHT", label: "Midnight", tone: "Darkroom", paper: "#0E0D0B", ink: "#F1ECDF", accent: "#FF6B49" },
-  { id: "BLANK", label: "Blank", tone: "No caption", paper: "#FFFFFF", ink: "#141414", accent: "#FFFFFF" }
-];
-
-const FILTERS: FilterSpec[] = [
-  { id: "BARE", label: "Bare", group: "DAYLIGHT", css: "none" },
-  { id: "BRIGHT", label: "Bright", group: "DAYLIGHT", css: "brightness(1.12) contrast(1.04) saturate(1.04)" },
-  { id: "BLOOM", label: "Bloom", group: "DAYLIGHT", css: "brightness(1.08) contrast(0.95) saturate(0.95)" },
-  { id: "COOL", label: "Cool", group: "DAYLIGHT", css: "brightness(1.04) contrast(1.04) saturate(0.96) hue-rotate(10deg)" },
-  { id: "VIVID", label: "Vivid", group: "DAYLIGHT", css: "brightness(1.04) contrast(1.12) saturate(1.42)" },
-  { id: "WARM", label: "Warm", group: "DAYLIGHT", css: "brightness(1.08) contrast(1.02) saturate(1.12) sepia(0.08)" },
-  { id: "INK", label: "Ink", group: "MONO", css: "grayscale(1) contrast(1.38) brightness(1.03)" },
-  { id: "SILVER", label: "Silver", group: "MONO", css: "grayscale(1) contrast(0.94) brightness(1.06)" },
-  { id: "CHARCOAL", label: "Charcoal", group: "MONO", css: "grayscale(1) contrast(1.28) brightness(0.92)" },
-  { id: "KODAK", label: "Kodak", group: "FILM", css: "sepia(0.24) saturate(1.16) contrast(1.05) brightness(1.03)" },
-  { id: "PORTRA", label: "Portra", group: "FILM", css: "sepia(0.12) saturate(0.96) contrast(1.02)" },
-  { id: "CINESTILL", label: "Cinestill", group: "FILM", css: "saturate(1.22) hue-rotate(-8deg) contrast(1.1)" },
-  { id: "FADE", label: "Fade", group: "FILM", css: "sepia(0.12) saturate(0.78) contrast(0.88) brightness(1.08)" },
-  { id: "VELVET", label: "Velvet", group: "FILM", css: "sepia(0.1) saturate(0.86) contrast(1.12) brightness(0.99)" },
-  { id: "DUSK", label: "Dusk", group: "MOOD", css: "sepia(0.28) hue-rotate(-24deg) saturate(1.18) contrast(1.08)" },
-  { id: "EXPIRED", label: "Expired", group: "MOOD", css: "sepia(0.36) saturate(0.74) contrast(0.92) brightness(1.06)" },
-  { id: "RISO", label: "Riso", group: "MOOD", css: "saturate(0.68) contrast(1.28) hue-rotate(8deg)" },
-  { id: "NOIR", label: "Noir", group: "MOOD", css: "grayscale(0.86) contrast(1.42) brightness(0.9)" },
-  { id: "NEON", label: "Neon", group: "LAB", css: "saturate(1.72) contrast(1.18) hue-rotate(-18deg) brightness(1.02)" },
-  { id: "TUNGSTEN", label: "Tungsten", group: "LAB", css: "sepia(0.2) saturate(1.1) hue-rotate(-16deg) contrast(1.1)" },
-  { id: "FLASH", label: "Flash", group: "LAB", css: "brightness(1.18) contrast(1.22) saturate(0.94)" },
-  { id: "CHROME", label: "Chrome", group: "LAB", css: "contrast(1.26) saturate(1.28) brightness(0.98)" },
-  { id: "HALATION", label: "Halation", group: "LAB", css: "sepia(0.18) saturate(1.36) contrast(1.06) brightness(1.08)" },
-  { id: "SOLAR", label: "Solar", group: "LAB", css: "invert(1) hue-rotate(180deg) saturate(1.25) contrast(1.1)" }
-];
-
-const FILTER_GROUPS: FilterSpec["group"][] = ["DAYLIGHT", "MONO", "FILM", "MOOD", "LAB"];
-
-const CAPTION_GROUPS: CaptionGroup[] = ["EDITORIAL", "ANALOG", "PLAYFUL", "MINIMAL"];
-
-const CAPTION_PRESETS: CaptionPreset[] = [
-  { group: "EDITORIAL", value: "BROWSER DARKROOM" },
-  { group: "EDITORIAL", value: "CONTACT SHEET CLUB" },
-  { group: "EDITORIAL", value: "PAPER MEMORY" },
-  { group: "EDITORIAL", value: "FRAME THE MOMENT" },
-  { group: "EDITORIAL", value: "ARCHIVE THIS" },
-  { group: "EDITORIAL", value: "BIG MOOD ONLY" },
-  { group: "ANALOG", value: "FLASH BETWEEN FRIENDS" },
-  { group: "ANALOG", value: "AFTERLIGHT SESSION" },
-  { group: "ANALOG", value: "GOOD LIGHT ONLY" },
-  { group: "ANALOG", value: "KEEP IT IN THE ROLL" },
-  { group: "ANALOG", value: "ONE MORE FOR THE WALL" },
-  { group: "ANALOG", value: "SOFT PRESS PAPER" },
-  { group: "PLAYFUL", value: "PRESS, POSE, PRINT" },
-  { group: "PLAYFUL", value: "PROOF OF LIFE" },
-  { group: "PLAYFUL", value: "NO RETAKE ENERGY" },
-  { group: "PLAYFUL", value: "ONE MORE STRIP" },
-  { group: "PLAYFUL", value: "FLASH ME AGAIN" },
-  { group: "PLAYFUL", value: "POCKET TIME CAPSULE" },
-  { group: "MINIMAL", value: "LOCAL ONLY" },
-  { group: "MINIMAL", value: "MADE IN THE BROWSER" },
-  { group: "MINIMAL", value: "FRAME BY FRAME" },
-  { group: "MINIMAL", value: "NO CLOUD REQUIRED" },
-  { group: "MINIMAL", value: "FAST ROLL" },
-  { group: "MINIMAL", value: "SILENT SHUTTER" }
-];
-
-function getFilter(id: FilterId): FilterSpec {
-  return FILTERS.find((filter) => filter.id === id) ?? FILTERS[0];
-}
-
-function getFrame(id: FrameId): FrameSpec {
-  return FRAMES.find((frame) => frame.id === id) ?? FRAMES[0];
-}
-
-function emptyPhotos(layout: LayoutId): PhotoSlot[] {
-  return Array.from({ length: LAYOUTS[layout].frames }, () => null);
-}
-
-function nowStamp(): string {
-  const date = new Date();
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-function persistSession(key: string, value: string): void {
-  try {
-    window.sessionStorage.setItem(key, value);
-  } catch {
-    // Storage may be full (large photo data URLs) or blocked by the browser.
-    // Persisting is best-effort; the app must keep working without it.
-  }
-}
-
-class SoundEffects {
-  private ctx: AudioContext | null = null;
-  public enabled: boolean = true;
-
-  private init() {
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-    if (this.ctx && this.ctx.state === "suspended") {
-      void this.ctx.resume();
-    }
-  }
-
-  playBeep() {
-    if (!this.enabled) return;
-    this.init();
-    const ctx = this.ctx;
-    if (!ctx) return;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(880, ctx.currentTime);
-
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + 0.12);
-  }
-
-  playShutter() {
-    if (!this.enabled) return;
-    this.init();
-    const ctx = this.ctx;
-    if (!ctx) return;
-
-    const duration = 0.12;
-    const bufferSize = ctx.sampleRate * duration;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 1200;
-    filter.Q.value = 3;
-
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.24, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-
-    noise.start();
-
-    const osc = ctx.createOscillator();
-    const oscGain = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(2000, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.08);
-
-    oscGain.gain.setValueAtTime(0.16, ctx.currentTime);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-
-    osc.connect(oscGain);
-    oscGain.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + 0.08);
-  }
-
-  playChime() {
-    if (!this.enabled) return;
-    this.init();
-    const ctx = this.ctx;
-    if (!ctx) return;
-
-    const playNote = (freq: number, delay: number, dur: number) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-      
-      gain.gain.setValueAtTime(0, ctx.currentTime + delay);
-      gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + delay + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(ctx.currentTime + delay);
-      osc.stop(ctx.currentTime + delay + dur);
-    };
-
-    playNote(659.25, 0, 0.4);
-    playNote(830.61, 0.08, 0.4);
-    playNote(987.77, 0.16, 0.4);
-    playNote(1318.51, 0.24, 0.6);
-  }
-}
-
-const sounds = new SoundEffects();
 
 const handleMouseMove3D = (e: React.MouseEvent<HTMLDivElement>) => {
   const el = e.currentTarget;
@@ -531,7 +150,9 @@ export default function App() {
   const countdownRef = useRef(0);
 
   const total = LAYOUTS[layout].frames;
-  const filled = photos.filter(Boolean).length;
+  // Stable identity between photo changes so Develop/Studio memoization works.
+  const filledPhotos = useMemo(() => photos.filter(Boolean) as string[], [photos]);
+  const filled = filledPhotos.length;
   const complete = filled === total;
   const nextIndex = photos.findIndex((photo) => !photo);
   const activeIndex = selectedSlot !== null ? selectedSlot : (nextIndex === -1 ? total - 1 : nextIndex);
@@ -814,6 +435,10 @@ export default function App() {
     void captureWithCountdown();
   }, [captureWithCountdown, mode, startAuto]);
 
+  const handleSelectSlot = useCallback((index: number) => {
+    setSelectedSlot((current) => (current === index ? null : index));
+  }, []);
+
   const stopAuto = useCallback(() => {
     autoRef.current = false;
     setAutoRunning(false);
@@ -1040,7 +665,7 @@ export default function App() {
             onRetakeLast={retakeLast}
             onRetakeAll={retakeAll}
             onDevelop={startDevelop}
-            onSelectSlot={(index) => setSelectedSlot((current) => (current === index ? null : index))}
+            onSelectSlot={handleSelectSlot}
             showGrid={showGrid}
             captionFont={captionFont}
             vignette={vignette}
@@ -1057,7 +682,7 @@ export default function App() {
             layout={layout}
             frame={frame}
             filter={filter}
-            photos={photos.filter(Boolean) as string[]}
+            photos={filledPhotos}
             caption={caption}
             note={note}
             textScale={textScale}
@@ -1502,6 +1127,28 @@ function Studio(props: StudioProps) {
   );
 }
 
+const INTRO_STEPS = [
+  ["01", "Pick a layout", "Choose from single, strip, pair, quad, or contact sheet."],
+  ["02", "Set the frame", "Select a paper tone, caption preset, and decide how much text belongs on the print."],
+  ["03", "Shoot and develop", "Capture with count-in by webcam or upload, then export PNG, GIF, boomerang GIF, or QR."]
+];
+
+const INTRO_SAMPLES = [
+  { layout: "B" as LayoutId, frame: "BROADSHEET" as FrameId, title: "CONTACT SHEET CLUB", note: "KODAK / BROADSHEET" },
+  { layout: "A" as LayoutId, frame: "POLAROID" as FrameId, title: "PRESS, POSE, PRINT", note: "PORTRA / POLAROID" },
+  { layout: "C" as LayoutId, frame: "PANEL" as FrameId, title: "AFTERLIGHT SESSION", note: "INK / PANEL" },
+  { layout: "D" as LayoutId, frame: "MIDNIGHT" as FrameId, title: "NO RETAKE ENERGY", note: "NOIR / MIDNIGHT" },
+  { layout: "S" as LayoutId, frame: "ALBUM" as FrameId, title: "LOCAL ONLY", note: "BRIGHT / ALBUM" },
+  { layout: "B" as LayoutId, frame: "ZINE" as FrameId, title: "ONE MORE STRIP", note: "DUSK / ZINE" }
+];
+
+// Stable placeholder arrays: emptyPhotos() returns a fresh array each call,
+// which would defeat StripPreview's React.memo shallow compare on every render.
+const INTRO_PLACEHOLDER_PHOTOS: Record<string, PhotoSlot[]> = {
+  ...Object.fromEntries(LAYOUT_ORDER.map((id) => [id, emptyPhotos(id)])),
+  hero: emptyPhotos("B")
+};
+
 function Intro({
   onBegin,
   onJumpSamples
@@ -1509,20 +1156,8 @@ function Intro({
   onBegin: () => void;
   onJumpSamples: () => void;
 }) {
-  const steps = [
-    ["01", "Pick a layout", "Choose from single, strip, pair, quad, or contact sheet."],
-    ["02", "Set the frame", "Select a paper tone, caption preset, and decide how much text belongs on the print."],
-    ["03", "Shoot and develop", "Capture with count-in by webcam or upload, then export PNG, GIF, boomerang GIF, or QR."]
-  ];
-
-  const samples = [
-    { layout: "B" as LayoutId, frame: "BROADSHEET" as FrameId, title: "CONTACT SHEET CLUB", note: "KODAK / BROADSHEET" },
-    { layout: "A" as LayoutId, frame: "POLAROID" as FrameId, title: "PRESS, POSE, PRINT", note: "PORTRA / POLAROID" },
-    { layout: "C" as LayoutId, frame: "PANEL" as FrameId, title: "AFTERLIGHT SESSION", note: "INK / PANEL" },
-    { layout: "D" as LayoutId, frame: "MIDNIGHT" as FrameId, title: "NO RETAKE ENERGY", note: "NOIR / MIDNIGHT" },
-    { layout: "S" as LayoutId, frame: "ALBUM" as FrameId, title: "LOCAL ONLY", note: "BRIGHT / ALBUM" },
-    { layout: "B" as LayoutId, frame: "ZINE" as FrameId, title: "ONE MORE STRIP", note: "DUSK / ZINE" }
-  ];
+  const steps = INTRO_STEPS;
+  const samples = INTRO_SAMPLES;
 
   return (
     <section className="intro-page">
@@ -1563,7 +1198,7 @@ function Intro({
             <StripPreview
               layout="B"
               frame="MIDNIGHT"
-              photos={emptyPhotos("B")}
+              photos={INTRO_PLACEHOLDER_PHOTOS.hero}
               caption="BROWSER DARKROOM"
               note="LAYOUT B / 3 FRAMES"
               textScale={1}
@@ -1593,7 +1228,7 @@ function Intro({
               <StripPreview
                 layout={sample.layout}
                 frame={sample.frame}
-                photos={emptyPhotos(sample.layout)}
+                photos={INTRO_PLACEHOLDER_PHOTOS[sample.layout]}
                 caption={sample.title}
                 note={sample.note}
                 textScale={0.92}
@@ -1624,7 +1259,7 @@ function Intro({
   );
 }
 
-function ViewfinderGrid({
+const ViewfinderGrid = memo(function ViewfinderGrid({
   layout,
   photos,
   activeIndex,
@@ -1715,7 +1350,7 @@ function ViewfinderGrid({
       })}
     </div>
   );
-}
+});
 
 function Develop({
   layout,
@@ -1882,7 +1517,13 @@ function Develop({
     setBusy("gif");
     setGifProgress(0);
     try {
-      const canvas = await renderStripCanvas(renderOptions);
+      // Lazy-load the encoder so the ~50KB gif.js + qrcode libs stay out of
+      // the initial bundle.
+      const { default: GIF } = await import("gif.js");
+      const fullCanvas = await renderStripCanvas(renderOptions);
+      // GIF is a 256-color sharing format: cap frame width so the encoder
+      // does not hold hundreds of MB of full-resolution ImageData.
+      const canvas = downscaleForGif(fullCanvas);
       const gif = new GIF({
         workers: 2,
         quality: 10,
@@ -1892,11 +1533,14 @@ function Develop({
       });
       const frames = 18;
 
+      // One reusable canvas: addFrame({ copy: true }) snapshots the pixels
+      // immediately, so 18 separate canvases are never needed.
+      const temp = document.createElement("canvas");
+      temp.width = canvas.width;
+      temp.height = canvas.height;
+      const ctx = temp.getContext("2d");
+
       for (let index = 0; index < frames; index += 1) {
-        const temp = document.createElement("canvas");
-        temp.width = canvas.width;
-        temp.height = canvas.height;
-        const ctx = temp.getContext("2d");
         if (!ctx) continue;
         const phase = Math.sin((index / (frames - 1)) * Math.PI);
         const scale = 1 + phase * 0.035;
@@ -1927,23 +1571,28 @@ function Develop({
     setGifProgress(0);
 
     try {
+      const { default: GIF } = await import("gif.js");
       const images = await Promise.all(photos.map(loadImage));
       const keyedImages = images.map((image, index) => ({ image, index }));
       const sequence = keyedImages.length > 1 ? [...keyedImages, ...keyedImages.slice(1, -1).reverse()] : keyedImages;
-      const first = renderPoseFrameCanvas({
-        layout,
-        frame,
-        image: sequence[0].image,
-        caption,
-        note,
-        textScale,
-        timestamp,
-        index: sequence[0].index + 1,
-        total: images.length,
-        captionFont,
-        vignette,
-        grain
-      });
+      const renderPose = (image: HTMLImageElement, index: number) =>
+        downscaleForGif(
+          renderPoseFrameCanvas({
+            layout,
+            frame,
+            image,
+            caption,
+            note,
+            textScale,
+            timestamp,
+            index: index + 1,
+            total: images.length,
+            captionFont,
+            vignette,
+            grain
+          })
+        );
+      const first = renderPose(sequence[0].image, sequence[0].index);
       const gif = new GIF({
         workers: 2,
         quality: 10,
@@ -1953,21 +1602,7 @@ function Develop({
       });
 
       sequence.forEach(({ image, index }) => {
-        const canvas = renderPoseFrameCanvas({
-          layout,
-          frame,
-          image,
-          caption,
-          note,
-          textScale,
-          timestamp,
-          index: index + 1,
-          total: images.length,
-          captionFont,
-          vignette,
-          grain
-        });
-        gif.addFrame(canvas, { delay: index === 0 ? 320 : 170, copy: true });
+        gif.addFrame(renderPose(image, index), { delay: index === 0 ? 320 : 170, copy: true });
       });
 
       gif.on("progress", (progress) => setGifProgress(progress));
@@ -2065,6 +1700,7 @@ function Develop({
       const canvas = await renderStripCanvas(renderOptions);
       const blob = await canvasToBlob(canvas, "image/png");
       const link = await uploadTemporary(blob, filename);
+      const { default: QRCode } = await import("qrcode");
       const qr = await QRCode.toDataURL(link, {
         margin: 1,
         width: 260,
@@ -2303,19 +1939,8 @@ function Develop({
   );
 }
 
-function getFontFamilyCSS(fontKey: string): string {
-  switch (fontKey) {
-    case "Playfair": return "'Playfair Display', Georgia, serif";
-    case "Cormorant": return "'Cormorant Garamond', Georgia, serif";
-    case "Bebas": return "'Bebas Neue', sans-serif";
-    case "Outfit": return "'Outfit', sans-serif";
-    case "Syne": return "'Syne', sans-serif";
-    case "Mono": return "'JetBrains Mono', monospace";
-    default: return "Fraunces, Georgia, serif";
-  }
-}
 
-function StripPreview({
+const StripPreview = memo(function StripPreview({
   layout,
   frame,
   photos,
@@ -2554,7 +2179,7 @@ function StripPreview({
       })}
     </div>
   );
-}
+});
 
 function ShareDialog({
   share,
@@ -2872,484 +2497,8 @@ function StaticPage({ kind }: { kind: "faq" | "privacy" | "contact" }) {
   );
 }
 
-function getViewfinderAspect(layout: LayoutSpec): number {
-  const [cols, rows] = layout.grid;
-  return (cols * layout.cellAspect) / rows;
-}
 
-function getViewfinderMaxWidth(layout: LayoutSpec): number {
-  if (layout.id === "B" || layout.id === "C") return 360;
-  if (layout.id === "S") return 520;
-  return 760;
-}
 
-function createDemoPhoto(index: number, aspect: number, filterCss: string): string {
-  const width = 960;
-  const height = Math.round(width / aspect);
-  const base = document.createElement("canvas");
-  base.width = width;
-  base.height = height;
-  const baseCtx = base.getContext("2d");
-  if (!baseCtx) return "";
-
-  const palettes = [
-    ["#F5D6B8", "#9BB7A7", "#282521"],
-    ["#D7E1EA", "#E84A2A", "#171717"],
-    ["#F7E0D4", "#5E7A8A", "#2B211B"],
-    ["#E7D7A8", "#2F6F4E", "#141414"],
-    ["#E8C4C4", "#29384A", "#F9F1E7"],
-    ["#D8D6C9", "#B5302A", "#111111"]
-  ];
-  const [paper, accent, ink] = palettes[index % palettes.length];
-  const gradient = baseCtx.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, paper);
-  gradient.addColorStop(0.62, "#f7f1df");
-  gradient.addColorStop(1, accent);
-  baseCtx.fillStyle = gradient;
-  baseCtx.fillRect(0, 0, width, height);
-
-  baseCtx.fillStyle = "rgba(255,255,255,0.28)";
-  baseCtx.fillRect(width * 0.08, height * 0.08, width * 0.84, height * 0.84);
-  baseCtx.fillStyle = accent;
-  baseCtx.beginPath();
-  baseCtx.ellipse(width * 0.5, height * 0.44, width * 0.18, height * 0.18, 0, 0, Math.PI * 2);
-  baseCtx.fill();
-  baseCtx.fillStyle = ink;
-  baseCtx.beginPath();
-  baseCtx.ellipse(width * 0.5, height * 0.84, width * 0.32, height * 0.26, 0, Math.PI, Math.PI * 2);
-  baseCtx.fill();
-  baseCtx.strokeStyle = "rgba(20,20,20,0.22)";
-  baseCtx.lineWidth = 10;
-  baseCtx.strokeRect(44, 44, width - 88, height - 88);
-
-  baseCtx.fillStyle = "rgba(20,20,20,0.12)";
-  for (let dot = 0; dot < 220; dot += 1) {
-    const x = (dot * 47 + index * 83) % width;
-    const y = (dot * 71 + index * 53) % height;
-    baseCtx.fillRect(x, y, 2, 2);
-  }
-
-  baseCtx.fillStyle = ink;
-  baseCtx.font = "600 40px JetBrains Mono, monospace";
-  baseCtx.textAlign = "center";
-  baseCtx.fillText(`POSE ${String(index + 1).padStart(2, "0")}`, width / 2, height - 72);
-
-  if (filterCss === "none") return base.toDataURL("image/jpeg", 0.92);
-  const filtered = document.createElement("canvas");
-  filtered.width = width;
-  filtered.height = height;
-  const filteredCtx = filtered.getContext("2d");
-  if (!filteredCtx) return base.toDataURL("image/jpeg", 0.92);
-  filteredCtx.filter = filterCss;
-  filteredCtx.drawImage(base, 0, 0);
-  return filtered.toDataURL("image/jpeg", 0.92);
-}
-
-function captureSourceToDataUrl({
-  source,
-  sourceWidth,
-  sourceHeight,
-  aspect,
-  filterCss,
-  mirror
-}: {
-  source: CanvasImageSource;
-  sourceWidth: number;
-  sourceHeight: number;
-  aspect: number;
-  filterCss: string;
-  mirror: boolean;
-}): string {
-  const targetWidth = 960;
-  const targetHeight = Math.round(targetWidth / aspect);
-  const canvas = document.createElement("canvas");
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return "";
-
-  const sourceAspect = sourceWidth / sourceHeight;
-  let sx = 0;
-  let sy = 0;
-  let sw = sourceWidth;
-  let sh = sourceHeight;
-
-  if (sourceAspect > aspect) {
-    sw = sourceHeight * aspect;
-    sx = (sourceWidth - sw) / 2;
-  } else {
-    sh = sourceWidth / aspect;
-    sy = (sourceHeight - sh) / 2;
-  }
-
-  ctx.save();
-  ctx.filter = filterCss;
-  if (mirror) {
-    ctx.translate(targetWidth, 0);
-    ctx.scale(-1, 1);
-  }
-  ctx.drawImage(source, sx, sy, sw, sh, 0, 0, targetWidth, targetHeight);
-  ctx.restore();
-
-  return canvas.toDataURL("image/jpeg", 0.92);
-}
-
-async function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("Could not read image file."));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Could not decode image."));
-    image.src = src;
-  });
-}
-
-let cachedNoisePattern: CanvasPattern | null = null;
-function getNoisePattern(ctx: CanvasRenderingContext2D): CanvasPattern | null {
-  if (cachedNoisePattern) return cachedNoisePattern;
-  
-  const size = 128;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const nCtx = canvas.getContext("2d");
-  if (!nCtx) return null;
-  
-  const imgData = nCtx.createImageData(size, size);
-  const data = imgData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const val = Math.floor(Math.random() * 255);
-    data[i] = val;
-    data[i + 1] = val;
-    data[i + 2] = val;
-    data[i + 3] = 45;
-  }
-  nCtx.putImageData(imgData, 0, 0);
-  
-  cachedNoisePattern = ctx.createPattern(canvas, "repeat");
-  return cachedNoisePattern;
-}
-
-async function renderStripCanvas(options: {
-  layout: LayoutId;
-  frame: FrameId;
-  filter: FilterId;
-  photos: string[];
-  caption: string;
-  note: string;
-  textScale: number;
-  timestamp: string;
-  stickers?: StickerInstance[];
-  captionFont?: string;
-  vignette?: number;
-  grain?: number;
-}): Promise<HTMLCanvasElement> {
-  const layout = LAYOUTS[options.layout];
-  const frame = getFrame(options.frame);
-  const [cols, rows] = layout.grid;
-  const width = layout.stripWidth;
-  const pad = 64;
-  const gap = 28;
-  const captionHeight = options.frame === "BLANK" ? 24 : 132;
-  const cellWidth = (width - pad * 2 - gap * (cols - 1)) / cols;
-  const cellHeight = cellWidth / layout.cellAspect;
-  const height = Math.round(pad * 2 + rows * cellHeight + (rows - 1) * gap + captionHeight);
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return canvas;
-
-  ctx.fillStyle = frame.paper;
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.strokeStyle = frame.accent;
-  ctx.lineWidth = options.frame === "BLANK" ? 0 : 10;
-  if (ctx.lineWidth > 0) {
-    ctx.strokeRect(18, 18, width - 36, height - 36);
-  }
-
-  drawPerforations(ctx, width, height, frame.paper, frame.ink);
-
-  const images = await Promise.all(options.photos.map(loadImage));
-  images.forEach((image, index) => {
-    const row = Math.floor(index / cols);
-    const col = index % cols;
-    const x = pad + col * (cellWidth + gap);
-    const y = pad + row * (cellHeight + gap);
-    ctx.drawImage(image, x, y, cellWidth, cellHeight);
-
-    // Vignette Effect
-    if (options.vignette && options.vignette > 0) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(x, y, cellWidth, cellHeight);
-      ctx.clip();
-      
-      const cx = x + cellWidth / 2;
-      const cy = y + cellHeight / 2;
-      const rOuter = Math.sqrt((cellWidth / 2) ** 2 + (cellHeight / 2) ** 2);
-      const rInner = cellWidth * 0.25;
-      
-      const grad = ctx.createRadialGradient(cx, cy, rInner, cx, cy, rOuter);
-      grad.addColorStop(0, "rgba(0,0,0,0)");
-      grad.addColorStop(1, `rgba(0,0,0,${0.85 * (options.vignette / 100)})`);
-      
-      ctx.fillStyle = grad;
-      ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(x, y, cellWidth, cellHeight);
-      ctx.restore();
-    }
-    
-    // Grain Effect
-    if (options.grain && options.grain > 0) {
-      const pattern = getNoisePattern(ctx);
-      if (pattern) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x, y, cellWidth, cellHeight);
-        ctx.clip();
-        
-        ctx.fillStyle = pattern;
-        ctx.globalAlpha = options.grain / 100;
-        ctx.globalCompositeOperation = "overlay";
-        ctx.fillRect(x, y, cellWidth, cellHeight);
-        ctx.restore();
-      }
-    }
-
-    ctx.strokeStyle = "rgba(20,20,20,0.22)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, cellWidth, cellHeight);
-  });
-
-  if (options.frame !== "BLANK") {
-    const textY = height - captionHeight + 50;
-    ctx.fillStyle = frame.ink;
-    ctx.textAlign = "center";
-    ctx.font = `${Math.round(34 * options.textScale)}px ${getFontFamilyCSS(options.captionFont || "Fraunces")}`;
-    ctx.fillText(options.caption.toUpperCase(), width / 2, textY, width - pad * 2);
-    ctx.font = `${Math.round(18 * options.textScale)}px JetBrains Mono, monospace`;
-    ctx.fillText(
-      `${options.note} / ${layout.code} / ${getFilter(options.filter).label} / ${options.timestamp}`.toUpperCase(),
-      width / 2,
-      textY + 40,
-      width - pad * 2
-    );
-  }
-
-  if (options.stickers && options.stickers.length > 0) {
-    const baseStickerWidth = width * 0.12;
-    options.stickers.forEach((sticker) => {
-      const canvasX = (sticker.x / 100) * width;
-      const canvasY = (sticker.y / 100) * height;
-
-      ctx.save();
-      ctx.translate(canvasX, canvasY);
-      ctx.rotate((sticker.rotation * Math.PI) / 180);
-
-      const stickerScale = sticker.scale;
-      const stickerColor = sticker.color || frame.ink;
-
-      if (sticker.type === "svg") {
-        const template = STICKER_TEMPLATES.find((t) => t.id === sticker.value);
-        if (template) {
-          ctx.fillStyle = stickerColor;
-          const path = new Path2D(template.path);
-          const [, , vbW, vbH] = template.viewBox.split(" ").map(Number);
-          const maxDim = Math.max(vbW, vbH);
-          const drawScale = (baseStickerWidth * stickerScale) / maxDim;
-
-          ctx.scale(drawScale, drawScale);
-          ctx.translate(-vbW / 2, -vbH / 2);
-          ctx.fill(path);
-        }
-      } else if (sticker.type === "text") {
-        ctx.fillStyle = stickerColor;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        const fontSize = Math.round((sticker.fontSize || 22) * (width / 520) * stickerScale);
-        const fontName =
-          sticker.font === "var(--font-serif)"
-            ? "Fraunces, Georgia, serif"
-            : sticker.font === "var(--font-mono)"
-            ? "JetBrains Mono, monospace"
-            : "Inter, sans-serif";
-        ctx.font = `bold ${fontSize}px ${fontName}`;
-        ctx.fillText(sticker.value, 0, 0);
-      }
-
-      ctx.restore();
-    });
-  }
-
-  return canvas;
-}
-
-function renderPoseFrameCanvas(options: {
-  layout: LayoutId;
-  frame: FrameId;
-  image: HTMLImageElement;
-  caption: string;
-  note: string;
-  textScale: number;
-  timestamp: string;
-  index: number;
-  total: number;
-  captionFont?: string;
-  vignette?: number;
-  grain?: number;
-}): HTMLCanvasElement {
-  const layout = LAYOUTS[options.layout];
-  const frame = getFrame(options.frame);
-  const width = 720;
-  const pad = 38;
-  const captionHeight = options.frame === "BLANK" ? 28 : 112;
-  const imageWidth = width - pad * 2;
-  const imageHeight = Math.round(imageWidth / layout.cellAspect);
-  const height = pad * 2 + imageHeight + captionHeight;
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return canvas;
-
-  ctx.fillStyle = frame.paper;
-  ctx.fillRect(0, 0, width, height);
-  ctx.strokeStyle = frame.accent;
-  ctx.lineWidth = options.frame === "BLANK" ? 0 : 8;
-  if (ctx.lineWidth > 0) {
-    ctx.strokeRect(16, 16, width - 32, height - 32);
-  }
-
-  const x = pad;
-  const y = pad;
-  ctx.drawImage(options.image, x, y, imageWidth, imageHeight);
-
-  // Vignette Effect
-  if (options.vignette && options.vignette > 0) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y, imageWidth, imageHeight);
-    ctx.clip();
-    
-    const cx = x + imageWidth / 2;
-    const cy = y + imageHeight / 2;
-    const rOuter = Math.sqrt((imageWidth / 2) ** 2 + (imageHeight / 2) ** 2);
-    const rInner = imageWidth * 0.25;
-    
-    const grad = ctx.createRadialGradient(cx, cy, rInner, cx, cy, rOuter);
-    grad.addColorStop(0, "rgba(0,0,0,0)");
-    grad.addColorStop(1, `rgba(0,0,0,${0.85 * (options.vignette / 100)})`);
-    
-    ctx.fillStyle = grad;
-    ctx.globalCompositeOperation = "multiply";
-    ctx.fillRect(x, y, imageWidth, imageHeight);
-    ctx.restore();
-  }
-  
-  // Grain Effect
-  if (options.grain && options.grain > 0) {
-    const pattern = getNoisePattern(ctx);
-    if (pattern) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(x, y, imageWidth, imageHeight);
-      ctx.clip();
-      
-      ctx.fillStyle = pattern;
-      ctx.globalAlpha = options.grain / 100;
-      ctx.globalCompositeOperation = "overlay";
-      ctx.fillRect(x, y, imageWidth, imageHeight);
-      ctx.restore();
-    }
-  }
-
-  ctx.strokeStyle = "rgba(20,20,20,0.22)";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, imageWidth, imageHeight);
-
-  if (options.frame !== "BLANK") {
-    const textY = y + imageHeight + 48;
-    ctx.fillStyle = frame.ink;
-    ctx.textAlign = "center";
-    ctx.font = `${Math.round(28 * options.textScale)}px ${getFontFamilyCSS(options.captionFont || "Fraunces")}`;
-    ctx.fillText(options.caption.toUpperCase(), width / 2, textY, width - pad * 2);
-    ctx.font = `${Math.round(14 * options.textScale)}px JetBrains Mono, monospace`;
-    ctx.fillText(
-      `${options.note} / POSE ${String(options.index).padStart(2, "0")}-${String(options.total).padStart(2, "0")} / ${options.timestamp}`.toUpperCase(),
-      width / 2,
-      textY + 34,
-      width - pad * 2
-    );
-  }
-
-  return canvas;
-}
-
-function drawPerforations(
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  paper: string,
-  ink: string
-) {
-  const count = Math.max(4, Math.floor(height / 92));
-  ctx.fillStyle = paper;
-  ctx.strokeStyle = ink;
-  ctx.lineWidth = 1;
-  for (let index = 0; index < count; index += 1) {
-    const y = 42 + index * ((height - 84) / Math.max(1, count - 1));
-    for (const x of [18, width - 38]) {
-      ctx.fillRect(x, y, 20, 42);
-      ctx.strokeRect(x, y, 20, 42);
-    }
-  }
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) reject(new Error("Could not render export."));
-      else resolve(blob);
-    }, type);
-  });
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1200);
-}
-
-async function uploadTemporary(blob: Blob, filename: string): Promise<string> {
-  const body = new FormData();
-  body.append("file", blob, filename);
-  const response = await fetch(TMPFILES_API, {
-    method: "POST",
-    body
-  });
-  if (!response.ok) {
-    throw new Error(`Temporary upload failed with ${response.status}.`);
-  }
-  const data = (await response.json()) as { status?: string; data?: { url?: string } };
-  if (data.status !== "success" || !data.data?.url) {
-    throw new Error("Temporary upload did not return a link.");
-  }
-  return data.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
-}
 
 function GalleryView({
   onBack,
