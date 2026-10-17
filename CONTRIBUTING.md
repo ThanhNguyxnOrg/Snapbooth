@@ -14,7 +14,7 @@ npm run build
 npm run test:e2e
 ```
 
-Run the build and smoke test before pushing. This project publishes the production build from `docs/`.
+Run the build and smoke test before pushing. You do not need to commit build output: the `Deploy to GitHub Pages` workflow builds from source and deploys `main` automatically.
 
 If Playwright asks for browsers on a new machine, run `npx playwright install chromium` once.
 
@@ -36,4 +36,4 @@ If Playwright asks for browsers on a new machine, run `npx playwright install ch
 - Does the change improve the booth flow?
 - Does it keep the privacy-first browser-only model intact?
 - Is the UI still readable on mobile?
-- Did the generated `docs/` output get refreshed?
+- Did the Pages deploy workflow succeed after the push to `main`?

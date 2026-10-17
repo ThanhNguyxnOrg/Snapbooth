@@ -80,7 +80,7 @@ For the Pages build:
 npm run build
 ```
 
-The production output is written to `docs/`, and GitHub Pages is configured from `main` + `docs/`.
+The production output is written to `docs/` (gitignored). GitHub Pages deploys automatically from the `main` branch via the `Deploy to GitHub Pages` workflow — no manual build commit is needed.
 
 For a local smoke pass against the preview build:
 
@@ -102,9 +102,12 @@ npm run test:e2e
 
 | File | Role |
 | --- | --- |
-| `src/App.tsx` | App flow, presets, capture, export |
+| `src/App.tsx` | App flow, capture, export orchestration |
+| `src/presets.ts` | Layouts, frames, filters, caption presets |
+| `src/render.ts` | Canvas strip/pose rendering and export helpers |
+| `src/galleryDb.ts` | IndexedDB roll storage |
 | `src/styles.css` | Visual system and responsive layout |
-| `docs/` | Generated Pages output |
+| `.github/workflows/deploy-pages.yml` | Pages build and deploy |
 | `PRESET_CATALOG.md` | Caption, frame, and filter reference |
 | `CONTRIBUTING.md` | Branch, build, and review workflow |
 
@@ -121,7 +124,8 @@ Ideas were selected from real photobooth projects instead of being invented blin
 ## Deploy
 
 - Default branch: `main`
-- Pages source: `main` + `docs/`
+- Pages source: GitHub Actions (`Deploy to GitHub Pages` workflow)
+- The workflow builds from source and publishes `docs/` as the Pages artifact on every push to `main`
 - Live URL: [thanhnguyxnorg.github.io/Snapbooth](https://thanhnguyxnorg.github.io/Snapbooth/)
 
 ## GitHub Topics
