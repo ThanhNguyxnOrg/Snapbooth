@@ -28,7 +28,7 @@ import {
   Menu,
   Grid
 } from "lucide-react";
-import { saveRoll, getAllRolls, deleteRoll } from "./galleryDb";
+import { saveRoll, getAllRolls, deleteRoll, pruneRolls } from "./galleryDb";
 import type { SavedRoll } from "./galleryDb";
 
 type Theme = "light" | "dark";
@@ -293,6 +293,15 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+function persistSession(key: string, value: string): void {
+  try {
+    window.sessionStorage.setItem(key, value);
+  } catch {
+    // Storage may be full (large photo data URLs) or blocked by the browser.
+    // Persisting is best-effort; the app must keep working without it.
+  }
+}
+
 class SoundEffects {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
@@ -538,63 +547,63 @@ export default function App() {
   }, [soundEnabled]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-view", view);
+    persistSession("snapbooth-view", view);
   }, [view]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-layout", layout);
+    persistSession("snapbooth-layout", layout);
   }, [layout]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-frame", frame);
+    persistSession("snapbooth-frame", frame);
   }, [frame]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-filter", filter);
+    persistSession("snapbooth-filter", filter);
   }, [filter]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-photos", JSON.stringify(photos));
+    persistSession("snapbooth-photos", JSON.stringify(photos));
   }, [photos]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-mode", mode);
+    persistSession("snapbooth-mode", mode);
   }, [mode]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-timerSec", String(timerSec));
+    persistSession("snapbooth-timerSec", String(timerSec));
   }, [timerSec]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-mirror", String(mirror));
+    persistSession("snapbooth-mirror", String(mirror));
   }, [mirror]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-caption", caption);
+    persistSession("snapbooth-caption", caption);
   }, [caption]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-note", note);
+    persistSession("snapbooth-note", note);
   }, [note]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-textScale", String(textScale));
+    persistSession("snapbooth-textScale", String(textScale));
   }, [textScale]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-showGrid", String(showGrid));
+    persistSession("snapbooth-showGrid", String(showGrid));
   }, [showGrid]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-captionFont", captionFont);
+    persistSession("snapbooth-captionFont", captionFont);
   }, [captionFont]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-vignette", String(vignette));
+    persistSession("snapbooth-vignette", String(vignette));
   }, [vignette]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("snapbooth-grain", String(grain));
+    persistSession("snapbooth-grain", String(grain));
   }, [grain]);
 
   useEffect(() => {
@@ -674,18 +683,18 @@ export default function App() {
   }, [activeIndex, layout, photos, view]);
 
   const addPhoto = useCallback((dataUrl: string, targetSlot: number | null = null) => {
-    let inserted = false;
-    setPhotos((current) => {
-      const index = targetSlot !== null ? targetSlot : current.findIndex((photo) => !photo);
-      if (index === -1) return current;
-      const next = [...current];
-      next[index] = dataUrl;
-      photosRef.current = next;
-      inserted = true;
-      return next;
-    });
+    // Compute the slot from the synced ref so the result is deterministic.
+    // React does not run state updaters synchronously, so a flag set inside
+    // setPhotos would read as false whenever an update is already queued.
+    const current = photosRef.current;
+    const index = targetSlot !== null ? targetSlot : current.findIndex((photo) => !photo);
+    if (index === -1) return false;
+    const next = [...current];
+    next[index] = dataUrl;
+    photosRef.current = next;
+    setPhotos(next);
     setSelectedSlot(null);
-    return inserted;
+    return true;
   }, []);
 
   const captureVideo = useCallback(() => {
@@ -1747,6 +1756,14 @@ function Develop({
   const [textFont, setTextFont] = useState("JetBrains Mono");
 
   const timestamp = useMemo(nowStamp, []);
+  // One stable id + creation time per developed roll: repeated auto-saves
+  // (caption edits, sticker drags) update the same record instead of
+  // appending a new gallery entry, and same-second saves cannot collide.
+  const rollId = useMemo(
+    () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    []
+  );
+  const rollCreatedRef = useRef<number>(Date.now());
   const filename = useMemo(
     () => `snapbooth_${layout.toLowerCase()}_${frame.toLowerCase()}_${Date.now().toString(36)}.png`,
     [frame, layout]
@@ -1822,7 +1839,7 @@ function Develop({
         const image = canvas.toDataURL("image/png");
         if (!active) return;
         await saveRoll({
-          id: timestamp,
+          id: rollId,
           layout,
           frame,
           filter,
@@ -1832,12 +1849,13 @@ function Develop({
           textScale,
           timestamp,
           stickers,
-          created: Date.now(),
+          created: rollCreatedRef.current,
           image,
           captionFont,
           vignette,
           grain
         });
+        await pruneRolls();
       } catch (err) {
         console.error("Failed to auto-save to gallery:", err);
       }
@@ -1863,39 +1881,45 @@ function Develop({
   async function exportGif() {
     setBusy("gif");
     setGifProgress(0);
-    const canvas = await renderStripCanvas(renderOptions);
-    const gif = new GIF({
-      workers: 2,
-      quality: 10,
-      width: canvas.width,
-      height: canvas.height,
-      workerScript: gifWorkerUrl
-    });
-    const frames = 18;
+    try {
+      const canvas = await renderStripCanvas(renderOptions);
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: canvas.width,
+        height: canvas.height,
+        workerScript: gifWorkerUrl
+      });
+      const frames = 18;
 
-    for (let index = 0; index < frames; index += 1) {
-      const temp = document.createElement("canvas");
-      temp.width = canvas.width;
-      temp.height = canvas.height;
-      const ctx = temp.getContext("2d");
-      if (!ctx) continue;
-      const phase = Math.sin((index / (frames - 1)) * Math.PI);
-      const scale = 1 + phase * 0.035;
-      const width = canvas.width * scale;
-      const height = canvas.height * scale;
-      ctx.fillStyle = getFrame(frame).paper;
-      ctx.fillRect(0, 0, temp.width, temp.height);
-      ctx.drawImage(canvas, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
-      gif.addFrame(temp, { delay: 90, copy: true });
-    }
+      for (let index = 0; index < frames; index += 1) {
+        const temp = document.createElement("canvas");
+        temp.width = canvas.width;
+        temp.height = canvas.height;
+        const ctx = temp.getContext("2d");
+        if (!ctx) continue;
+        const phase = Math.sin((index / (frames - 1)) * Math.PI);
+        const scale = 1 + phase * 0.035;
+        const width = canvas.width * scale;
+        const height = canvas.height * scale;
+        ctx.fillStyle = getFrame(frame).paper;
+        ctx.fillRect(0, 0, temp.width, temp.height);
+        ctx.drawImage(canvas, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+        gif.addFrame(temp, { delay: 90, copy: true });
+      }
 
-    gif.on("progress", (progress) => setGifProgress(progress));
-    gif.on("finished", (blob) => {
-      downloadBlob(blob, filename.replace(".png", ".gif"));
+      gif.on("progress", (progress) => setGifProgress(progress));
+      gif.on("finished", (blob) => {
+        downloadBlob(blob, filename.replace(".png", ".gif"));
+        setBusy(null);
+        setGifProgress(1);
+      });
+      gif.render();
+    } catch (error) {
+      console.error(error);
       setBusy(null);
-      setGifProgress(1);
-    });
-    gif.render();
+      setGifProgress(0);
+    }
   }
 
   async function exportBoomerangGif() {
