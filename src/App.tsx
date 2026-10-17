@@ -298,7 +298,10 @@ export default function App() {
   }, [view, cameraFacing]);
 
   useEffect(() => {
-    if (videoRef.current && streamRef.current) {
+    // Re-attach only when the video element remounted (slot/layout changes can
+    // move it between cells). Re-assigning the same stream restarts the
+    // preview, which shows up as a stutter after every capture.
+    if (videoRef.current && streamRef.current && videoRef.current.srcObject !== streamRef.current) {
       videoRef.current.srcObject = streamRef.current;
     }
   }, [activeIndex, layout, photos, view]);
