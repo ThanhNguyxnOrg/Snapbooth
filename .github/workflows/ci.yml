@@ -19,6 +19,7 @@ jobs:
     with:
       job_name: Smoke & E2E
       node_version: "22"
+      runner: ubuntu-24.04
       package_manager: npm
       cache: npm
       cache_dependency_path: package-lock.json
