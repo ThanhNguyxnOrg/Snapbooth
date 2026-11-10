@@ -6,24 +6,22 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Install Playwright
-        run: npx playwright install --with-deps chromium
-
-      - name: Build and smoke test
-        run: npm run test:e2e
+  verify:
+    uses: ThanhNguyxnOrg/.github/.github/workflows/ci-node.yml@2bda8e8e8073a2578db4bbb1e0f6aaf21d061bcd
+    with:
+      job_name: Smoke & E2E
+      node_version: "22"
+      package_manager: npm
+      cache: npm
+      cache_dependency_path: package-lock.json
+      prepare_command: npx playwright install --with-deps chromium
+      test_command: npm run test:e2e
+      timeout_minutes: 30
