@@ -741,8 +741,8 @@ interface StudioProps {
   complete: boolean;
   activeIndex: number;
   selectedSlot: number | null;
-  videoRef: RefObject<HTMLVideoElement>;
-  fileRef: React.RefObject<HTMLInputElement>;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  fileRef: React.RefObject<HTMLInputElement | null>;
   onLayout: (layout: LayoutId) => void;
   onFrame: (frame: FrameId) => void;
   onFilter: (filter: FilterId) => void;
@@ -1282,7 +1282,7 @@ const ViewfinderGrid = memo(function ViewfinderGrid({
   activeIndex: number;
   selectedSlot: number | null;
   mirror: boolean;
-  videoRef: RefObject<HTMLVideoElement>;
+  videoRef: RefObject<HTMLVideoElement | null>;
   cameraState: "idle" | "ready" | "error" | "unsupported";
   cameraMessage: string;
   filterCss: string;
