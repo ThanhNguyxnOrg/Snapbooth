@@ -5,10 +5,10 @@ import {
   Aperture,
   Camera,
   Check,
+  CodeXml,
   Copy,
   Download,
   FlipHorizontal,
-  Github,
   Moon,
   QrCode,
   RotateCcw,
@@ -2351,7 +2351,7 @@ function TopBar({
           {soundEnabled ? <Volume2 size={17} /> : <VolumeX size={17} />}
         </button>
         <a href={REPO_URL} target="_blank" rel="noreferrer" aria-label="Open GitHub repository">
-          <Github size={17} />
+          <CodeXml size={17} />
           <span>Repo</span>
         </a>
         <button onClick={onToggleTheme} aria-label="Toggle theme">
