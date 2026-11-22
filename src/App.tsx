@@ -26,7 +26,7 @@ import {
   Menu,
   Grid
 } from "lucide-react";
-import { saveRoll, getAllRolls, deleteRoll, pruneRolls } from "./galleryDb";
+import { saveRoll, getAllRolls, deleteRoll, pruneRolls, MAX_ROLLS } from "./galleryDb";
 import type { SavedRoll } from "./galleryDb";
 import { CAPTION_GROUPS, CAPTION_PRESETS, FILTERS, FILTER_GROUPS, FRAMES, LAYOUTS, LAYOUT_ORDER, REPO_URL, STICKER_TEMPLATES, emptyPhotos, getFilter, getFrame } from "./presets";
 import type { CameraFacing, FilterId, FilterSpec, FrameId, LayoutId, PhotoSlot, StickerInstance } from "./presets";
@@ -1695,6 +1695,10 @@ function Develop({
   }
 
   async function createShareQr() {
+    if (!window.confirm(
+      "Upload the finished PNG to tmpfiles.org? Anyone with the link or QR code can download it for about 60 minutes."
+    )) return;
+
     setShareOpen(true);
     setShare({});
     setBusy("qr");
@@ -2270,7 +2274,7 @@ function ShareDialog({
               boxSizing: "border-box"
             }}>
               <Timer size={14} style={{ flexShrink: 0 }} />
-              <span>This link and QR code will expire in 60 minutes (hosted temporarily via tmpfiles.org).</span>
+              <span>This PNG is hosted temporarily on tmpfiles.org for about 60 minutes.</span>
             </div>
           </>
         )}
@@ -2438,15 +2442,20 @@ function StaticPage({ kind }: { kind: "faq" | "privacy" | "contact" }) {
     return (
       <article className="editorial-page">
         <p className="eyebrow">Privacy</p>
-        <h1>No account. No backend. No photo library.</h1>
+        <h1>Your photos stay on this device unless you share them.</h1>
         <p>
-          Snapbooth processes camera captures, uploads, filters, and exports inside your browser. The app does not
-          run a custom server and does not keep a copy of your images.
+          Snapbooth processes camera captures, imported photos, filters, and exports in your browser.
+          The current roll is kept in this tab’s session storage so it can be restored after a reload.
         </p>
         <p>
-          The only network share flow is optional: when you press Share QR, the generated PNG is uploaded to
-          tmpfiles.org so another device can download it for about 60 minutes. If you do not use that button, your
-          roll remains local.
+          Developing a roll automatically saves its source photos and the finished PNG in this browser’s
+          Gallery (IndexedDB). The Gallery keeps the latest {MAX_ROLLS} rolls, removing the oldest as new
+          ones are saved. Delete a roll in Gallery, or clear this site’s data in your browser settings to
+          remove all locally stored rolls.
+        </p>
+        <p>
+          Share QR asks before uploading the finished PNG to tmpfiles.org. Anyone with the link or QR code
+          can download it for about 60 minutes. Cancel to skip the upload.
         </p>
         <p>
           Camera access is requested by the browser and can be revoked in browser settings. Uploaded files are read
