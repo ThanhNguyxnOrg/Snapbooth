@@ -44,7 +44,7 @@ Snapbooth is a single-page React app that turns the browser into a photobooth wo
 - front/rear camera switching
 - demo roll for camera-less preview
 
-The app stays browser-only unless you use the temporary QR share flow.
+Developed rolls are saved in your browser’s Gallery. Share QR asks before uploading a finished PNG to tmpfiles.org; anyone with the link can download it for about 60 minutes.
 
 ## Capture Flow
 
